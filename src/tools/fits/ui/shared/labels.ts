@@ -1,10 +1,17 @@
 // How engine verdicts are shown: the status icon for an in-service verdict or
 // an advisor check, the words for fit types, and the nominal size as a label.
-import type { Status } from '../../../../app/ui'
+import type { SegmentOption, Status } from '../../../../app/ui'
 import { formatDecimal, toDisplay, type UnitSystem } from '../../../../core/units'
 import type { CheckStatus } from '../../advisor'
 import type { FitType } from '../../calc'
 import type { FitStatus } from '../logic/serviceClearance'
+import type { FitMode } from '../state/fitInputs'
+
+/** The modes of the switch heading the inputs. */
+export const FIT_MODES: readonly SegmentOption<FitMode>[] = [
+  { value: 'advisor', label: 'Fit advisor' },
+  { value: 'calculator', label: 'Calculator' },
+]
 
 export const STATUS_ICON: Record<FitStatus, Status> = { pass: 'ok', review: 'warn', fail: 'bad' }
 

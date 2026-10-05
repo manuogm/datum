@@ -35,7 +35,7 @@ describe('formatQuantityRange', () => {
 
 describe('toDisplay / fromDisplay', () => {
   it('round-trips every quantity in both systems', () => {
-    for (const quantity of ['length', 'deviation', 'temperature', 'expansion', 'density', 'modulus', 'strength', 'conductivity', 'force', 'torque'] as const) {
+    for (const quantity of ['length', 'deviation', 'temperature', 'expansion', 'density', 'modulus', 'strength', 'conductivity', 'force', 'torque', 'area', 'stiffness', 'resilience'] as const) {
       for (const system of ['si', 'imperial'] as const) {
         expect(fromDisplay(quantity, system, toDisplay(quantity, system, 37.25))).toBeCloseTo(37.25, 9)
       }
@@ -71,6 +71,19 @@ describe('material properties', () => {
     expect(unitOf('modulus', 'imperial')).toBe('Msi')
     expect(unitOf('strength', 'imperial')).toBe('ksi')
     expect(unitOf('conductivity', 'si')).toBe('W/(m·K)')
+  })
+})
+
+describe('area, stiffness and resilience', () => {
+  it('shows bolt section and elastic properties', () => {
+    expect(formatQuantity('area', 'si', 57.99, { withUnit: true })).toBe('57.99 mm²')
+    expect(formatQuantity('area', 'imperial', 645.16, { withUnit: true })).toBe('1.0000 in²')
+    // 300 kN/mm = 300 000 N/mm; 1 N/mm = 5.71 lbf/in
+    expect(formatQuantity('stiffness', 'si', 300_000, { withUnit: true })).toBe('300.0 kN/mm')
+    expect(formatQuantity('stiffness', 'imperial', 1000, { withUnit: true })).toBe('5.7 klbf/in')
+    // δ = 3.2e-6 mm/N = 3.2 µm/kN
+    expect(formatQuantity('resilience', 'si', 3.2e-6, { withUnit: true })).toBe('3.200 µm/kN')
+    expect(formatQuantity('resilience', 'imperial', 1e-6, { withUnit: true })).toBe('0.175 µin/lbf')
   })
 })
 

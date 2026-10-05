@@ -1,5 +1,5 @@
-/* A4 fit report, after the "Fit Report" design. Always rendered inside a
-   data-theme="light" sheet, so the tokens give the print colours. */
+/* A4 calculation report, after the "Fit Report" design. Always rendered
+   inside a data-theme="light" sheet, so the tokens give the print colours. */
 .report {
   display: flex;
   flex-direction: column;
@@ -116,7 +116,7 @@
   color: var(--status-text, var(--text-muted));
 }
 
-.fitType {
+.kind {
   font-size: var(--fs-14);
   font-weight: var(--weight-semibold);
   color: var(--hole);

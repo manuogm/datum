@@ -2,7 +2,7 @@
 // chart and the reasoning in the centre, the recommendation and the ranked
 // candidates on the right.
 import { useState, type Dispatch } from 'react'
-import { Badge, Callout, Column, ColumnHeader, Rationale } from '../../../../app/ui'
+import { Badge, Callout, Column, ColumnHeader, ModeSwitch, Rationale } from '../../../../app/ui'
 import { unitOf, type UnitSystem } from '../../../../core/units'
 import type { FitAdvice } from '../../advisor'
 import { formatFit, parseFitDesignation } from '../../calc'
@@ -10,8 +10,7 @@ import { chartedCandidates } from '../logic/candidates'
 import type { FitResults } from '../logic/fitResults'
 import { serviceClearance } from '../logic/serviceClearance'
 import { BandLegend } from '../shared/BandLegend'
-import { nominalLabel } from '../shared/labels'
-import { ModeSwitch } from '../shared/ModeSwitch'
+import { FIT_MODES, nominalLabel } from '../shared/labels'
 import sharedStyles from '../shared/shared.module.css'
 import type { FitInputs } from '../state/fitInputs'
 import type { FitAction } from '../state/fitReducer'
@@ -32,7 +31,7 @@ export function AdvisorView({ inputs, results, system, dispatch }: AdvisorViewPr
   const advice = results.advice
   return (
     <>
-      <Column width="inputs" label="Inputs" header={<ModeSwitch mode={inputs.mode} onChange={(mode) => dispatch({ type: 'change', changes: { mode } })} />}>
+      <Column width="inputs" label="Inputs" header={<ModeSwitch modes={FIT_MODES} mode={inputs.mode} onChange={(mode) => dispatch({ type: 'change', changes: { mode } })} />}>
         <AdvisorInputs inputs={inputs} results={results} system={system} dispatch={dispatch} />
       </Column>
       {advice.ok ? (

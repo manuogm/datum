@@ -7,6 +7,7 @@ import { ProjectDetailPage } from './app/projects/detail/ProjectDetailPage'
 import { ProjectsPage } from './app/projects/ProjectsPage'
 import { useRoute } from './app/router/useRoute'
 import { SettingsProvider } from './app/settings/SettingsProvider'
+import { BoltedJointPage, BoltReportPage } from './tools/bolted/ui'
 import { FitReportPage, FitTolerancePage } from './tools/fits/ui'
 
 function Screen() {
@@ -17,6 +18,8 @@ function Screen() {
   if (route.name === 'mat') return <MaterialsPage />
   if (route.name === 'fit') return <FitTolerancePage />
   if (route.name === 'fitReport') return <FitReportPage />
+  if (route.name === 'bolt') return <BoltedJointPage />
+  if (route.name === 'boltReport') return <BoltReportPage />
   return <PlaceholderPage {...placeholderFor(route)} />
 }
 

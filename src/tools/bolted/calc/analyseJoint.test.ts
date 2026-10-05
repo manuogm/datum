@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { materialById } from '../../../core/materials'
-import { expectOk, relativeDifference } from '../../fits/calc/testHelpers'
+import { expectOk, relativeDifference } from '../../../core/testing'
 import { analyseBoltedJoint, type BoltedJointAnalysis, type BoltedJointInput, type StepId } from '.'
 
 const al7075 = expectOk(materialById('al-7075-t6')) // E 71.7 GPa, α 23.4, Rm 572 MPa

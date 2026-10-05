@@ -1,0 +1,47 @@
+/* The calculation trail: each step's message, values and clause. */
+.message {
+  margin: 0;
+  font-size: var(--fs-12-5);
+  line-height: var(--leading-body);
+  color: var(--text-secondary);
+}
+
+.values {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: var(--space-4) var(--space-10);
+  margin: 0;
+  font-size: var(--fs-12);
+}
+
+.symbol {
+  font-family: var(--font-mono);
+  color: var(--text);
+}
+
+.label {
+  color: var(--text-muted);
+}
+
+.value {
+  font-family: var(--font-mono);
+  text-align: right;
+  white-space: nowrap;
+}
+
+.unit {
+  margin-left: var(--space-4);
+  font-size: var(--fs-11);
+  color: var(--text-muted);
+}
+
+.required {
+  font-family: var(--font-mono);
+  font-size: var(--fs-11);
+  color: var(--text-muted);
+}
+
+/* One symbol–label–value line of the grid. */
+.entry {
+  display: contents;
+}

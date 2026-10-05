@@ -2,7 +2,7 @@
 // axis (interference left of zero, clearance right) with the fit's band at
 // each temperature and the required window. Values come in display units;
 // positions are percentages of the strip width.
-import { niceAxis, scaleLinear } from './scale'
+import { niceAxis, scaleLinear } from '../../../../app/charts'
 import type { BandKind } from './serviceClearance'
 
 const MAX_TICKS = 7

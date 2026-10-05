@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { materialById } from '../../../core/materials'
-import { expectError, expectOk } from '../../fits/calc/testHelpers'
+import { expectError, expectOk } from '../../../core/testing'
 import type { JointDesign } from '../calc'
 import { analyseBoltPattern, boltLoads, loadAtCentroid, patternProperties, type BoltPatternInput, type PatternLoadCase } from '.'
 

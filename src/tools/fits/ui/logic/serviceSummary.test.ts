@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { materialById } from '../../../../core/materials'
 import { analyseFitDesignation } from '../../calc'
-import { expectOk } from '../../calc/testHelpers'
+import { expectOk } from '../../../../core/testing'
 import { DEFAULT_FIT_INPUTS } from '../state/fitInputs'
 import { candidateFor, fitResults } from './fitResults'
 import { serviceClearance } from './serviceClearance'

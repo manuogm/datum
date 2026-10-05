@@ -1,0 +1,232 @@
+/* The Bolted Joint drawings: section A–A, the joint diagram and the plan of a
+   pattern. Text sizes are in the SVG's own units. */
+.svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 100%;
+}
+
+.text {
+  fill: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: var(--fs-11);
+}
+
+.faintText {
+  fill: var(--text-faint);
+  font-family: var(--font-mono);
+  font-size: var(--fs-10);
+}
+
+.end {
+  text-anchor: end;
+}
+
+.strong {
+  fill: var(--text);
+  font-weight: var(--weight-semibold);
+}
+
+.grid {
+  stroke: var(--grid);
+  stroke-width: var(--chart-stroke-thin);
+}
+
+.axis {
+  stroke: var(--stroke-faint);
+  stroke-width: var(--chart-stroke-thin);
+}
+
+.centreLine {
+  stroke: var(--stroke-faint);
+  stroke-width: var(--chart-stroke-thin);
+  stroke-dasharray: var(--chart-dash-guide);
+}
+
+.guide {
+  stroke: var(--stroke-faint);
+  stroke-width: var(--chart-stroke-thin);
+  stroke-dasharray: var(--chart-dash-extension);
+}
+
+/* Section */
+.steel {
+  fill: var(--surface-muted);
+  stroke: var(--text-secondary);
+  stroke-width: var(--chart-stroke-thin);
+}
+
+.part {
+  stroke: var(--family);
+  stroke-width: var(--chart-stroke-thin);
+}
+
+.hatch {
+  stroke: var(--family);
+  stroke-width: var(--chart-stroke-thin);
+  opacity: 0.5;
+}
+
+.hole {
+  fill: var(--surface);
+}
+
+.thread {
+  fill: none;
+  stroke: var(--text-muted);
+  stroke-width: var(--chart-stroke-thin);
+  stroke-dasharray: var(--chart-dash-extension);
+}
+
+.insert {
+  fill: var(--surface-muted);
+  stroke: var(--warn);
+  stroke-width: var(--chart-stroke-thin);
+}
+
+.cone {
+  fill: var(--hole-soft);
+  fill-opacity: 0.6;
+  stroke: var(--hole);
+  stroke-width: var(--chart-stroke-thin);
+}
+
+/* Arrows: colour set by the group's --arrow */
+.arrow {
+  stroke: var(--arrow);
+  stroke-width: var(--chart-stroke);
+}
+
+.arrowHead {
+  fill: var(--arrow);
+}
+
+.arrowLabel {
+  fill: var(--arrow);
+  font-family: var(--font-mono);
+  font-size: var(--fs-11);
+}
+
+.axial {
+  --arrow: var(--accent);
+}
+
+.shear {
+  --arrow: var(--hole);
+}
+
+.residual {
+  --arrow: var(--ok);
+}
+
+/* Joint diagram */
+.boltLine {
+  stroke: var(--text);
+  stroke-width: var(--chart-stroke);
+}
+
+.partsLine {
+  stroke: var(--hole);
+  stroke-width: var(--chart-stroke);
+}
+
+.point {
+  fill: var(--surface);
+  stroke: var(--text);
+  stroke-width: var(--chart-stroke);
+}
+
+.separation {
+  fill: var(--surface);
+  stroke: var(--bad);
+  stroke-width: var(--chart-stroke);
+}
+
+.badText {
+  fill: var(--bad);
+}
+
+/* Plan */
+.plate {
+  fill: var(--surface-sunken);
+  stroke: var(--text-muted);
+  stroke-width: var(--chart-stroke);
+}
+
+.boltRing {
+  fill: var(--surface);
+  stroke: var(--tone);
+  stroke-width: 2.5px;
+}
+
+.boltMark {
+  fill: none;
+  stroke: var(--text);
+  stroke-width: var(--chart-stroke);
+}
+
+.boltDot {
+  fill: var(--text);
+}
+
+.dashed {
+  stroke-dasharray: 2 2;
+}
+
+.selected .boltRing {
+  stroke-width: 4px;
+}
+
+.boltHit {
+  cursor: pointer;
+}
+
+.boltHit:focus-visible {
+  outline: none;
+}
+
+.boltHit:focus-visible .boltRing {
+  stroke: var(--accent);
+}
+
+.ok {
+  --tone: var(--ok);
+}
+
+.warn {
+  --tone: var(--warn);
+}
+
+.bad {
+  --tone: var(--bad);
+}
+
+.none {
+  --tone: var(--stroke-faint);
+}
+
+.toneText {
+  fill: var(--tone);
+  font-family: var(--font-mono);
+  font-size: var(--fs-10-5);
+}
+
+.centroid {
+  fill: none;
+  stroke: var(--text-muted);
+  stroke-width: var(--chart-stroke-thin);
+}
+
+.loadPoint {
+  fill: var(--surface);
+  stroke: var(--accent);
+  stroke-width: var(--chart-stroke);
+}
+
+.icon {
+  flex: none;
+  width: 24px;
+  height: 24px;
+  --tone: var(--text-secondary);
+}

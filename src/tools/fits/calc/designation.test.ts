@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { formatFit, parseFitDesignation, parseZone } from './designation'
-import { expectError, expectOk } from './testHelpers'
+import { expectError, expectOk } from '../../../core/testing'
 
 describe('parseZone', () => {
   it.each([

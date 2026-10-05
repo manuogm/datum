@@ -3,9 +3,8 @@
 // 20 °C, hot), drawn against the required window and the assembly
 // interference limit. Values come in display units (µm or thou); positions
 // are in the SVG's own coordinates.
-import type { Rect, Segment } from './geometry'
 import type { BandKind } from './serviceClearance'
-import { niceAxis, scaleLinear } from './scale'
+import { niceAxis, scaleLinear, type Rect, type Segment } from '../../../../app/charts'
 
 export const CANDIDATE_CHART_FRAME = {
   width: 720,

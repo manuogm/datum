@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { expectError, expectOk } from '../../fits/calc/testHelpers'
+import { expectError, expectOk } from '../../../core/testing'
 import { boltDimensions } from './boltDimensions'
 import { boltMaterial, PROPERTY_CLASSES } from './propertyClasses'
 import { NOMINAL_DIAMETERS_MM, pitchesForMm, threadGeometry } from './threads'

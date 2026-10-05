@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { relativeDifference } from '../../fits/calc/testHelpers'
+import { relativeDifference } from '../../../core/testing'
 import { coneResilience, coneTanPhi } from './resilience'
 
 /**

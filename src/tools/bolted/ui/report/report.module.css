@@ -1,0 +1,7 @@
+/* Bolted Joint report: drawings side by side inside a report section. */
+.drawings {
+  display: grid;
+  grid-template-columns: 0.8fr 1fr;
+  gap: var(--space-10);
+  align-items: start;
+}
