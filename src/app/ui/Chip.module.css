@@ -60,7 +60,7 @@ button.chip:focus-visible {
 .add {
   padding: var(--space-5) var(--space-10);
   border-style: dashed;
-  border-color: var(--text-faint);
+  border-color: var(--stroke-faint);
   color: var(--text-muted);
   font-size: var(--fs-12-5);
 }

@@ -29,12 +29,18 @@ body {
 }
 
 a {
-  color: var(--accent);
+  color: var(--accent-fg);
   text-decoration: none;
 }
 
+/* Keyboard focus for anything without its own focus style. */
+:focus-visible {
+  outline: var(--underline-width) solid var(--accent);
+  outline-offset: var(--space-2);
+}
+
 a:hover {
-  color: var(--accent-hover);
+  color: var(--accent-fg-hover);
 }
 
 ::selection {

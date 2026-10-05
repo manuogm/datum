@@ -77,7 +77,7 @@
 }
 
 .link {
-  stroke: var(--text-faint);
+  stroke: var(--stroke-faint);
   stroke-width: var(--chart-stroke-thin);
 }
 
@@ -90,7 +90,7 @@
 }
 
 .bestName {
-  fill: var(--accent);
+  fill: var(--accent-fg);
 }
 
 .tagline {

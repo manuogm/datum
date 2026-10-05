@@ -1,4 +1,5 @@
 import type { Material } from '../../../core/materials'
+import type { UnitSystem } from '../../../core/units'
 import type { FitAnalysis, FitBasis, PreferredFit } from '../calc'
 
 /** What the fitted parts must do (the APPLICATION toggles of the Fit advisor). */
@@ -36,9 +37,11 @@ export interface FitAdvisorInput {
   readonly maxAssemblyInterferenceUm: number
   /** Workshop temperature; 20 °C when omitted. */
   readonly assemblyTempC?: number
+  /** Units of the text output (why, check messages, notes); SI when omitted. Numbers are always SI. */
+  readonly unitSystem?: UnitSystem
 }
 
-/** Input with the defaults filled in (hole-basis, assembly at 20 °C). */
+/** Input with the defaults filled in (hole-basis, assembly at 20 °C, SI text). */
 export type AdvisorSettings = Required<FitAdvisorInput>
 
 export type CheckStatus = 'pass' | 'warn' | 'fail'
@@ -52,6 +55,8 @@ export interface Check {
   readonly status: CheckStatus
   /** Short plain-English result with the numbers, e.g. 'Up to 35.0 µm interference at 20 °C (limit 40 µm).' */
   readonly message: string
+  /** Score points this check deducts (≥ 0, unrounded); see SCORE_POINTS in rules.ts. */
+  readonly penalty: number
 }
 
 export interface ClearanceAtTemperature extends ClearanceRangeUm {
@@ -80,7 +85,7 @@ export interface FitCandidate {
   /** Only for thermal assembly of a fit with interference at assembly temperature. */
   readonly thermalAssembly: ThermalAssembly | null
   readonly checks: readonly Check[]
-  /** 0 … 100, see score.ts. */
+  /** 0 … 100: 100 − Σ check penalties, see score.ts. */
   readonly score: number
 }
 

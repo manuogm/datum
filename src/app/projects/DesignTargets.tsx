@@ -5,7 +5,7 @@ import { useId, type ReactNode } from 'react'
 import type { DesignTargets } from '../../core/projects'
 import { formatQuantityRange, unitOf } from '../../core/units'
 import { useSettings } from '../settings/settings'
-import { InputWell, MonoLabel, NumberInput, QuantityInput, ValueRow } from '../ui'
+import { InputWell, MonoLabel, NumberInput, ValueRow } from '../ui'
 import styles from './DesignTargets.module.css'
 
 type FactorKey = 'minSafetyFactorMetallic' | 'minReserveFactorComposite' | 'minSlipSafety'
@@ -30,7 +30,7 @@ export function DesignTargetsEditor({ targets, onChange }: EditorProps) {
   const { unitSystem } = useSettings()
   const headingId = useId()
   const temperature = (key: 'serviceTempMinC' | 'serviceTempMaxC', label: string) => (
-    <QuantityInput
+    <NumberInput
       label={label}
       quantity="temperature"
       system={unitSystem}

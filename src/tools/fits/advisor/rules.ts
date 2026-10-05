@@ -6,20 +6,26 @@
  * judgement (with the reasoning given), so it can be argued with and tuned
  * here without touching the calculation.
  *
- * Rules that use these constants (see checks.ts):
- * - Service window: the share of the in-service clearance range inside the
- *   required window sets the base score.
+ * The rules (see checks.ts), each with the score points it costs (SCORE_POINTS):
+ * - Service window: at each end of the service temperature range, how far
+ *   (µm) the clearance range goes outside the required window; the worse end
+ *   counts, as a fraction of the window width. The worst end is used because
+ *   the fit must work at every service temperature; it also favours fits that
+ *   sit in the middle of the thermal swing.
  * - Assembly interference: interference at assembly temperature must not
- *   exceed the user's limit.
- * - By hand: needs clearance (min clearance ≥ 0) at assembly temperature.
+ *   exceed the user's limit (hard limit: fixed penalty).
+ * - By hand: needs clearance (min clearance ≥ 0) at assembly temperature (hard).
  * - Thermal assembly: heat the housing (or cool the shaft) until there is
- *   ASSEMBLY_CLEARANCE_UM_PER_MM of clearance; heating the housing above its
- *   material's maxServiceTempC is flagged, because it may spoil the temper.
- * - Locate: max clearance in service ≤ LOCATE_MAX_CLEARANCE_IN_IT7 × IT7.
+ *   ASSEMBLY_CLEARANCE_UM_PER_MM of clearance; each kelvin of heating above
+ *   the housing material's maxServiceTempC costs points (it may spoil the temper).
+ * - Locate: max clearance in service ≤ LOCATE_MAX_CLEARANCE_IN_IT7 × IT7; the
+ *   excess, as a fraction of that limit, costs points.
  * - Transmit torque: favours interference at every service temperature
- *   (torque carried by friction); otherwise a key, pin or spline is needed.
- * - Slide / rotate: no interference anywhere in service.
- * - Disassemble often: interference at assembly temperature is penalised.
+ *   (torque carried by friction); the share of the in-service range that is
+ *   clearance costs points, since there a key, pin or spline is needed.
+ * - Slide / rotate: no interference anywhere in service (hard: parts seize).
+ * - Disassemble often: the share of the assembly-temperature range that is
+ *   interference costs points.
  */
 
 /**
@@ -46,7 +52,24 @@ export const COLDEST_SHAFT_COOLING_TEMP_C = -196
 export const LOCATE_MAX_CLEARANCE_IN_IT7 = 2
 
 /**
- * Score points deducted per check that is not a pass (window check excluded:
- * it sets the base score). A failed check costs three warnings.
+ * Score points deducted by each rule; a candidate starts at 100.
+ * The weights rank the requirements: the clearance window the user asked for
+ * matters most, then the application functions. A window excursion as wide as
+ * the window itself costs 40 points; the application terms cost at most 20
+ * each when fully unmet; hard limits (user's interference limit, by hand,
+ * seizing) cost a fixed 30.
  */
-export const SCORE_PENALTY = { pass: 0, warn: 10, fail: 30 } as const
+export const SCORE_POINTS = {
+  /** × (worst excursion outside the window ÷ window width) */
+  windowPerWidth: 40,
+  /** × (excess max clearance ÷ locate limit) */
+  locatePerLimit: 20,
+  /** × share (0 … 1) of the in-service range that is clearance */
+  torqueClearanceShare: 20,
+  /** × share (0 … 1) of the assembly-temperature range that is interference */
+  disassemblyInterferenceShare: 20,
+  /** × kelvin of housing heating above its material's service limit (20 points per 100 K) */
+  heatingPerKelvinOverLimit: 0.2,
+  /** For a hard limit that is not met. */
+  hardLimit: 30,
+} as const

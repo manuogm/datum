@@ -2,7 +2,7 @@
 // with this revision ("CHANGES SINCE REV B"), or all of them for a first
 // revision.
 import { figureChanges, figureText, type Revision, type ToolSnapshot } from '../../core/projects'
-import { MonoLabel } from '../ui'
+import { EmptyState, MonoLabel } from '../ui'
 import styles from './FigureChangesTable.module.css'
 
 interface FigureChangesTableProps {
@@ -20,7 +20,7 @@ export function FigureChangesTable({ before, after }: FigureChangesTableProps) {
     <div className={styles.changes}>
       <MonoLabel>{heading}</MonoLabel>
       {rows.length === 0 ? (
-        <p className={styles.none}>No headline figure changed.</p>
+        <EmptyState inset="none">No headline figure changed.</EmptyState>
       ) : (
         <table className={styles.table} aria-label={heading}>
           <tbody>

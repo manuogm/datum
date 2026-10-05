@@ -31,11 +31,14 @@
   --text: #ecedef;
   --text-secondary: #c2c5ca;
   --text-muted: #8a8f96;
-  --text-faint: #5b6067;
+  --text-faint: #7e838b; /* quietest text; still WCAG AA (4.5:1) on every surface */
+  --stroke-faint: #5b6067; /* quiet non-text: axes, dashed outlines, empty checkboxes */
 
   /* Accent (also the shaft colour in fit diagrams) */
   --accent: #ff6b2c;
-  --accent-hover: #ff8a55;
+  --accent-hover: #ff8a55; /* hovered accent fill */
+  --accent-fg: #ff6b2c; /* accent as text: links, numbering, actions */
+  --accent-fg-hover: #ff8a55;
   --accent-text: #ff8a55; /* accent-coloured text on --accent-soft */
   --accent-ink: #0c0d0f; /* text on a solid accent fill */
   --accent-soft: #2b1a11;
@@ -191,6 +194,8 @@
   --column-inputs: 340px;
   --column-results: 380px;
   --column-sidebar: 280px;
+  --column-min-height: 600px; /* a column's height once the row wraps */
+  --chart-height-stacked: 520px; /* a chart's height once columns stack */
   --drawer-width: 420px;
 }
 
@@ -214,13 +219,16 @@
 
   --text: #141619;
   --text-secondary: #3b3f45;
-  --text-muted: #6c7178;
-  --text-faint: #a3a7ac;
+  --text-muted: #5f646b;
+  --text-faint: #686d74;
+  --stroke-faint: #a3a7ac;
 
   --accent: #e8561c;
-  --accent-hover: #b8410f;
+  --accent-hover: #f27140;
+  --accent-fg: #b8410f;
+  --accent-fg-hover: #8f320b;
   --accent-text: #b8410f;
-  --accent-ink: #ffffff;
+  --accent-ink: #141619; /* dark ink keeps button text AA on the light accent */
   --accent-soft: #fcebe2;
   --accent-border: #f2c1a8;
   --accent-border-subtle: #f7dccd;

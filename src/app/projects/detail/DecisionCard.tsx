@@ -2,7 +2,7 @@
 // revision it rests on and who approved it (or an Approve button).
 import type { Decision } from '../../../core/projects'
 import { formatActivityTime } from '../../format/formatActivityTime'
-import { Badge, Button } from '../../ui'
+import { Badge, Button, Card } from '../../ui'
 import styles from './DecisionCard.module.css'
 
 interface DecisionCardProps {
@@ -13,7 +13,7 @@ interface DecisionCardProps {
 export function DecisionCard({ decision, onApprove }: DecisionCardProps) {
   const approved = decision.status === 'approved'
   return (
-    <article className={styles.card} aria-labelledby={`${decision.id}-title`}>
+    <Card as="article" variant="surface" padding="lg" labelledBy={`${decision.id}-title`}>
       <div className={styles.head}>
         <span className={styles.id}>{decision.id}</span>
         <Badge tone={approved ? 'ok' : 'warn'}>{decision.status}</Badge>
@@ -39,6 +39,6 @@ export function DecisionCard({ decision, onApprove }: DecisionCardProps) {
           </>
         )}
       </div>
-    </article>
+    </Card>
   )
 }

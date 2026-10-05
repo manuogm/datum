@@ -2,7 +2,8 @@
  * Unit systems for display. Calculations always run in SI (mm, µm, °C); the
  * screens convert to the viewer's unit system only when showing or reading a
  * value. Imperial shows lengths in inches, small deviations in thou
- * (0.001 in) and temperatures in °F.
+ * (0.001 in), temperatures in °F and material properties in lb/in³, Msi,
+ * ksi and BTU/(h·ft·°F).
  */
 
 export const UNIT_SYSTEMS = ['si', 'imperial'] as const
@@ -13,9 +14,13 @@ export type UnitSystem = (typeof UNIT_SYSTEMS)[number]
  * - length: sizes such as a nominal diameter or a limit of size (SI unit mm);
  * - deviation: small differences such as tolerances and clearances (SI unit µm);
  * - temperature: °C;
- * - expansion: coefficient of linear thermal expansion α (SI unit µm/(m·K)).
+ * - expansion: coefficient of linear thermal expansion α (SI unit µm/(m·K));
+ * - density (g/cm³), modulus (GPa), strength (MPa) and conductivity (W/(m·K))
+ *   of a material.
  */
-export type Quantity = 'length' | 'deviation' | 'temperature' | 'expansion'
+export type Quantity =
+  | 'length' | 'deviation' | 'temperature' | 'expansion'
+  | 'density' | 'modulus' | 'strength' | 'conductivity'
 
 interface DisplayUnit {
   readonly unit: string
@@ -28,7 +33,15 @@ interface DisplayUnit {
 
 const MM_PER_INCH = 25.4
 const UM_PER_THOU = 25.4
+const LB_PER_IN3_PER_G_PER_CM3 = 0.0361273
+const KSI_PER_MPA = 0.1450377 // also Msi per GPa
+const BTU_PER_H_FT_F_PER_W_PER_M_K = 0.5778
 const identity = (value: number) => value
+
+/** A unit that is a fixed multiple of the SI unit. */
+function scaled(unit: string, decimals: number, factor: number): DisplayUnit {
+  return { unit, decimals, fixed: true, fromSi: (value) => value * factor, toSi: (value) => value / factor }
+}
 
 const DISPLAY_UNITS: Record<Quantity, Record<UnitSystem, DisplayUnit>> = {
   length: {
@@ -48,6 +61,10 @@ const DISPLAY_UNITS: Record<Quantity, Record<UnitSystem, DisplayUnit>> = {
     // 1 µm/(m·K) = 1e-6 /K = 1e-6 · 5/9 /°F = 5/9 µin/(in·°F)
     imperial: { unit: 'µin/(in·°F)', decimals: 1, fixed: false, fromSi: (a) => (a * 5) / 9, toSi: (a) => (a * 9) / 5 },
   },
+  density: { si: scaled('g/cm³', 2, 1), imperial: scaled('lb/in³', 3, LB_PER_IN3_PER_G_PER_CM3) },
+  modulus: { si: scaled('GPa', 1, 1), imperial: scaled('Msi', 1, KSI_PER_MPA) },
+  strength: { si: scaled('MPa', 0, 1), imperial: scaled('ksi', 1, KSI_PER_MPA) },
+  conductivity: { si: scaled('W/(m·K)', 1, 1), imperial: scaled('BTU/(h·ft·°F)', 1, BTU_PER_H_FT_F_PER_W_PER_M_K) },
 }
 
 /** Unit symbol shown next to a quantity, e.g. 'µm' or 'thou'. */

@@ -35,8 +35,3 @@
   color: var(--text-faint);
 }
 
-.none {
-  margin: 0;
-  font-size: var(--fs-12-5);
-  color: var(--text-muted);
-}

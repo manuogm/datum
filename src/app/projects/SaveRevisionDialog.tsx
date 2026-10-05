@@ -18,7 +18,7 @@ import {
   type Project,
   type ToolSnapshot,
 } from '../../core/projects'
-import { Avatar, Button, Checkbox, Dialog, Field, Marker, MonoLabel, Select, Switch, TextArea } from '../ui'
+import { Avatar, Button, Checkbox, Dialog, EmptyState, Field, Marker, MonoLabel, Select, Switch, TextArea } from '../ui'
 import { FigureChangesTable } from './FigureChangesTable'
 import { FormError } from './FormError'
 import { NEW_PROJECT_HREF } from './newProjectLink'
@@ -53,9 +53,9 @@ export function SaveRevisionDialog({ snapshot, onClose, onSaved }: SaveRevisionD
   if (!project) {
     return (
       <Dialog title="Save revision to project" subtitle={tool.name} onClose={onClose}>
-        <p className={styles.empty}>
+        <EmptyState inset="none">
           There is no open project to save to. <a href={NEW_PROJECT_HREF}>Create a project</a> first.
-        </p>
+        </EmptyState>
       </Dialog>
     )
   }

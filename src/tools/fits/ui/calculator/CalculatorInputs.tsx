@@ -108,7 +108,7 @@ function NominalSize({ nominalMm, system, onChange }: NominalSizeProps) {
         onChange={onChange}
       />
       <Slider
-        label="Nominal diameter, coarse"
+        name="Nominal diameter, coarse"
         value={sliderPosition(nominalMm)}
         min={0}
         max={SLIDER_STEPS}

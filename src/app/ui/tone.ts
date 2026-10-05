@@ -17,7 +17,7 @@ const MARKER_TOKENS: Record<Tone | 'text' | 'muted' | 'faint', string> = {
   neutral: '--text-muted',
   text: '--text',
   muted: '--text-muted',
-  faint: '--text-faint',
+  faint: '--stroke-faint',
 }
 
 /** CSS colour value (a token reference) for a marker colour. */

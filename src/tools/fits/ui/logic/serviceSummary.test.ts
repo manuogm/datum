@@ -20,7 +20,7 @@ describe('serviceSummary', () => {
 })
 
 describe('reportWarnings', () => {
-  const results = fitResults(DEFAULT_FIT_INPUTS)
+  const results = fitResults(DEFAULT_FIT_INPUTS, 'si')
   const notes = ['Al 7075-T6 is advised for sustained service up to about 120 °C; the service range reaches 140 °C.']
 
   it("lists the advisor's checks that did not pass, then the material notes", () => {

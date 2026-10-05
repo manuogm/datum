@@ -3,7 +3,7 @@
 // as a grid, on the Decisions tab.
 import { useState } from 'react'
 import type { Project } from '../../../core/projects'
-import { cx, MonoLabel } from '../../ui'
+import { Button, cx, EmptyState, MonoLabel } from '../../ui'
 import { useProjects } from '../useProjects'
 import { DecisionCard } from './DecisionCard'
 import styles from './DecisionsPanel.module.css'
@@ -24,9 +24,9 @@ export function DecisionsPanel({ project, layout }: DecisionsPanelProps) {
         <MonoLabel as="h2" id="decisions-heading">
           Design decisions
         </MonoLabel>
-        <button type="button" className={styles.record} onClick={() => setRecording(true)}>
+        <Button variant="link" size="sm" onClick={() => setRecording(true)}>
           + Record decision
-        </button>
+        </Button>
       </div>
       <div className={styles.cards}>
         {decisions.map((decision) => (
@@ -36,7 +36,7 @@ export function DecisionsPanel({ project, layout }: DecisionsPanelProps) {
             onApprove={() => actions.approveDecision(project, decision.id)}
           />
         ))}
-        {decisions.length === 0 && <p className={styles.empty}>No decisions recorded yet.</p>}
+        {decisions.length === 0 && <EmptyState inset="none">No decisions recorded yet.</EmptyState>}
       </div>
       {recording && <RecordDecisionDialog project={project} onClose={() => setRecording(false)} />}
     </section>

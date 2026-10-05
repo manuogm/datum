@@ -1,7 +1,7 @@
 // ProjectSidebar: the left column of a project page: parts (choosing one
 // filters the history), design targets and team.
 import type { Project } from '../../../core/projects'
-import { Avatar, cx, Marker, MonoLabel } from '../../ui'
+import { Avatar, Button, cx, Marker, MonoLabel } from '../../ui'
 import { DesignTargetsList } from '../DesignTargets'
 import styles from './ProjectSidebar.module.css'
 
@@ -43,9 +43,9 @@ export function ProjectSidebar({ project, partId, onPartChange, onEditTargets }:
       <section className={styles.section}>
         <div className={styles.heading}>
           <MonoLabel as="h2">Design targets</MonoLabel>
-          <button type="button" className={styles.edit} onClick={onEditTargets}>
+          <Button variant="link" size="sm" onClick={onEditTargets}>
             Edit
-          </button>
+          </Button>
         </div>
         <DesignTargetsList targets={project.targets} />
         <p className={styles.note}>Applied to every calculation in this project.</p>

@@ -4,12 +4,6 @@
   border-bottom: var(--border-width) solid var(--border);
 }
 
-.columns {
-  display: flex;
-  flex: 1;
-  min-height: 0;
-}
-
 .scope {
   display: flex;
   flex-direction: column;
@@ -60,12 +54,8 @@
     padding: var(--space-28) var(--space-16) var(--space-20);
   }
 
-  .columns {
-    flex-direction: column-reverse;
-  }
-
-  .columns > section {
-    width: auto;
-    border-right: 0;
+  /* The stage leads once the columns stack. */
+  .stage {
+    order: -1;
   }
 }

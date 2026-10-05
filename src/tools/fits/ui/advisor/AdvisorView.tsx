@@ -12,6 +12,7 @@ import { serviceClearance } from '../logic/serviceClearance'
 import { BandLegend } from '../shared/BandLegend'
 import { nominalLabel } from '../shared/labels'
 import { ModeSwitch } from '../shared/ModeSwitch'
+import sharedStyles from '../shared/shared.module.css'
 import type { FitInputs } from '../state/fitInputs'
 import type { FitAction } from '../state/fitReducer'
 import { AdvisorInputs } from './AdvisorInputs'
@@ -38,7 +39,7 @@ export function AdvisorView({ inputs, results, system, dispatch }: AdvisorViewPr
         <AdvisorResults advice={advice.value} inputs={inputs} results={results} system={system} dispatch={dispatch} />
       ) : (
         <Column label="Fit candidates" divider={false} header={<ColumnHeader title="Fit candidates" />}>
-          <div className={styles.problem}>
+          <div className={sharedStyles.problem}>
             <Callout status="bad" title="No advice for these inputs">
               {advice.error}
             </Callout>
@@ -103,6 +104,7 @@ function AdvisorResults({ advice, inputs, results, system, dispatch }: AdvisorRe
       <Column
         width="results"
         divider={false}
+        wrap
         label="Recommendation"
         header={
           <ColumnHeader
@@ -115,10 +117,10 @@ function AdvisorResults({ advice, inputs, results, system, dispatch }: AdvisorRe
           />
         }
       >
-        <CandidateSummary candidate={best} title="Best match" size="lg">
+        <CandidateSummary candidate={best} title="Best match" size="lg" system={system}>
           <RecommendationActions comparing={compared !== null} onApply={applyBest} onToggleCompare={toggleCompare} />
         </CandidateSummary>
-        {compared && <CandidateSummary candidate={compared} title="Compared" size="sm" />}
+        {compared && <CandidateSummary candidate={compared} title="Compared" size="sm" system={system} />}
         <RankedCandidates
           candidates={advice.candidates}
           system={system}

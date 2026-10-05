@@ -12,8 +12,9 @@
   color: var(--text);
 }
 
+/* The tabs keep their full width; the project chip shrinks instead. */
 .nav {
-  flex: 0 1 auto;
+  flex: none;
   min-width: 0;
   margin-left: var(--space-10);
   overflow-x: auto;
@@ -28,29 +29,20 @@
   flex: 1;
 }
 
+.project {
+  display: flex;
+  flex: 0 1 auto;
+  min-width: 0;
+}
+
 .actions {
   display: flex;
   gap: var(--space-8);
   flex: none;
 }
 
-@media (max-width: 900px) {
-  .header {
-    gap: var(--space-10);
-    padding: 0 var(--space-16);
-  }
-
-  .nav {
-    margin-left: 0;
-  }
-
-  .header .project,
-  .header .units {
-    display: none;
-  }
-}
-
-@media (max-width: 640px) {
+/* Tool actions become icon-only so the chip keeps its project name. */
+@media (max-width: 1360px) {
   .actionLabel {
     position: absolute;
     width: 1px;
@@ -58,5 +50,33 @@
     overflow: hidden;
     clip-path: inset(50%);
     white-space: nowrap;
+  }
+}
+
+@media (max-width: 1100px) {
+  .header {
+    gap: var(--space-10);
+  }
+}
+
+@media (max-width: 1000px) {
+  .header .project {
+    display: none;
+  }
+}
+
+/* Phones and small tablets: the tabs scroll sideways. */
+@media (max-width: 900px) {
+  .header {
+    padding: 0 var(--space-16);
+  }
+
+  .nav {
+    flex: 0 1 auto;
+    margin-left: 0;
+  }
+
+  .header .units {
+    display: none;
   }
 }

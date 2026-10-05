@@ -68,10 +68,10 @@
   padding: var(--space-16) var(--space-20) 0;
 }
 
-.problem {
-  margin: 0;
-  padding: var(--space-20);
-  color: var(--text-muted);
+@media (max-width: 900px) {
+  .diagramArea {
+    min-height: var(--chart-height-stacked);
+  }
 }
 
 .spectrum {

@@ -2,12 +2,13 @@
 // the advisor): inputs on the left, the zone diagram and fit spectrum in the
 // centre, the results on the right.
 import type { Dispatch } from 'react'
-import { Badge, Column, ColumnHeader } from '../../../../app/ui'
+import { Badge, Callout, Column, ColumnHeader } from '../../../../app/ui'
 import { unitOf, type UnitSystem } from '../../../../core/units'
 import type { FitResults } from '../logic/fitResults'
 import { serviceClearance } from '../logic/serviceClearance'
 import { nominalLabel } from '../shared/labels'
 import { ModeSwitch } from '../shared/ModeSwitch'
+import sharedStyles from '../shared/shared.module.css'
 import { ZoneDiagram } from '../shared/ZoneDiagram'
 import type { FitInputs } from '../state/fitInputs'
 import type { FitAction } from '../state/fitReducer'
@@ -48,13 +49,18 @@ export function CalculatorView({ inputs, results, system, dispatch }: Calculator
             <FitSpectrum service={shown.service} window={inputs.requiredClearanceUm} system={system} />
           </>
         ) : (
-          <p className={styles.problem}>Choose a fit that ISO 286 defines at this size (see the inputs).</p>
+          <div className={sharedStyles.problem}>
+            <Callout status="bad" title="No zones for this fit">
+              Choose a fit that ISO 286 defines at this size (see the inputs).
+            </Callout>
+          </div>
         )}
       </Column>
 
       <Column
         width="results"
         divider={false}
+        wrap
         label="Results"
         header={
           <ColumnHeader

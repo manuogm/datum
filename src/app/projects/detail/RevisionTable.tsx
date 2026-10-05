@@ -3,7 +3,7 @@
 // to reopen it in its tool.
 import { TOOLS, type RevisionInContext } from '../../../core/projects'
 import { formatActivityTime } from '../../format/formatActivityTime'
-import { Badge } from '../../ui'
+import { Badge, EmptyState } from '../../ui'
 import { reopenRevisionHref } from '../reopenLink'
 import { revisionBadge } from '../revisionStatus'
 import styles from './RevisionTable.module.css'
@@ -15,7 +15,7 @@ interface RevisionTableProps {
 }
 
 export function RevisionTable({ label, rows, empty }: RevisionTableProps) {
-  if (rows.length === 0) return <p className={styles.empty}>{empty}</p>
+  if (rows.length === 0) return <EmptyState inset="none">{empty}</EmptyState>
   return (
     <table className={styles.table} aria-label={label}>
       <thead>

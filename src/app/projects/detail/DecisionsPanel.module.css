@@ -19,21 +19,6 @@
   align-items: center;
 }
 
-.record {
-  padding: 0;
-  border: 0;
-  background: none;
-  color: var(--accent);
-  font: inherit;
-  font-size: var(--fs-12);
-  font-weight: var(--weight-semibold);
-  cursor: pointer;
-}
-
-.record:hover {
-  color: var(--accent-hover);
-}
-
 .cards {
   display: flex;
   flex-direction: column;
@@ -46,8 +31,14 @@
   align-items: start;
 }
 
-.empty {
-  margin: 0;
-  font-size: var(--fs-13);
-  color: var(--text-muted);
+/* Once the timeline wraps, the decisions column runs full width below it. */
+@media (max-width: 1200px) {
+  .panel {
+    overflow: visible;
+  }
+
+  .column {
+    border-top: var(--border-width) solid var(--border);
+    border-left: 0;
+  }
 }

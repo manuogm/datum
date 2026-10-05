@@ -3,6 +3,9 @@
 
 const DAY_MS = 24 * 60 * 60 * 1000
 
+// Fixed three-letter months: recent browsers' en-GB gives "Sept".
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+
 function startOfDay(date: Date): number {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime()
 }
@@ -15,9 +18,6 @@ export function formatActivityTime(when: Date, now: Date = new Date()): string {
   }
   if (daysAgo === 1) return 'yesterday'
   const sameYear = when.getFullYear() === now.getFullYear()
-  return when.toLocaleDateString('en-GB', {
-    day: 'numeric',
-    month: 'short',
-    year: sameYear ? undefined : 'numeric',
-  })
+  const date = `${when.getDate()} ${MONTHS[when.getMonth()]}`
+  return sameYear ? date : `${date} ${when.getFullYear()}`
 }

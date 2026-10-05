@@ -26,20 +26,6 @@
   align-items: baseline;
 }
 
-.edit {
-  padding: 0;
-  border: 0;
-  background: none;
-  color: var(--accent);
-  font: inherit;
-  font-size: var(--fs-11-5);
-  cursor: pointer;
-}
-
-.edit:hover {
-  color: var(--accent-hover);
-}
-
 .parts,
 .team {
   display: flex;
@@ -119,4 +105,17 @@
 .role {
   font-size: var(--fs-11-5);
   color: var(--text-faint);
+}
+
+@media (max-width: 1200px) {
+  .sidebar {
+    overflow: visible;
+  }
+}
+
+@media (max-width: 900px) {
+  .sidebar {
+    border-right: 0;
+    border-bottom: var(--border-width) solid var(--border);
+  }
 }

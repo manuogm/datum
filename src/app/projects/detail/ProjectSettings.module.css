@@ -52,3 +52,9 @@
     padding: var(--space-20) var(--space-16);
   }
 }
+
+@media (max-width: 900px) {
+  .settings {
+    overflow: visible;
+  }
+}

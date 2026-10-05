@@ -35,7 +35,7 @@
 }
 
 .add {
-  border: var(--border-width) dashed var(--text-faint);
+  border: var(--border-width) dashed var(--stroke-faint);
   color: var(--text-muted);
   font: inherit;
   font-size: var(--fs-14);

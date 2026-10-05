@@ -1,11 +1,10 @@
 // MaterialFilters: the left column of the Materials page: search, family,
 // property sliders and data source.
 import { MATERIAL_FAMILIES, type MaterialFamily, type SourceKind } from '../../core/materials'
-import type { UnitSystem } from '../../core/units'
-import { Checkbox, Chip, Marker, PanelSection, RangeSlider, SearchField } from '../ui'
+import { formatQuantity, unitOf, type UnitSystem } from '../../core/units'
+import { Checkbox, Chip, Marker, PanelSection, SearchField, Slider } from '../ui'
 import { SLIDER_RANGES, SOURCE_FILTERS, type MaterialFilter } from './materialFilter'
 import styles from './MaterialFilters.module.css'
-import { formatMaterialValue, materialUnit } from './materialUnits'
 
 interface MaterialFiltersProps {
   filter: MaterialFilter
@@ -25,7 +24,7 @@ function toggled<T>(set: ReadonlySet<T>, item: T): Set<T> {
 export function MaterialFilters({ filter, onChange, unitSystem, temperatureNote }: MaterialFiltersProps) {
   const set = <K extends keyof MaterialFilter>(key: K, value: MaterialFilter[K]) => onChange({ ...filter, [key]: value })
   const [minDensity, maxDensity] = filter.densityGPerCm3
-  const density = (value: number) => formatMaterialValue('density', unitSystem, value)
+  const density = (value: number) => formatQuantity('density', unitSystem, value)
   return (
     <>
       <PanelSection>
@@ -54,33 +53,36 @@ export function MaterialFilters({ filter, onChange, unitSystem, temperatureNote 
       </PanelSection>
       <PanelSection label="Properties" aside={temperatureNote}>
         <div className={styles.sliders}>
-          <RangeSlider
+          <Slider
+            mode="atLeast"
             label="Service temp. ≥"
             name="Minimum service temperature"
-            valueText={`${formatMaterialValue('temperature', unitSystem, filter.minServiceTempC)} ${materialUnit('temperature', unitSystem)}`}
+            valueText={`${formatQuantity('temperature', unitSystem, filter.minServiceTempC)} ${unitOf('temperature', unitSystem)}`}
             {...SLIDER_RANGES.serviceTempC}
-            values={[filter.minServiceTempC]}
-            onChange={([value]) => set('minServiceTempC', value)}
+            value={filter.minServiceTempC}
+            onChange={(value) => set('minServiceTempC', value)}
           />
-          <RangeSlider
+          <Slider
+            mode="range"
             label="Density ρ"
             name="Density"
-            valueText={`${density(minDensity)} – ${density(maxDensity)} ${materialUnit('density', unitSystem)}`}
+            valueText={`${density(minDensity)} – ${density(maxDensity)} ${unitOf('density', unitSystem)}`}
             {...SLIDER_RANGES.densityGPerCm3}
-            values={filter.densityGPerCm3}
-            onChange={([low, high]) => set('densityGPerCm3', [low, high])}
+            value={filter.densityGPerCm3}
+            onChange={(bounds) => set('densityGPerCm3', bounds)}
           />
-          <RangeSlider
+          <Slider
+            mode="atLeast"
             label={
               <>
                 Yield R<sub>p0.2</sub> ≥
               </>
             }
             name="Minimum yield strength"
-            valueText={`${formatMaterialValue('strength', unitSystem, filter.minYieldMPa)} ${materialUnit('strength', unitSystem)}`}
+            valueText={`${formatQuantity('strength', unitSystem, filter.minYieldMPa)} ${unitOf('strength', unitSystem)}`}
             {...SLIDER_RANGES.yieldMPa}
-            values={[filter.minYieldMPa]}
-            onChange={([value]) => set('minYieldMPa', value)}
+            value={filter.minYieldMPa}
+            onChange={(value) => set('minYieldMPa', value)}
           />
         </div>
       </PanelSection>

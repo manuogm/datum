@@ -3,13 +3,14 @@
 import { useMemo, useState } from 'react'
 import { projectStats } from '../../core/projects'
 import { AppLayout } from '../AppLayout'
-import { Button, Callout, PageTitle, SearchField, SegmentedControl } from '../ui'
+import { Button, Callout, EmptyState, PageTitle, SearchField, SegmentedControl } from '../ui'
 import { asksForNewProject } from './newProjectLink'
 import { NewProjectDrawer } from './NewProjectDrawer'
 import { filterProjects, PROJECT_VIEWS, type ProjectView } from './projectFilter'
 import styles from './ProjectsPage.module.css'
 import { ProjectsTable } from './ProjectsTable'
 import { useProjects } from './useProjects'
+import { countOf } from '../format/count'
 
 export function ProjectsPage() {
   const { projects, active, problem } = useProjects()
@@ -26,7 +27,7 @@ export function ProjectsPage() {
       <div className={styles.layout}>
         <div className={styles.main} inert={creating}>
           <header className={styles.head}>
-            <PageTitle eyebrow={`${projects.length} projects · ${calculationCount} calculations`} title="Projects" />
+            <PageTitle eyebrow={`${countOf(projects.length, 'project')} · ${countOf(calculationCount, 'calculation')}`} title="Projects" />
             <div className={styles.controls}>
               <SegmentedControl variant="joined" label="Show" options={PROJECT_VIEWS} value={view} onChange={setView} />
               <SearchField
@@ -52,7 +53,7 @@ export function ProjectsPage() {
             </div>
           )}
           <ProjectsTable rows={shown} highlightId={active?.projectId} />
-          {shown.length === 0 && <p className={styles.empty}>No projects match. Clear the filter or create one.</p>}
+          {shown.length === 0 && <EmptyState inset="page">No projects match. Clear the filter or create one.</EmptyState>}
         </div>
         {creating && <NewProjectDrawer onClose={() => setCreating(false)} />}
       </div>

@@ -69,10 +69,39 @@ function approved(id: string, title: string, rationale: string, at: string, basi
   return { id, title, rationale, status: 'approved', proposedBy: MR, recordedAt: at, approvedBy: JO, approvedAt: at, basis }
 }
 
-/** Inputs for a fit revision; the Fit Tolerance page defines the full shape. */
-function fitInputs(nominalMm: number, fit: string, housingMaterialId: string, shaftMaterialId: string) {
-  return { nominalMm, fit, housingMaterialId, shaftMaterialId }
+interface FitRequirements {
+  functions: string[]
+  assembly: 'by-hand' | 'press' | 'thermal'
+  serviceTempC: [min: number, max: number]
+  requiredClearanceUm: [min: number, max: number]
+  maxAssemblyInterferenceUm?: number
 }
+
+/**
+ * The inputs of a fit saved from the calculator, in the Fit Tolerance tool's
+ * FitInputs shape. The tool's tests check that every seed reopens exactly as
+ * stored and that its figures are the ones the tool computes.
+ */
+function fitInputs(nominalMm: number, fit: string, [housingMaterialId, shaftMaterialId]: [string, string], needs: FitRequirements) {
+  const [hole, shaft] = fit.split('/').map((zone) => /^([a-z]+)(\d+)$/i.exec(zone) ?? ['', '', ''])
+  return {
+    mode: 'calculator',
+    nominalMm,
+    hole: { kind: 'hole', letter: hole[1].toLowerCase(), grade: hole[2] },
+    shaft: { kind: 'shaft', letter: shaft[1], grade: shaft[2] },
+    functions: needs.functions,
+    housingMaterialId,
+    shaftMaterialId,
+    assembly: needs.assembly,
+    serviceTempC: { minC: needs.serviceTempC[0], maxC: needs.serviceTempC[1] },
+    requiredClearanceUm: { minUm: needs.requiredClearanceUm[0], maxUm: needs.requiredClearanceUm[1] },
+    maxAssemblyInterferenceUm: needs.maxAssemblyInterferenceUm ?? 40,
+  }
+}
+
+const FW27_TEMP_C: [number, number] = [TARGETS.serviceTempMinC, TARGETS.serviceTempMaxC]
+const UPRIGHT_PIN: [string, string] = ['al-7075-t6', 'steel-42crmo4-qt']
+const LOCATE_PIN = { functions: ['locate', 'transmit-torque'], serviceTempC: FW27_TEMP_C }
 
 const REAR_UPRIGHT: Project = {
   id: 'P-0142',
@@ -104,22 +133,22 @@ const REAR_UPRIGHT: Project = {
       {
         at: '2026-09-28T10:15:00', by: MR, status: 'pass', title: 'Ø25 H7/f7',
         note: 'First pass: running clearance for easy assembly.',
-        figures: [['Fit', 'H7/f7'], ['C at 20 °C', '20…62', 'µm'], ['C at 140 °C', '57…99', 'µm']],
-        inputs: fitInputs(25, 'H7/f7', 'al-7075-t6', 'steel-42crmo4-qt'),
+        figures: [['Fit', 'H7/f7'], ['Nominal', '25.000', 'mm'], ['C at −20 °C', '7.7 … 49.7', 'µm'], ['C at 20 °C', '20 … 62', 'µm'], ['C at 140 °C', '56.9 … 98.9', 'µm']],
+        inputs: fitInputs(25, 'H7/f7', UPRIGHT_PIN, { functions: ['locate', 'slide'], assembly: 'by-hand', serviceTempC: FW27_TEMP_C, requiredClearanceUm: [0, 100] }),
         materialIds: ['al-7075-t6', 'steel-42crmo4-qt'],
       },
       {
-        at: '2026-10-02T15:10:00', by: MR, status: 'pass', title: 'Ø25 H7/g6',
+        at: '2026-10-02T15:10:00', by: MR, status: 'review', title: 'Ø25 H7/g6',
         note: 'Tightened from H7/f7 for location accuracy.',
-        figures: [['Fit', 'H7/g6'], ['C at 20 °C', '7…41', 'µm'], ['C at 140 °C', '44…78', 'µm']],
-        inputs: fitInputs(25, 'H7/g6', 'al-7075-t6', 'steel-42crmo4-qt'),
+        figures: [['Fit', 'H7/g6'], ['Nominal', '25.000', 'mm'], ['C at −20 °C', '−5.3 … 28.7', 'µm'], ['C at 20 °C', '7 … 41', 'µm'], ['C at 140 °C', '43.9 … 77.9', 'µm']],
+        inputs: fitInputs(25, 'H7/g6', UPRIGHT_PIN, { ...LOCATE_PIN, assembly: 'by-hand', requiredClearanceUm: [0, 40] }),
         materialIds: ['al-7075-t6', 'steel-42crmo4-qt'],
       },
       {
         at: '2026-10-05T14:32:00', by: MR, status: 'pass', title: 'Ø25 H7/p6', report: true,
         note: 'Advisor flagged H7/g6 too loose at temperature. Switched to H7/p6, housing heated for assembly.',
-        figures: [['Fit', 'H7/p6'], ['C at 20 °C', '−35…−1', 'µm'], ['C at 140 °C', '2…36', 'µm']],
-        inputs: fitInputs(25, 'H7/p6', 'al-7075-t6', 'steel-42crmo4-qt'),
+        figures: [['Fit', 'H7/p6'], ['Nominal', '25.000', 'mm'], ['C at −20 °C', '−47.3 … −13.3', 'µm'], ['C at 20 °C', '−35 … −1', 'µm'], ['C at 140 °C', '1.9 … 35.9', 'µm']],
+        inputs: fitInputs(25, 'H7/p6', UPRIGHT_PIN, { ...LOCATE_PIN, assembly: 'thermal', requiredClearanceUm: [-50, 40] }),
         materialIds: ['al-7075-t6', 'steel-42crmo4-qt'],
       },
     ]),
@@ -185,7 +214,9 @@ const OTHER_PROJECTS: Project[] = [
     calculations: [
       calculation('FT-0405', 'fit', 'housing-boss', [
         { at: '2026-09-30T13:15:00', by: MR, status: 'pass', title: 'Ø6 H8/f7', note: 'Locating spigot for the clamp.',
-          figures: [['Fit', 'H8/f7'], ['C at 20 °C', '10…40', 'µm']], inputs: fitInputs(6, 'H8/f7', 'pa66-gf30', 'al-6082-t6') },
+          figures: [['Fit', 'H8/f7'], ['Nominal', '6.000', 'mm'], ['C at −30 °C', '9.5 … 39.5', 'µm'], ['C at 20 °C', '10 … 40', 'µm'], ['C at 85 °C', '10.6 … 40.6', 'µm']],
+          inputs: fitInputs(6, 'H8/f7', ['pa66-gf30', 'al-6082-t6'], { functions: ['locate'], assembly: 'by-hand', serviceTempC: [-30, 85], requiredClearanceUm: [0, 60] }),
+          materialIds: ['pa66-gf30', 'al-6082-t6'] },
       ]),
       calculation('BJ-0181', 'bolt', 'clamp-screws', [
         { at: '2026-10-04T17:05:00', by: MR, status: 'review', title: 'M5 into PA66',
@@ -213,7 +244,8 @@ const OTHER_PROJECTS: Project[] = [
     calculations: [
       calculation('FT-0377', 'fit', 'bearing-seats', [
         { at: '2026-09-29T09:30:00', by: MR, status: 'pass', title: 'Ø40 H6/k5', note: 'Inner ring seat for the rotating shaft.',
-          figures: [['Fit', 'H6/k5'], ['C at 20 °C', '−13…14', 'µm']], inputs: fitInputs(40, 'H6/k5', 'steel-42crmo4-qt', 'steel-42crmo4-qt'),
+          figures: [['Fit', 'H6/k5'], ['Nominal', '40.000', 'mm'], ['C at −20 °C', '−13 … 14', 'µm'], ['C at 20 °C', '−13 … 14', 'µm'], ['C at 140 °C', '−13 … 14', 'µm']],
+          inputs: fitInputs(40, 'H6/k5', ['steel-42crmo4-qt', 'steel-42crmo4-qt'], { functions: ['locate', 'rotate'], assembly: 'press', serviceTempC: FW27_TEMP_C, requiredClearanceUm: [-20, 20] }),
           materialIds: ['steel-42crmo4-qt'] },
       ]),
     ],
@@ -244,8 +276,11 @@ const OTHER_PROJECTS: Project[] = [
     parts: parts('Housing', 'Stator core'),
     calculations: [
       calculation('FT-0360', 'fit', 'stator-core', [
-        { at: '2026-09-18T10:10:00', by: MR, status: 'pass', title: 'Ø180 H7/s6', note: 'Shrink fit holds the stator torque up to 120 °C.',
-          figures: [['Fit', 'H7/s6'], ['C at 20 °C', '−133…−68', 'µm']], inputs: fitInputs(180, 'H7/s6', 'al-6082-t6', 'steel-c45-n') },
+        { at: '2026-09-18T10:10:00', by: MR, status: 'review', title: 'Ø180 H7/s6',
+          note: 'Shrink fit for the stator torque. The aluminium housing lets go of the core near 140 °C; the key carries the torque there.',
+          figures: [['Fit', 'H7/s6'], ['Nominal', '180.000', 'mm'], ['C at −20 °C', '−218.7 … −153.7', 'µm'], ['C at 20 °C', '−133 … −68', 'µm'], ['C at 140 °C', '124 … 189', 'µm']],
+          inputs: fitInputs(180, 'H7/s6', ['al-6082-t6', 'steel-c45-n'], { functions: ['transmit-torque'], assembly: 'thermal', serviceTempC: FW27_TEMP_C, requiredClearanceUm: [-200, -10], maxAssemblyInterferenceUm: 150 }),
+          materialIds: ['al-6082-t6', 'steel-c45-n'] },
       ]),
     ],
   }),

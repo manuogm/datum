@@ -16,8 +16,10 @@ interface ProjectChipProps extends ProjectContext {
 }
 
 export function ProjectChip({ name, part, rev, onClick }: ProjectChipProps) {
+  // The visible text may be truncated; the label and tooltip carry it in full.
+  const context = [name, part].filter(Boolean).join(' / ') + (rev ? `, revision ${rev}` : '')
   return (
-    <button type="button" className={styles.chip} onClick={onClick} aria-label={`Project ${name}`}>
+    <button type="button" className={styles.chip} onClick={onClick} aria-label={`Project ${context}`} title={context}>
       <Marker shape="diamond" size={8} />
       <span className={styles.name}>{name}</span>
       {part && (

@@ -10,7 +10,7 @@
 }
 
 .axis {
-  stroke: var(--text-faint);
+  stroke: var(--stroke-faint);
 }
 
 .tick,

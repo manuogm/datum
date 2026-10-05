@@ -14,7 +14,7 @@ export function FitReportPage() {
   const { unitSystem } = useSettings()
   const query = hashQuery()
   const inputs = useMemo(() => decodeFitInputs(query), [query])
-  const results = useMemo(() => fitResults(inputs), [inputs])
+  const results = useMemo(() => fitResults(inputs, unitSystem), [inputs, unitSystem])
   const fit = presentedFit(inputs, results)
   const printRequested = new URLSearchParams(query).has(PRINT_PARAM)
 

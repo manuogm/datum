@@ -6,6 +6,7 @@ import { routeHref } from '../router/routes'
 import { Badge, cx, Icon, Marker, type IconName } from '../ui'
 import { PROJECT_STATUS_TONE } from './projectSummary'
 import styles from './ProjectsTable.module.css'
+import { countOf } from '../format/count'
 
 const TOOL_ICONS: Record<ToolId, { icon: IconName; label: string }> = {
   fit: { icon: 'tool-fit', label: 'fit calculations' },
@@ -42,7 +43,7 @@ export function ProjectsTable({ rows, highlightId }: ProjectsTableProps) {
                   {project.name}
                 </a>
                 <span className={styles.meta}>
-                  {project.id} · {project.parts.length} parts
+                  {project.id} · {countOf(project.parts.length, 'part')}
                 </span>
               </div>
             </div>

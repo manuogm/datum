@@ -5,6 +5,7 @@ import { formatActivityTime } from '../format/formatActivityTime'
 import { PROJECT_STATUS_TONE, type ProjectSummary } from '../projects/projectSummary'
 import { routeHref } from '../router/routes'
 import { Badge, Card, cx, Marker, MonoLabel } from '../ui'
+import { countOf } from '../format/count'
 
 interface ProjectCardProps {
   project: ProjectSummary
@@ -25,8 +26,8 @@ export function ProjectCard({ project, now }: ProjectCardProps) {
         <Badge tone={PROJECT_STATUS_TONE[project.status]}>{project.status}</Badge>
       </div>
       <div className={styles.stats}>
-        <span>{project.calculationCount} calcs</span>
-        <span>{project.decisionCount} decisions</span>
+        <span>{countOf(project.calculationCount, 'calc')}</span>
+        <span>{countOf(project.decisionCount, 'decision')}</span>
         <span className={styles.when}>{formatActivityTime(new Date(project.updatedAt), now)}</span>
       </div>
     </Card>

@@ -1,5 +1,5 @@
 // InputWell: the small boxed mono well of the requirement rows
-// ("−20 … 140 °C"). Holds one or more QuantityInputs and their unit.
+// ("−20 … 140 °C"). Holds one or more NumberInputs and their unit.
 import type { ReactNode } from 'react'
 import styles from './InputWell.module.css'
 

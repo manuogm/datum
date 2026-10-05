@@ -1,8 +1,11 @@
 // Advisor mode, right column, top: the best match (or the compared fit) with
-// its fit type and the advisor's checks, and the actions on it.
+// its fit type, the advisor's checks, the assembly temperatures for a thermal
+// assembly, and the actions on it.
 import type { ReactNode } from 'react'
 import { Badge, Button, CheckRow, PanelSection, Readout } from '../../../../app/ui'
+import type { UnitSystem } from '../../../../core/units'
 import type { FitCandidate } from '../../advisor'
+import { assemblyTemperatures } from '../logic/assemblyTemperatures'
 import { CHECK_ICON, FIT_TYPE_LABEL } from '../shared/labels'
 import styles from './advisor.module.css'
 
@@ -10,12 +13,13 @@ interface CandidateSummaryProps {
   candidate: FitCandidate
   title: string
   size: 'sm' | 'lg'
+  system: UnitSystem
   /** Actions under the checks. */
   children?: ReactNode
 }
 
-/** Designation, fit type at 20 °C and the advisor's checks for one candidate. */
-export function CandidateSummary({ candidate, title, size, children }: CandidateSummaryProps) {
+/** Designation, fit type at 20 °C, the advisor's checks and the assembly temperatures of one candidate. */
+export function CandidateSummary({ candidate, title, size, system, children }: CandidateSummaryProps) {
   return (
     <PanelSection label={`${title} · score ${candidate.score}`}>
       <div className={styles.designation}>
@@ -27,6 +31,9 @@ export function CandidateSummary({ candidate, title, size, children }: Candidate
       <div className={styles.checks}>
         {candidate.checks.map((check) => (
           <CheckRow key={check.id} status={CHECK_ICON[check.status]} label={check.message} />
+        ))}
+        {assemblyTemperatures(candidate.thermalAssembly, system).map((row) => (
+          <CheckRow key={row.label} status={CHECK_ICON.warn} label={row.label} value={row.value} />
         ))}
       </div>
       {children}

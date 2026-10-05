@@ -3,13 +3,12 @@
 // material is chosen for a project part.
 import { sourceOf, type Material, type MaterialProperty, type MaterialSource } from '../../core/materials'
 import type { SnapshotFigure, ToolSnapshot } from '../../core/projects'
-import { formatDecimal, type UnitSystem } from '../../core/units'
-import { formatMaterialValue, materialUnit, type MaterialQuantity } from './materialUnits'
+import { formatDecimal, formatQuantity, unitOf, type Quantity, type UnitSystem } from '../../core/units'
 
 interface PropertyDefinition {
   key: MaterialProperty | 'maxServiceTempC'
   label: string
-  quantity?: MaterialQuantity
+  quantity?: Quantity
   /** Fixed unit for unit-less or percentage values. */
   unit?: string
   value: (m: Material) => number | null
@@ -67,8 +66,8 @@ export function materialDetails(material: Material, system: UnitSystem): Materia
     const raw = property.value(material)
     const label = property.key === 'fatigue' && material.fatigue ? `${property.label} ${cyclesText(material.fatigue.cycles)}` : property.label
     const value =
-      raw === null ? '—' : property.quantity ? formatMaterialValue(property.quantity, system, raw) : (property.format ?? String)(raw)
-    const unit = property.quantity ? materialUnit(property.quantity, system) : (property.unit ?? '')
+      raw === null ? '—' : property.quantity ? formatQuantity(property.quantity, system, raw) : (property.format ?? String)(raw)
+    const unit = property.quantity ? unitOf(property.quantity, system) : (property.unit ?? '')
     return { label, value, unit, sourceNumber: entry.number }
   })
   return { rows, sources }

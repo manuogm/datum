@@ -54,12 +54,6 @@
   clip-path: inset(50%);
 }
 
-.empty {
-  margin: 0;
-  font-size: var(--fs-13);
-  color: var(--text-muted);
-}
-
 @media (max-width: 640px) {
   .table th:nth-child(2),
   .table td:nth-child(2),

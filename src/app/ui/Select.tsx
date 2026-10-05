@@ -7,7 +7,7 @@ import { cx } from './cx'
 import { Icon } from './Icon'
 import { MonoLabel } from './MonoLabel'
 
-export interface SelectOption<T extends string> {
+interface SelectOption<T extends string> {
   value: T
   label: string
 }

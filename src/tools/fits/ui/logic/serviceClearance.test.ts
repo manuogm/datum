@@ -34,4 +34,9 @@ describe('serviceClearance', () => {
     expect(service.bands).toHaveLength(1)
     expect(service.inServiceUm).toEqual({ minUm: 7, maxUm: 41 })
   })
+
+  it('fails a range that only touches the window from outside', () => {
+    const inputs = { ...DEFAULT_FIT_INPUTS, serviceTempC: { minC: 20, maxC: 20 }, requiredClearanceUm: { minUm: 41, maxUm: 60 } }
+    expect(serviceClearance(h7g6, inputs, aluminium, steel).status).toBe('fail')
+  })
 })

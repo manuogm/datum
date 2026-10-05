@@ -1,21 +1,38 @@
-// NumberInput: a bare, unit-less number input for use inside an InputWell
-// (a safety factor such as 1.50). The counterpart of QuantityInput for
-// plain numbers; keeps what the user types until it is a complete number.
+// NumberInput: a bare number input for use inside an InputWell, as wide as
+// its text ("−20 … 140 °C" is two of these). Give it a quantity and unit
+// system to show the value in the viewer's units and report it in SI, or
+// just decimals for a plain number such as a safety factor (1.50). Keeps
+// what the user types until it is a complete number (see useNumberDraft).
 import { formatDecimal } from '../../core/units'
-import styles from './QuantityInput.module.css'
-import { useNumberDraft } from './useNumberDraft'
+import styles from './NumberInput.module.css'
+import { useNumberDraft, type DraftInputProps } from './useNumberDraft'
+import { useQuantityDraft, type QuantityValueProps } from './useQuantityDraft'
 
-interface NumberInputProps {
+interface PlainValueProps {
   value: number
   onChange: (value: number) => void
-  /** Accessible name, e.g. "Minimum safety factor, metallic". */
-  label: string
   /** Decimals shown (with trailing zeros) when not editing. */
   decimals?: number
 }
 
-export function NumberInput({ value, onChange, label, decimals = 2 }: NumberInputProps) {
-  const draft = useNumberDraft(formatDecimal(value, decimals, true), onChange)
+type NumberInputProps = { /** Accessible name, e.g. "Lowest service temperature". */ label: string } & (
+  | QuantityValueProps
+  | (PlainValueProps & { quantity?: never })
+)
+
+export function NumberInput({ label, ...value }: NumberInputProps) {
+  return value.quantity === undefined ? <PlainInput label={label} {...value} /> : <QuantityInput label={label} {...value} />
+}
+
+function PlainInput({ label, value, onChange, decimals = 2 }: PlainValueProps & { label: string }) {
+  return <BareInput label={label} draft={useNumberDraft(formatDecimal(value, decimals, true), onChange)} />
+}
+
+function QuantityInput({ label, ...value }: QuantityValueProps & { label: string }) {
+  return <BareInput label={label} draft={useQuantityDraft(value)} />
+}
+
+function BareInput({ label, draft }: { label: string; draft: DraftInputProps }) {
   const chars = Math.max(String(draft.value).length, 1)
   return <input className={styles.input} aria-label={label} style={{ width: `${chars}ch` }} {...draft} />
 }

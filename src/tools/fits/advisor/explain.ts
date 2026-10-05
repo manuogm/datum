@@ -1,47 +1,47 @@
-import { formatChange, formatNumber, formatRange } from './format'
+import { advisorFormat } from './format'
 import { REFERENCE_TEMP_C } from './thermal'
 import type { AdvisorSettings, FitCandidate } from './types'
 
 /**
- * The "why" text of the Fit advisor: how temperature moves the fit, whether
- * any candidate can meet the required window, and what the best match gives.
- * `ranked` is best first and not empty.
+ * The "why" text of the Fit advisor, two or three short sentences: the
+ * physical reason (differential expansion, with the numbers) and the verdict.
+ * The per-check detail is left to the checks list. `ranked` is best first, not empty.
  */
 export function explainBest(settings: AdvisorSettings, ranked: readonly FitCandidate[], shiftUmPerK: number): string {
-  return [
-    thermalSentence(settings, shiftUmPerK),
-    feasibilitySentence(settings, ranked, shiftUmPerK),
-    bestSentence(ranked[0]),
-  ].filter((sentence) => sentence !== '').join(' ')
+  return [thermalSentence(settings, shiftUmPerK), ...verdictSentences(settings, ranked, shiftUmPerK)].join(' ')
 }
 
-function thermalSentence({ housing, shaft, serviceTempC }: AdvisorSettings, shiftUmPerK: number): string {
-  const housingText = `${housing.name} housing (α ${formatNumber(housing.thermalExpansionUmPerMK)} µm/(m·K))`
-  const shaftText = `${shaft.name} shaft (α ${formatNumber(shaft.thermalExpansionUmPerMK)})`
+function thermalSentence({ housing, shaft, serviceTempC, unitSystem }: AdvisorSettings, shiftUmPerK: number): string {
+  const f = advisorFormat(unitSystem)
   if (shiftUmPerK === 0) {
-    return `The ${housingText} and the ${shaftText} expand alike, so the fit is the same at every temperature.`
+    return `Housing (${housing.name}) and shaft (${shaft.name}) expand alike, so temperature does not change the fit.`
   }
-  const change = (tempC: number) =>
-    `${formatChange(shiftUmPerK * (tempC - REFERENCE_TEMP_C))} µm at ${formatNumber(tempC)} °C`
-  const order = shiftUmPerK > 0 ? `the ${housingText} expands more than the ${shaftText}` : `the ${shaftText} expands more than the ${housingText}`
-  return `Relative to ${REFERENCE_TEMP_C} °C the clearance changes by ${change(serviceTempC.minC)} and ${change(serviceTempC.maxC)}: ${order}.`
+  const [more, less] = shiftUmPerK > 0 ? [`${housing.name} housing`, `${shaft.name} shaft`] : [`${shaft.name} shaft`, `${housing.name} housing`]
+  const alphas = `α ${f.expansionPair(housing.thermalExpansionUmPerMK, shaft.thermalExpansionUmPerMK)}`
+  const change = (tempC: number) => `${f.clearanceChange(shiftUmPerK * (tempC - REFERENCE_TEMP_C))} at ${f.temperature(tempC)}`
+  return `The ${more} expands more than the ${less} (${alphas}), so the clearance shifts ${change(serviceTempC.minC)}`
+    + ` and ${change(serviceTempC.maxC)} from its ${f.temperature(REFERENCE_TEMP_C)} value.`
 }
 
-function feasibilitySentence(settings: AdvisorSettings, ranked: readonly FitCandidate[], shiftUmPerK: number): string {
-  if (ranked.some((c) => c.windowShare === 1)) return ''
-  const { requiredClearanceUm: window, serviceTempC } = settings
-  const noneFits = `No candidate keeps the clearance inside ${formatRange(window.minUm, window.maxUm, 'µm')} at every service temperature`
+function verdictSentences(settings: AdvisorSettings, ranked: readonly FitCandidate[], shiftUmPerK: number): readonly string[] {
+  const best = ranked[0]
+  const { requiredClearanceUm: window, serviceTempC, unitSystem } = settings
+  const f = advisorFormat(unitSystem)
+  const windowText = f.clearanceRange(window.minUm, window.maxUm)
+  const bestText = `${best.fit.designation} (score ${best.score})`
+  if (best.windowShare === 1) {
+    return [`${bestText} stays inside ${windowText} at every service temperature.`]
+  }
+  const inService = f.clearanceRange(best.inServiceUm.minUm, best.inServiceUm.maxUm)
+  if (ranked.some((c) => c.windowShare === 1)) {
+    return [`${bestText} is the best balance of the requirements, with ${inService} in service.`]
+  }
+  const closest = `${bestText} comes closest, with ${inService} in service.`
   const thermalChangeUm = Math.abs(shiftUmPerK) * (serviceTempC.maxC - serviceTempC.minC)
   const smallestFitToleranceUm = Math.min(...ranked.map((c) => c.fit.fitToleranceUm))
   const windowWidthUm = window.maxUm - window.minUm
-  if (thermalChangeUm + smallestFitToleranceUm <= windowWidthUm) return `${noneFits}.`
-  return `${noneFits}: the thermal change over the service range (${formatNumber(thermalChangeUm)} µm) plus the fit tolerance`
-    + ` of the most precise candidate (${formatNumber(smallestFitToleranceUm)} µm) is wider than the ${formatNumber(windowWidthUm)} µm window.`
-    + ' Narrow the temperature range, widen the window or pair materials with closer α.'
-}
-
-function bestSentence(best: FitCandidate): string {
-  const name = best.preferred ? ` (${best.preferred.name.toLowerCase()})` : ''
-  const shown = best.checks.filter((check) => check.status !== 'pass' || check.id === 'service-window' || check.id === 'thermal-assembly')
-  return [`Best match: ${best.fit.designation}${name}, score ${best.score}.`, ...shown.map((check) => check.message)].join(' ')
+  const reason = thermalChangeUm + smallestFitToleranceUm > windowWidthUm
+    ? `: the ${f.clearance(thermalChangeUm)} thermal swing plus the tightest fit tolerance (${f.clearance(smallestFitToleranceUm)}) is wider than the window`
+    : ''
+  return [`No ISO fit stays inside ${windowText} over the whole service range${reason}.`, closest]
 }

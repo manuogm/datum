@@ -35,7 +35,7 @@ describe('formatQuantityRange', () => {
 
 describe('toDisplay / fromDisplay', () => {
   it('round-trips every quantity in both systems', () => {
-    for (const quantity of ['length', 'deviation', 'temperature', 'expansion'] as const) {
+    for (const quantity of ['length', 'deviation', 'temperature', 'expansion', 'density', 'modulus', 'strength', 'conductivity'] as const) {
       for (const system of ['si', 'imperial'] as const) {
         expect(fromDisplay(quantity, system, toDisplay(quantity, system, 37.25))).toBeCloseTo(37.25, 9)
       }
@@ -46,6 +46,31 @@ describe('toDisplay / fromDisplay', () => {
     expect(fromDisplay('length', 'imperial', 1)).toBe(25.4)
     expect(fromDisplay('deviation', 'imperial', 1)).toBe(25.4)
     expect(fromDisplay('temperature', 'imperial', 212)).toBe(100)
+  })
+})
+
+describe('material properties', () => {
+  it('shows SI values as stored, with fixed decimals', () => {
+    expect(formatQuantity('density', 'si', 4.43)).toBe('4.43')
+    expect(formatQuantity('modulus', 'si', 210)).toBe('210.0')
+    expect(formatQuantity('strength', 'si', 880)).toBe('880')
+    expect(formatQuantity('conductivity', 'si', 6.7)).toBe('6.7')
+  })
+
+  it('converts to Imperial', () => {
+    expect(formatQuantity('density', 'imperial', 7.85)).toBe('0.284') // steel ≈ 0.284 lb/in³
+    expect(formatQuantity('modulus', 'imperial', 200)).toBe('29.0') // 29 Msi
+    expect(formatQuantity('strength', 'imperial', 880)).toBe('127.6')
+    expect(formatQuantity('conductivity', 'imperial', 6.7)).toBe('3.9')
+    expect(formatQuantity('temperature', 'imperial', 350)).toBe('662')
+    expect(formatQuantity('expansion', 'imperial', 8.6)).toBe('4.8')
+  })
+
+  it('names the units', () => {
+    expect(unitOf('density', 'imperial')).toBe('lb/in³')
+    expect(unitOf('modulus', 'imperial')).toBe('Msi')
+    expect(unitOf('strength', 'imperial')).toBe('ksi')
+    expect(unitOf('conductivity', 'si')).toBe('W/(m·K)')
   })
 })
 

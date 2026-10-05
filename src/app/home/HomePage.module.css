@@ -24,7 +24,7 @@
 }
 
 .titleAccent {
-  color: var(--accent);
+  color: var(--accent); /* display size: large-text contrast applies */
 }
 
 .intro {
@@ -79,7 +79,7 @@
 }
 
 .request:hover {
-  color: var(--accent);
+  color: var(--accent-fg);
 }
 
 /* Recent projects */

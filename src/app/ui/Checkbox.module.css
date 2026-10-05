@@ -27,7 +27,7 @@
   justify-content: center;
   flex: none;
   box-sizing: border-box;
-  border: var(--border-width) solid var(--text-faint);
+  border: var(--border-width) solid var(--stroke-faint);
   border-radius: var(--radius-xs);
   color: var(--accent-ink);
   font-weight: var(--weight-bold);

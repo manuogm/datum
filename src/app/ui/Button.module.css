@@ -84,9 +84,13 @@
   padding: 0;
   height: auto;
   border: 0;
-  color: var(--accent);
+  color: var(--accent-fg);
+}
+
+.link.sm {
+  font-size: var(--fs-12);
 }
 
 .link:hover {
-  color: var(--accent-hover);
+  color: var(--accent-fg-hover);
 }

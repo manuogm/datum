@@ -1,6 +1,7 @@
 // Content of the four tool cards on Home: fixed copy per tool plus the
 // live tag and footnote derived from HomeData.
 import type { HomeData, ToolSection } from './homeData'
+import { countOf } from '../format/count'
 
 export interface ToolCardContent {
   tool: ToolSection
@@ -43,7 +44,7 @@ export function toolCards(data: HomeData): ToolCardContent[] {
     return {
       tool,
       index: String(i + 1).padStart(2, '0'),
-      tag: standard ?? `${data.materials.count} materials`,
+      tag: standard ?? countOf(data.materials.count, 'material'),
       title,
       description,
       footnote: tool === 'mat' ? data.materials.sources.join(' · ') : last ? `LAST · ${last}` : 'NOT USED YET',

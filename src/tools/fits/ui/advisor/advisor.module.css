@@ -12,12 +12,14 @@
   padding: var(--space-12) var(--space-16) 0;
 }
 
-.notes {
-  color: var(--warn-text);
+@media (max-width: 900px) {
+  .chartArea {
+    min-height: var(--chart-height-stacked);
+  }
 }
 
-.problem {
-  padding: var(--space-20);
+.notes {
+  color: var(--warn-text);
 }
 
 .designation {

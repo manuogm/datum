@@ -3,13 +3,10 @@
 // defaults are written. Reading ignores anything malformed and keeps the
 // default for it, so an edited or old link never breaks the screen.
 import { routeHref } from '../../../../app/router/routes'
-import { materialById } from '../../../../core/materials'
 import { parseDecimal } from '../../../../core/units'
-import { formatZone, parseZone, type ZoneKind, type ZoneSpec } from '../../calc'
-import { APPLICATION_FUNCTIONS, ASSEMBLY_METHODS } from '../logic/applications'
-import { DEFAULT_FIT_INPUTS, type FitInputs, type FitMode } from './fitInputs'
-
-const MODES: readonly FitMode[] = ['advisor', 'calculator']
+import { formatZone } from '../../calc'
+import { DEFAULT_FIT_INPUTS, type FitInputs } from './fitInputs'
+import { asAssembly, asFunctions, asMaterialId, asMode, asZone } from './readInputs'
 
 /** Query parameter asking the report page to open the print dialog. */
 export const PRINT_PARAM = 'print'
@@ -70,14 +67,14 @@ export function decodeFitInputs(query: string): FitInputs {
   const serviceTemp = read(KEY.serviceTemp, parsePair, null)
   const clearance = read(KEY.requiredClearance, parsePair, null)
   return {
-    mode: read(KEY.mode, (text) => MODES.find((mode) => mode === text) ?? null, d.mode),
+    mode: read(KEY.mode, asMode, d.mode),
     nominalMm: read(KEY.nominal, parseDecimal, d.nominalMm),
-    hole: read(KEY.hole, (text) => zoneOfKind(text, 'hole'), d.hole),
-    shaft: read(KEY.shaft, (text) => zoneOfKind(text, 'shaft'), d.shaft),
-    functions: read(KEY.functions, parseFunctions, d.functions),
-    housingMaterialId: read(KEY.housingMaterial, knownMaterial, d.housingMaterialId),
-    shaftMaterialId: read(KEY.shaftMaterial, knownMaterial, d.shaftMaterialId),
-    assembly: read(KEY.assembly, (text) => ASSEMBLY_METHODS.find((method) => method === text) ?? null, d.assembly),
+    hole: read(KEY.hole, (text) => asZone(text, 'hole'), d.hole),
+    shaft: read(KEY.shaft, (text) => asZone(text, 'shaft'), d.shaft),
+    functions: read(KEY.functions, (text) => asFunctions(text === '' ? [] : text.split(',')), d.functions),
+    housingMaterialId: read(KEY.housingMaterial, asMaterialId, d.housingMaterialId),
+    shaftMaterialId: read(KEY.shaftMaterial, asMaterialId, d.shaftMaterialId),
+    assembly: read(KEY.assembly, asAssembly, d.assembly),
     serviceTempC: serviceTemp ? { minC: serviceTemp[0], maxC: serviceTemp[1] } : d.serviceTempC,
     requiredClearanceUm: clearance ? { minUm: clearance[0], maxUm: clearance[1] } : d.requiredClearanceUm,
     maxAssemblyInterferenceUm: read(KEY.maxInterference, parseDecimal, d.maxAssemblyInterferenceUm),
@@ -91,20 +88,4 @@ function pair(a: number, b: number): string {
 function parsePair(text: string): [number, number] | null {
   const [a, b, ...rest] = text.split(',').map(parseDecimal)
   return a != null && b != null && rest.length === 0 ? [a, b] : null
-}
-
-function zoneOfKind(text: string, kind: ZoneKind): ZoneSpec | null {
-  const zone = parseZone(text)
-  return zone.ok && zone.value.kind === kind ? zone.value : null
-}
-
-function parseFunctions(text: string): FitInputs['functions'] | null {
-  if (text === '') return []
-  const names = text.split(',')
-  const functions = APPLICATION_FUNCTIONS.filter((fn) => names.includes(fn))
-  return functions.length === names.length ? functions : null
-}
-
-function knownMaterial(id: string): string | null {
-  return materialById(id).ok ? id : null
 }

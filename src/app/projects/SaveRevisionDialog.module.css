@@ -53,7 +53,7 @@
 .decisionId {
   font-family: var(--font-mono);
   font-size: var(--fs-11);
-  color: var(--accent);
+  color: var(--accent-fg);
 }
 
 .approver {
@@ -75,12 +75,6 @@
 
 .noApprover {
   color: var(--text-faint);
-}
-
-.empty {
-  margin: 0;
-  font-size: var(--fs-13);
-  color: var(--text-secondary);
 }
 
 @media (max-width: 480px) {

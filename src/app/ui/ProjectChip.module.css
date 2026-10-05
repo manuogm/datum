@@ -4,6 +4,7 @@
   align-items: center;
   gap: var(--space-8);
   min-width: 0;
+  max-width: 100%;
   height: var(--control-height);
   margin: 0;
   padding: 0 var(--space-10) 0 var(--space-12);
@@ -19,7 +20,7 @@
 }
 
 .chip:hover {
-  border-color: var(--text-faint);
+  border-color: var(--stroke-faint);
 }
 
 .chip:focus-visible {
@@ -29,16 +30,22 @@
 }
 
 .name {
+  flex: 0 1 auto;
+  min-width: 0;
   font-weight: var(--weight-semibold);
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .separator {
+  flex: none;
   color: var(--text-faint);
 }
 
+/* The part gives way first when the header runs out of room. */
 .part {
+  flex: 0 100 auto;
+  min-width: 0;
   color: var(--text-secondary);
   overflow: hidden;
   text-overflow: ellipsis;

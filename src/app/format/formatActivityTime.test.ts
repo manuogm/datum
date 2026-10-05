@@ -14,6 +14,7 @@ describe('formatActivityTime', () => {
 
   it('shows day and month for older dates this year', () => {
     expect(formatActivityTime(new Date(2026, 9, 2, 9, 0), now)).toBe('2 Oct')
+    expect(formatActivityTime(new Date(2026, 8, 29, 9, 0), now)).toBe('29 Sep')
   })
 
   it('adds the year for earlier years', () => {

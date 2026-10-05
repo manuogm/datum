@@ -8,6 +8,7 @@ describe('fitSnapshot', () => {
     const inputs = { ...DEFAULT_FIT_INPUTS, mode: 'calculator' as const }
     const snapshot = expectOk(fitSnapshot(inputs))
     expect(snapshot).toMatchObject({ tool: 'fit', title: 'Ø25 H7/g6', status: 'review', inputs })
+    expect(snapshot.materialIds).toEqual(['al-7075-t6', 'steel-42crmo4-qt'])
     expect(snapshot.figures).toEqual([
       { label: 'Fit', value: 'H7/g6' },
       { label: 'Nominal', value: '25.000', unit: 'mm' },
@@ -19,8 +20,8 @@ describe('fitSnapshot', () => {
 
   it("describes the advisor's best match in advisor mode", () => {
     const snapshot = expectOk(fitSnapshot(DEFAULT_FIT_INPUTS))
-    expect(snapshot.title).toBe('Ø25 H7/js6')
-    expect(snapshot.figures[0]).toEqual({ label: 'Fit', value: 'H7/js6' })
+    expect(snapshot.title).toBe('Ø25 H7/k6')
+    expect(snapshot.figures[0]).toEqual({ label: 'Fit', value: 'H7/k6' })
   })
 
   it('is JSON-safe', () => {

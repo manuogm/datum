@@ -3,6 +3,7 @@
 // "about" (the one the report and a saved revision describe).
 import { MATERIALS, materialById, type Material } from '../../../../core/materials'
 import { fail, ok, type Result } from '../../../../core/result'
+import type { UnitSystem } from '../../../../core/units'
 import { adviseFit, type FitAdvice, type FitCandidate } from '../../advisor'
 import { analyseFit, type FitAnalysis } from '../../calc'
 import type { FitInputs } from '../state/fitInputs'
@@ -16,7 +17,8 @@ export interface FitResults {
   readonly advice: Result<FitAdvice>
 }
 
-export function fitResults(inputs: FitInputs): FitResults {
+/** `system` is the unit system of the advisor's texts. */
+export function fitResults(inputs: FitInputs, system: UnitSystem): FitResults {
   const housing = materialOrFirst(inputs.housingMaterialId)
   const shaft = materialOrFirst(inputs.shaftMaterialId)
   return {
@@ -32,6 +34,7 @@ export function fitResults(inputs: FitInputs): FitResults {
       serviceTempC: inputs.serviceTempC,
       requiredClearanceUm: inputs.requiredClearanceUm,
       maxAssemblyInterferenceUm: inputs.maxAssemblyInterferenceUm,
+      unitSystem: system,
     }),
   }
 }

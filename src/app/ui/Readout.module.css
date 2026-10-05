@@ -40,19 +40,3 @@
   color: var(--text-muted);
   letter-spacing: 0;
 }
-
-.default {
-  color: var(--text);
-}
-
-.ok {
-  color: var(--ok-text);
-}
-
-.warn {
-  color: var(--warn-text);
-}
-
-.bad {
-  color: var(--bad-text);
-}

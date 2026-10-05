@@ -1,11 +1,12 @@
 import { fail, ok, type Result } from '../../../core/result'
 import { analyseFitDesignation, PREFERRED_FITS, standardToleranceUm, type FitAnalysis } from '../calc'
 import { candidateDesignations } from './candidates'
-import { candidateChecks, shareInside, type CandidateClearances } from './checks'
+import { candidateChecks, type CandidateClearances } from './checks'
 import { explainBest } from './explain'
-import { formatNumber } from './format'
+import { advisorFormat } from './format'
+import { inServiceClearance } from './inService'
 import { ASSEMBLY_CLEARANCE_UM_PER_MM } from './rules'
-import { scoreCandidate } from './score'
+import { scoreCandidate, totalPenalty } from './score'
 import { clearanceAt, clearanceShiftUmPerK, joiningTempC, REFERENCE_TEMP_C } from './thermal'
 import type { AdvisorSettings, ClearanceAtTemperature, FitAdvice, FitAdvisorInput, FitCandidate, ThermalAssembly } from './types'
 
@@ -22,6 +23,7 @@ export function adviseFit(input: FitAdvisorInput): Result<FitAdvice> {
     ...input,
     basis: input.basis ?? 'hole-basis',
     assemblyTempC: input.assemblyTempC ?? REFERENCE_TEMP_C,
+    unitSystem: input.unitSystem ?? 'si',
   }
   // IT7 at the size: for the 'locate' rule; also checks the size is within ISO 286.
   const it7 = standardToleranceUm('7', settings.nominalMm)
@@ -34,7 +36,7 @@ export function adviseFit(input: FitAdvisorInput): Result<FitAdvice> {
     .map((designation) => analyseFitDesignation(designation, settings.nominalMm))
     .flatMap((result) => (result.ok ? [result.value] : []))
   if (fits.length === 0) {
-    return fail(`None of the candidate fits is defined by ISO 286 at ${formatNumber(settings.nominalMm)} mm.`)
+    return fail(`None of the candidate fits is defined by ISO 286 at ${advisorFormat(settings.unitSystem).length(settings.nominalMm)}.`)
   }
   const ranked = rank(fits.map((fit) => assessCandidate(settings, fit, shiftUmPerK, it7.value)), settings)
   return ok({
@@ -57,23 +59,17 @@ function inputError(input: FitAdvisorInput): string | null {
   if (requiredClearanceUm.minUm >= requiredClearanceUm.maxUm) {
     return 'The required clearance window must go from a smaller to a larger clearance (negative values are interference).'
   }
-  if (maxAssemblyInterferenceUm < 0) return 'The maximum assembly interference is a size of interference: enter it as 0 or a positive number of µm.'
+  if (maxAssemblyInterferenceUm < 0) return 'The maximum assembly interference is a size of interference: enter it as 0 or a positive number.'
   return null
 }
 
 function assessCandidate(settings: AdvisorSettings, fit: FitAnalysis, shiftUmPerK: number, it7Um: number): FitCandidate {
   const fitAt20C = { minUm: fit.minClearanceUm, maxUm: fit.maxClearanceUm }
-  const atServiceMin = clearanceAt(fitAt20C, shiftUmPerK, settings.serviceTempC.minC)
-  const atServiceMax = clearanceAt(fitAt20C, shiftUmPerK, settings.serviceTempC.maxC)
   const atAssembly = clearanceAt(fitAt20C, shiftUmPerK, settings.assemblyTempC)
-  // Clearance is linear in temperature, so its extremes over the range are at the range ends.
-  const inServiceUm = {
-    minUm: Math.min(atServiceMin.minUm, atServiceMax.minUm),
-    maxUm: Math.max(atServiceMin.maxUm, atServiceMax.maxUm),
-  }
   const clearances: CandidateClearances = {
-    fit, atServiceMin, atServiceMax, atAssembly, inServiceUm,
-    windowShare: shareInside(inServiceUm, settings.requiredClearanceUm),
+    ...inServiceClearance(fitAt20C, shiftUmPerK, settings.serviceTempC, settings.requiredClearanceUm),
+    fit,
+    atAssembly,
     thermalAssembly: settings.assembly === 'thermal' ? thermalAssembly(settings, atAssembly) : null,
   }
   const checks = candidateChecks(settings, clearances, it7Um)
@@ -81,7 +77,7 @@ function assessCandidate(settings: AdvisorSettings, fit: FitAnalysis, shiftUmPer
     ...clearances,
     preferred: PREFERRED_FITS.find((p) => p.designation === fit.designation) ?? null,
     checks,
-    score: scoreCandidate(clearances.windowShare, checks),
+    score: scoreCandidate(checks),
   }
 }
 
@@ -103,21 +99,24 @@ function thermalAssembly(settings: AdvisorSettings, atAssembly: ClearanceAtTempe
 }
 
 /**
- * Best first: highest score; on equal scores, the fit whose mid in-service
- * clearance is closest to the middle of the required window.
+ * Best first: smallest total penalty (the unrounded score, so fits with the
+ * same rounded score, or a score clamped at 0, still rank by merit); on equal
+ * penalties, the fit whose mid in-service clearance is closest to the middle
+ * of the required window.
  */
 function rank(candidates: readonly FitCandidate[], settings: AdvisorSettings): readonly FitCandidate[] {
   const { minUm, maxUm } = settings.requiredClearanceUm
   const windowMidUm = (minUm + maxUm) / 2
   const offCentreUm = (c: FitCandidate) => Math.abs((c.inServiceUm.minUm + c.inServiceUm.maxUm) / 2 - windowMidUm)
-  return [...candidates].sort((a, b) => b.score - a.score || offCentreUm(a) - offCentreUm(b))
+  return [...candidates].sort((a, b) => totalPenalty(a.checks) - totalPenalty(b.checks) || offCentreUm(a) - offCentreUm(b))
 }
 
 /** Materials used above their indicative service limit (see Material.maxServiceTempC). */
-function materialNotes({ housing, shaft, serviceTempC }: AdvisorSettings): readonly string[] {
+function materialNotes({ housing, shaft, serviceTempC, unitSystem }: AdvisorSettings): readonly string[] {
+  const f = advisorFormat(unitSystem)
   const parts = housing.name === shaft.name ? [housing] : [housing, shaft]
   return parts
     .filter((m) => serviceTempC.maxC > m.maxServiceTempC)
-    .map((m) => `${m.name} is advised for sustained service up to about ${formatNumber(m.maxServiceTempC)} °C;`
-      + ` the service range reaches ${formatNumber(serviceTempC.maxC)} °C.`)
+    .map((m) => `${m.name} is advised for sustained service up to about ${f.temperature(m.maxServiceTempC)};`
+      + ` the service range reaches ${f.temperature(serviceTempC.maxC)}.`)
 }

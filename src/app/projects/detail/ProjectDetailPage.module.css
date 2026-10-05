@@ -64,21 +64,20 @@
   overflow-y: auto;
 }
 
-/* Narrower: decisions move below the history and the page scrolls as a whole. */
+/* Narrower: decisions move below the history and the page scrolls as a
+   whole. Each column adapts its own rules and scrolling; this only places them. */
 @media (max-width: 1200px) {
   .timelineBody {
     flex: 1 0 auto;
     grid-template-columns: var(--column-sidebar) minmax(0, 1fr);
   }
 
-  .timelineBody > * {
-    overflow: visible;
-  }
-
   .timelineBody > :last-child {
     grid-column: 1 / -1;
-    border-top: var(--border-width) solid var(--border);
-    border-left: 0;
+  }
+
+  .pane {
+    overflow: visible;
   }
 }
 
@@ -91,11 +90,5 @@
   .body {
     display: flex;
     flex-direction: column;
-  }
-
-  .timelineBody > *,
-  .body > * {
-    border-right: 0;
-    overflow: visible;
   }
 }

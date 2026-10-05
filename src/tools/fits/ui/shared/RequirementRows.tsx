@@ -1,7 +1,7 @@
 // The requirement rows shared by both modes: a service temperature range, a
 // clearance window, and (advisor only) the assembly interference limit. Each
 // value is typed in the viewer's units and stored in SI.
-import { InputWell, QuantityInput, ValueRow } from '../../../../app/ui'
+import { InputWell, NumberInput, ValueRow } from '../../../../app/ui'
 import { unitOf, type Quantity, type UnitSystem } from '../../../../core/units'
 
 interface RangeRowProps {
@@ -20,9 +20,9 @@ export function RangeRow({ label, quantity, system, min, max, onChange }: RangeR
       label={label}
       value={
         <InputWell unit={unitOf(quantity, system)}>
-          <QuantityInput label={`${label}, lowest`} quantity={quantity} system={system} value={min} onChange={(v) => onChange(v, max)} />
+          <NumberInput label={`${label}, lowest`} quantity={quantity} system={system} value={min} onChange={(v) => onChange(v, max)} />
           …
-          <QuantityInput label={`${label}, highest`} quantity={quantity} system={system} value={max} onChange={(v) => onChange(min, v)} />
+          <NumberInput label={`${label}, highest`} quantity={quantity} system={system} value={max} onChange={(v) => onChange(min, v)} />
         </InputWell>
       }
     />
@@ -44,7 +44,7 @@ export function SingleRow({ label, quantity, system, value, onChange }: SingleRo
       label={label}
       value={
         <InputWell unit={unitOf(quantity, system)}>
-          <QuantityInput label={label} quantity={quantity} system={system} value={value} onChange={onChange} />
+          <NumberInput label={label} quantity={quantity} system={system} value={value} onChange={onChange} />
         </InputWell>
       }
     />

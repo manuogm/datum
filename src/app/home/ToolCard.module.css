@@ -69,10 +69,10 @@
 
 .open {
   flex: none;
-  color: var(--accent);
+  color: var(--accent-fg);
   font-weight: var(--weight-semibold);
 }
 
 .card:hover .open {
-  color: var(--accent-hover);
+  color: var(--accent-fg-hover);
 }

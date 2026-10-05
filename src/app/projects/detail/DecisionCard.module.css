@@ -1,14 +1,4 @@
 /* Decision card in the right column and on the Decisions tab. */
-.card {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-8);
-  padding: var(--space-14);
-  border: var(--border-width) solid var(--border);
-  border-radius: var(--radius-md);
-  background: var(--surface);
-}
-
 .head {
   display: flex;
   justify-content: space-between;
@@ -20,7 +10,7 @@
   font-family: var(--font-mono);
   font-size: var(--fs-10-5);
   letter-spacing: var(--tracking-badge);
-  color: var(--accent);
+  color: var(--accent-fg);
 }
 
 .title {

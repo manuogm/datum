@@ -28,8 +28,17 @@ export function ZoneDiagram({ fit, system, variant }: ZoneDiagramProps) {
   const screen = variant === 'screen'
   const sizes = (zone: ToleranceZone) =>
     [formatQuantity('length', system, zone.minSizeMm), formatQuantity('length', system, zone.maxSizeMm)].join(screen ? ' – ' : '–')
-  const captionY = (zone: DiagramZone, above: boolean) =>
-    screen ? (above ? zone.y - 13 : zone.y + zone.height + 24) : frame.height - 14
+  // Captions go on the outer side of each zone, clear of the gap between them:
+  // above the higher zone (the hole in a clearance fit), below the lower one.
+  const holeHigher = layout.hole.y + layout.hole.height / 2 <= layout.shaft.y + layout.shaft.height / 2
+  const zeroNoteY = layout.zeroY + 16
+  const captionY = (zone: DiagramZone, above: boolean) => {
+    if (!screen) return frame.height - 14
+    if (above) return zone.y - 13
+    // A zone ending at the zero line puts its caption a line below the zero-line note.
+    const below = zone.y + zone.height + 24
+    return Math.abs(below - zeroNoteY) < 14 ? zeroNoteY + 16 : below
+  }
 
   return (
     <svg
@@ -62,7 +71,7 @@ export function ZoneDiagram({ fit, system, variant }: ZoneDiagramProps) {
         0
       </text>
       {screen && (
-        <text className={styles.note} x={frame.left + 6} y={layout.zeroY + 16}>
+        <text className={styles.note} x={frame.left + 6} y={zeroNoteY}>
           zero line · Ø {formatQuantity('length', system, fit.nominalMm)}
         </text>
       )}
@@ -79,7 +88,7 @@ export function ZoneDiagram({ fit, system, variant }: ZoneDiagramProps) {
         detail={`IT${fit.hole.grade} = ${um(fit.hole.itUm, false)}`}
         limitLabels={screen ? [`ES ${um(fit.hole.upperDeviationUm)}`, `EI ${um(fit.hole.lowerDeviationUm)}`] : null}
         caption={`HOLE ${sizes(fit.hole)}`}
-        captionY={captionY(layout.hole, true)}
+        captionY={captionY(layout.hole, holeHigher)}
         large={screen}
       />
       <Zone
@@ -89,7 +98,7 @@ export function ZoneDiagram({ fit, system, variant }: ZoneDiagramProps) {
         detail={`IT${fit.shaft.grade} = ${um(fit.shaft.itUm, false)}`}
         limitLabels={screen ? [`es ${um(fit.shaft.upperDeviationUm)}`, `ei ${um(fit.shaft.lowerDeviationUm)}`] : null}
         caption={`SHAFT ${sizes(fit.shaft)}`}
-        captionY={captionY(layout.shaft, false)}
+        captionY={captionY(layout.shaft, !holeHigher)}
         large={screen}
       />
 

@@ -79,7 +79,7 @@
   margin-left: var(--space-4);
   font-family: var(--font-mono);
   font-size: var(--fs-9);
-  color: var(--accent);
+  color: var(--accent-fg);
 }
 
 .sources {
@@ -135,7 +135,7 @@
 }
 
 .use:hover {
-  color: var(--accent);
+  color: var(--accent-fg);
 }
 
 .useName {

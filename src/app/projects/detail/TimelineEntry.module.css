@@ -52,26 +52,13 @@
 
 .latest .node {
   border-color: var(--accent);
-  color: var(--accent);
+  color: var(--accent-fg);
 }
 
-.card {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-8);
-  margin-bottom: var(--space-16);
-  padding: var(--space-12) var(--space-14);
-  border: var(--border-width) solid var(--border);
-  border-radius: var(--radius-md);
-  background: var(--surface-raised);
-}
-
-.latest .card {
-  border-color: var(--accent-border-subtle);
-}
-
-.superseded {
-  background: none;
+/* Space below each card, along which the rail runs on to the next node. */
+.slot {
+  min-width: 0;
+  padding-bottom: var(--space-16);
 }
 
 .meta {
@@ -158,7 +145,7 @@
 }
 
 .decision {
-  color: var(--accent);
+  color: var(--accent-fg);
 }
 
 .reopen {

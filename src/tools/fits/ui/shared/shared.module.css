@@ -22,3 +22,8 @@
   flex-wrap: wrap;
   gap: var(--space-6);
 }
+
+/* Padding around the Callout that replaces a result the inputs cannot give. */
+.problem {
+  padding: var(--space-20);
+}

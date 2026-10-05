@@ -5,7 +5,7 @@ import styles from './PlaceholderPage.module.css'
 import { AppLayout } from '../AppLayout'
 import { ToolIllustration } from '../home/ToolIllustration'
 import { routeHref } from '../router/routes'
-import { Badge, Button, Column, ColumnHeader, Marker, PageTitle, PanelSection } from '../ui'
+import { Badge, Button, Column, ColumnHeader, ColumnRow, Marker, PageTitle, PanelSection } from '../ui'
 import type { PlaceholderContent } from './placeholders'
 
 const STATUS_BADGE = {
@@ -24,7 +24,7 @@ export function PlaceholderPage({ section, eyebrow, title, status, message, scop
           </Badge>
         </PageTitle>
       </div>
-      <div className={styles.columns}>
+      <ColumnRow>
         {scope.length > 0 && (
           <Column width="inputs" header={<ColumnHeader title="Planned scope" />}>
             <PanelSection label="What it will do">
@@ -49,7 +49,7 @@ export function PlaceholderPage({ section, eyebrow, title, status, message, scop
             <Button href={routeHref({ name: 'projects' })}>Open projects</Button>
           </div>
         </div>
-      </div>
+      </ColumnRow>
     </AppLayout>
   )
 }

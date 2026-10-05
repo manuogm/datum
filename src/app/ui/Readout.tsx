@@ -13,14 +13,13 @@ interface ReadoutProps {
   size?: 'sm' | 'md' | 'lg'
   /** mono for numbers, sans for designations like H7/p6. */
   font?: 'mono' | 'sans'
-  tone?: 'default' | 'ok' | 'warn' | 'bad'
 }
 
-export function Readout({ label, value, unit, size = 'md', font = 'mono', tone = 'default' }: ReadoutProps) {
+export function Readout({ label, value, unit, size = 'md', font = 'mono' }: ReadoutProps) {
   return (
     <div className={cx(styles.readout, styles[size])}>
       {label && <MonoLabel>{label}</MonoLabel>}
-      <span className={cx(styles.value, styles[font], styles[tone])}>
+      <span className={cx(styles.value, styles[font])}>
         {value}
         {unit && <span className={styles.unit}>{unit}</span>}
       </span>

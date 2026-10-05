@@ -9,7 +9,7 @@ import { useReopenedRevision } from '../projects/reopenLink'
 import { SaveRevisionDialog } from '../projects/SaveRevisionDialog'
 import { useProjects } from '../projects/useProjects'
 import { useSettings } from '../settings/settings'
-import { Badge, Column, ColumnHeader } from '../ui'
+import { Badge, Column, ColumnHeader, ColumnRow, EmptyState } from '../ui'
 import { MaterialDetail } from './MaterialDetail'
 import { defaultFilter, matchesFilter, type MaterialFilter } from './materialFilter'
 import { MaterialFilters } from './MaterialFilters'
@@ -40,11 +40,10 @@ export function MaterialsPage() {
 
   return (
     <AppLayout section="mat">
-      <div className={styles.columns}>
+      <ColumnRow>
         <Column
           width="filters"
           label="Filters"
-          className={styles.filters}
           header={<ColumnHeader title="Filters" meta={`${shown.length} OF ${MATERIALS.length}`} />}
         >
           <MaterialFilters
@@ -56,7 +55,6 @@ export function MaterialsPage() {
         </Column>
         <Column
           label="Materials"
-          className={styles.centre}
           header={
             <ColumnHeader title="Property chart" actions={<span className={styles.scale}>Log scales · 20 °C · SI</span>}>
               <span className={styles.axes}>
@@ -76,16 +74,16 @@ export function MaterialsPage() {
             />
           </div>
           <MaterialTable materials={shown} selectedId={selectedId} onSelect={setPickedId} unitSystem={unitSystem} />
-          {shown.length === 0 && <p className={styles.empty}>No material passes these filters.</p>}
+          {shown.length === 0 && <EmptyState>No material passes these filters.</EmptyState>}
         </Column>
-        <Column width="results" divider={false} label="Selected material" className={styles.detail}>
+        <Column width="results" divider={false} wrap label="Selected material">
           {selected?.ok ? (
             <MaterialDetail material={selected.value} unitSystem={unitSystem} onSaveToProject={() => setSaving(true)} />
           ) : (
-            <p className={styles.empty}>Choose a material in the chart or the table.</p>
+            <EmptyState>Choose a material in the chart or the table.</EmptyState>
           )}
         </Column>
-      </div>
+      </ColumnRow>
       {saving && selected?.ok && (
         <SaveRevisionDialog snapshot={materialSnapshot(selected.value)} onClose={() => setSaving(false)} />
       )}

@@ -1,20 +1,19 @@
-import { SCORE_PENALTY } from './rules'
 import type { Check } from './types'
+
+/** Sum of the points deducted by a candidate's checks (unrounded, may exceed 100). */
+export function totalPenalty(checks: readonly Check[]): number {
+  return checks.reduce((sum, check) => sum + check.penalty, 0)
+}
 
 /**
  * Score 0 … 100 of a candidate fit (a Datum judgement, see rules.ts):
  *
- *   score = 100 × windowShare − Σ penalty(status of every other check)
+ *   score = 100 − Σ penalty of every check, rounded, never below 0
  *
- * windowShare is the share of the in-service clearance range (all part sizes
- * within tolerance, all temperatures in the service range) that lies inside
- * the required clearance window: 1 when it is fully inside. Each other check
- * costs SCORE_PENALTY points for a warning or a failure. The result is
- * rounded to a whole number and never below 0.
+ * Each check's penalty is SCORE_POINTS × how far its requirement is missed
+ * (e.g. µm outside the clearance window ÷ window width), so the score keeps
+ * discriminating between fits even when none meets every requirement.
  */
-export function scoreCandidate(windowShare: number, checks: readonly Check[]): number {
-  const penalty = checks
-    .filter((check) => check.id !== 'service-window')
-    .reduce((sum, check) => sum + SCORE_PENALTY[check.status], 0)
-  return Math.max(0, Math.round(100 * windowShare - penalty))
+export function scoreCandidate(checks: readonly Check[]): number {
+  return Math.max(0, Math.round(100 - totalPenalty(checks)))
 }

@@ -14,6 +14,8 @@ import { ThemeToggle } from './ThemeToggle'
 export interface ToolActions {
   onSaveRevision: () => void
   onDownloadReport: () => void
+  /** Why there is nothing to save yet; disables "Save revision" and shows as its tooltip. */
+  saveBlockedReason?: string
 }
 
 const UNIT_OPTIONS: readonly { value: UnitSystem; label: string }[] = [
@@ -68,7 +70,13 @@ export function PitHeader({
       <ThemeToggle theme={theme} onToggle={onToggleTheme} />
       {toolActions && (
         <div className={styles.actions}>
-          <Button size="md" icon="save" onClick={toolActions.onSaveRevision}>
+          <Button
+            size="md"
+            icon="save"
+            onClick={toolActions.onSaveRevision}
+            disabled={toolActions.saveBlockedReason !== undefined}
+            title={toolActions.saveBlockedReason}
+          >
             <span className={styles.actionLabel}>Save revision</span>
           </Button>
           <Button size="md" variant="primary" icon="download" onClick={toolActions.onDownloadReport}>

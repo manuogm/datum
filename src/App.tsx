@@ -15,8 +15,7 @@ function Screen() {
   if (route.name === 'projects') return <ProjectsPage />
   if (route.name === 'project') return <ProjectDetailPage id={route.id} />
   if (route.name === 'mat') return <MaterialsPage />
-  // The projects module connects "Save revision" to its Save-to-Project dialog.
-  if (route.name === 'fit') return <FitTolerancePage onSaveRevision={() => undefined} />
+  if (route.name === 'fit') return <FitTolerancePage />
   if (route.name === 'fitReport') return <FitReportPage />
   return <PlaceholderPage {...placeholderFor(route)} />
 }

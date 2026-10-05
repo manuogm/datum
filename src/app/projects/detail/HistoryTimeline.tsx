@@ -3,7 +3,7 @@
 // without superseded revisions.
 import { useState } from 'react'
 import { isSuperseded, revisionsNewestFirst, TOOL_IDS, TOOLS, type Project, type ToolId } from '../../../core/projects'
-import { Chip, MonoLabel, Select } from '../../ui'
+import { Chip, EmptyState, MonoLabel, Select } from '../../ui'
 import styles from './HistoryTimeline.module.css'
 import { TimelineEntry } from './TimelineEntry'
 
@@ -48,9 +48,9 @@ export function HistoryTimeline({ project, partId }: HistoryTimelineProps) {
           ))}
         </ol>
       ) : (
-        <p className={styles.empty}>
+        <EmptyState inset="none">
           No saved revisions here yet. Use “+ New calculation”, then “Save revision” in the tool.
-        </p>
+        </EmptyState>
       )}
     </section>
   )

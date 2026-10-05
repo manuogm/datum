@@ -37,7 +37,12 @@ describe('worked example: Ø25, Al 7075-T6 housing, 42CrMo4 shaft, −20 … 140
   //   thermal assembly: 35 µm interference + 0.001 × 25 mm = 25 µm joining clearance = 60 µm
   //     housing: 20 + 60 / (25 × 10⁻³ × 23.4) = 20 + 60 / 0.585 = 122.6 °C (> 120 °C limit of 7075-T6)
   //     shaft:   20 − 60 / (25 × 10⁻³ × 11.1) = 20 − 216.2 = −196.2 °C (just below liquid nitrogen)
-  //   score: 100 × 0.4315 − 10 (heating warning) − 10 (torque warning) = 23.15 → 23
+  //   score (SCORE_POINTS in rules.ts):
+  //     window: worst end −20 °C, 47.3 µm below 0 → 40 × 47.3 / 40 = 47.3
+  //     heating: 0.2 × (122.56 − 120) = 0.51
+  //     torque: clearance share 35.9 / 83.2 = 0.4315 → 20 × 0.4315 = 8.63
+  //     locate: 35.9 ≤ 2 × IT7 = 42 µm → 0
+  //     100 − 47.3 − 0.51 − 8.63 = 43.56 → 44
   const advice = advise(designExample)
   const p6 = candidate(advice, 'H7/p6')
 
@@ -62,7 +67,7 @@ describe('worked example: Ø25, Al 7075-T6 housing, 42CrMo4 shaft, −20 … 140
     expect(statusOf(advice, 'H7/p6', 'thermal-assembly')).toBe('warn')
   })
 
-  it('scores H7/p6 23 with its checks', () => {
+  it('scores H7/p6 44 with its checks', () => {
     expect(p6.checks.map((check) => [check.id, check.status])).toEqual([
       ['service-window', 'warn'],
       ['assembly-interference', 'pass'],
@@ -70,28 +75,38 @@ describe('worked example: Ø25, Al 7075-T6 housing, 42CrMo4 shaft, −20 … 140
       ['locate', 'pass'],
       ['transmit-torque', 'warn'],
     ])
-    expect(p6.score).toBe(23)
+    const penalty = (id: string) => p6.checks.find((check) => check.id === id)?.penalty
+    expect(penalty('service-window')).toBeCloseTo(47.3, 6)
+    expect(penalty('thermal-assembly')).toBeCloseTo(0.2 * (60 / 0.585 - 100), 6)
+    expect(penalty('transmit-torque')).toBeCloseTo(20 * 35.9 / 83.2, 6)
+    expect(penalty('locate')).toBe(0)
+    expect(p6.score).toBe(44)
   })
 
-  it('explains that no fit can meet 0 … 40 µm over the whole range', () => {
+  it('explains in three short sentences: the expansion, why no fit can meet 0 … 40 µm, and the closest fit', () => {
     // Thermal change −20 … 140 °C: 0.3075 × 160 = 49.2 µm; tightest fit tolerance (H7/h6 … H7/u6: IT7 + IT6) = 21 + 13 = 34 µm.
     // 49.2 + 34 > 40, so the window cannot hold at both ends of the range.
     expect(advice.candidates.every((c) => c.windowShare < 1)).toBe(true)
-    expect(advice.why).toContain('changes by −12.3 µm at −20 °C and +36.9 µm at 140 °C')
-    expect(advice.why).toContain('No candidate keeps the clearance inside 0 … 40 µm')
-    expect(advice.why).toContain('(49.2 µm)')
-    expect(advice.why).toContain('(34 µm)')
+    expect(advice.why).toBe(
+      'The Al 7075-T6 housing expands more than the 42CrMo4 +QT shaft (α 23.4 vs 11.1 µm/(m·K)),'
+      + ' so the clearance shifts −12.3 µm at −20 °C and +36.9 µm at 140 °C from its 20 °C value.'
+      + ' No ISO fit stays inside 0 … 40 µm over the whole service range: the 49.2 µm thermal swing'
+      + ' plus the tightest fit tolerance (34 µm) is wider than the window.'
+      + ' H7/k6 (score 53) comes closest, with −27.3 … 55.9 µm in service.')
   })
 
-  it('ranks by score, then by how well the fit is centred in the window', () => {
-    // H7/js6, k6, m6, n6, h6, g6 all cover the whole 0 … 40 µm window (share 40 / 83.2 = 0.481)
-    // and carry two warnings (locate, torque): 48.1 − 20 → 28. H7/js6 (−18.8 … 64.4, mid 22.8 µm)
-    // is closest to the window's middle (20 µm).
-    const scores = advice.candidates.map((c) => c.score)
-    expect(scores).toEqual([...scores].sort((a, b) => b - a))
-    expect(advice.candidates[0].fit.designation).toBe('H7/js6')
-    expect(advice.candidates[0].score).toBe(28)
-    expect(advice.why).toContain('Best match: H7/js6, score 28.')
+  it('ranks interference-leaning fits above clearance fits that lose location hot, with distinct scores', () => {
+    // Penalties (window + locate + torque), by hand:
+    //   H7/k6: −27.3 … 55.9 µm; worst end −20 °C 27.3 µm out → 27.3; locate (55.9 − 42)/42 × 20 = 6.62;
+    //          torque 55.9/83.2 × 20 = 13.44 → 100 − 47.36 = 52.64 → 53
+    //   H7/m6: 33.3 + 3.76 + 12.00 → 51       H7/js6: 24.4 + 10.67 + 15.48 → 49.45 → 49
+    //   H7/n6: 40.3 + 0.43 + 10.31 → 48.96 → 49 (ranked after js6 on the unrounded score)
+    //   H7/p6: 44 (above)                    H7/h6: 30.9 + 13.76 + 17.04 → 38
+    //   H7/g6: 37.9 + 17.10 + 18.73 → 26
+    const top = advice.candidates.slice(0, 7).map((c) => [c.fit.designation, c.score])
+    expect(top).toEqual([
+      ['H7/k6', 53], ['H7/m6', 51], ['H7/js6', 49], ['H7/n6', 49], ['H7/p6', 44], ['H7/h6', 38], ['H7/g6', 26],
+    ])
   })
 
   it('notes that 7075-T6 is used above its service limit', () => {
@@ -110,21 +125,22 @@ describe('worked example: same parts, 20 … 140 °C, window −40 … 40 µm, p
   })
 
   it('recommends H7/p6: inside the window from 20 °C (−35 … −1 µm) to 140 °C (1.9 … 35.9 µm)', () => {
-    // 100 × 1 − 10 (torque: up to 35.9 µm clearance hot, needs a key) = 90
+    // Window and locate met; torque: clearance share 35.9 / (35.9 + 35) = 0.506 → 20 × 0.506 = 10.1 → 89.9 → 90
     const best = advice.candidates[0]
     expect(best.fit.designation).toBe('H7/p6')
     expect(best.windowShare).toBe(1)
     expect(best.score).toBe(90)
     expect(best.thermalAssembly).toBeNull()
-    expect(advice.why).toContain('Best match: H7/p6 (locational interference), score 90.')
-    expect(advice.why).not.toContain('No candidate')
+    expect(advice.why).toContain('H7/p6 (score 90) stays inside −40 … 40 µm at every service temperature.')
+    expect(advice.why).not.toContain('No ISO fit')
   })
 
   it('penalises H7/r6 for exceeding the 40 µm assembly interference', () => {
     // H7/r6 at 25 mm: −41 … −7 µm at 20 °C, −41 … 29.9 µm in service.
-    // Share (29.9 + 40) / (29.9 + 41) = 69.9 / 70.9 = 0.9859 → 98.6 − 30 (interference fail) − 10 (torque) = 58.6 → 59
+    // Window: 1 µm below −40 at 20 °C → 40 × 1/80 = 0.5; interference over the limit: 30;
+    // torque: 20 × 29.9 / 70.9 = 8.43 → 100 − 38.93 = 61.07 → 61
     expect(statusOf(advice, 'H7/r6', 'assembly-interference')).toBe('fail')
-    expect(candidate(advice, 'H7/r6').score).toBe(59)
+    expect(candidate(advice, 'H7/r6').score).toBe(61)
   })
 })
 
@@ -146,7 +162,8 @@ describe('housing and shaft of the same material', () => {
     for (const c of advice.candidates) {
       expect(c.inServiceUm).toEqual({ minUm: c.fit.minClearanceUm, maxUm: c.fit.maxClearanceUm })
     }
-    expect(advice.why).toMatch(/^The 42CrMo4 \+QT housing .* expand alike/)
+    expect(advice.why).toBe('Housing (42CrMo4 +QT) and shaft (42CrMo4 +QT) expand alike, so temperature does not change the fit.'
+      + ' H7/g6 (score 100) stays inside 5 … 50 µm at every service temperature.')
     expect(advice.materialNotes).toEqual([])
   })
 
@@ -176,8 +193,8 @@ describe('housing and shaft of the same material', () => {
     // H11/c11, the loosest candidate, gives at most 370 µm at 25 mm.
     const none = advise({ ...input, requiredClearanceUm: { minUm: 500, maxUm: 600 } })
     expect(none.candidates.every((c) => c.windowShare === 0)).toBe(true)
-    expect(none.why).toContain('No candidate keeps the clearance inside 500 … 600 µm at every service temperature.')
-    expect(none.why).not.toContain('thermal change')
+    expect(none.why).toContain('No ISO fit stays inside 500 … 600 µm over the whole service range.')
+    expect(none.why).toContain('H11/c11 (score 0) comes closest, with 110 … 370 µm in service.')
   })
 })
 
@@ -194,6 +211,37 @@ describe('assembly temperature', () => {
     const p6 = candidate(advice, 'H7/p6')
     expect(p6.thermalAssembly?.housingHeatTempC).toBeNull()
     expect(p6.checks.find((check) => check.id === 'thermal-assembly')?.message).toMatch(/^The housing does not expand/)
+  })
+})
+
+describe('text in imperial units', () => {
+  const advice = advise({ ...designExample, unitSystem: 'imperial' })
+
+  it('writes the why text in thou, °F and µin/(in·°F), with the same numbers converted', () => {
+    // −12.3 µm = −0.48 thou, +36.9 µm = +1.45 thou; −20 °C = −4 °F, 140 °C = 284 °F, 20 °C = 68 °F
+    // α: 23.4 × 5/9 = 13, 11.1 × 5/9 = 6.2 µin/(in·°F); window 40 µm = 1.57 thou
+    // 49.2 µm = 1.94 thou, 34 µm = 1.34 thou; H7/k6 −27.3 … 55.9 µm = −1.07 … 2.2 thou
+    expect(advice.why).toBe(
+      'The Al 7075-T6 housing expands more than the 42CrMo4 +QT shaft (α 13 vs 6.2 µin/(in·°F)),'
+      + ' so the clearance shifts −0.48 thou at −4 °F and +1.45 thou at 284 °F from its 68 °F value.'
+      + ' No ISO fit stays inside 0 … 1.57 thou over the whole service range: the 1.94 thou thermal swing'
+      + ' plus the tightest fit tolerance (1.34 thou) is wider than the window.'
+      + ' H7/k6 (score 53) comes closest, with −1.07 … 2.2 thou in service.')
+  })
+
+  it('writes check messages and notes in imperial units, leaving the numbers and scores in SI', () => {
+    // Heating: 122.56 °C = 252.6 °F; limit 120 °C = 248 °F; joining 25 µm = 0.98 thou; cooling −196.22 °C = −321.2 °F
+    const p6 = candidate(advice, 'H7/p6')
+    expect(p6.checks.find((check) => check.id === 'thermal-assembly')?.message).toBe(
+      'Heat the housing to ≥ 252.6 °F for 0.98 thou joining clearance: above the 248 °F service limit of Al 7075-T6,'
+      + ' so check its temper accepts a short exposure (cooling the shaft would need −321.2 °F, colder than liquid nitrogen).')
+    expect(p6.thermalAssembly?.housingHeatTempC).toBeCloseTo(122.56, 2)
+    expect(p6.score).toBe(44)
+    expect(advice.materialNotes).toEqual([
+      'Al 7075-T6 is advised for sustained service up to about 248 °F; the service range reaches 284 °F.',
+    ])
+    const allText = [advice.why, ...advice.materialNotes, ...advice.candidates.flatMap((c) => c.checks.map((check) => check.message))]
+    expect(allText.filter((text) => /µm|°C/.test(text))).toEqual([])
   })
 })
 

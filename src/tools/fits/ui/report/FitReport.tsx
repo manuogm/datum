@@ -14,6 +14,7 @@ import { FIT_TYPE_LABEL, nominalLabel } from '../shared/labels'
 import { ZoneDiagram } from '../shared/ZoneDiagram'
 import type { FitInputs } from '../state/fitInputs'
 import styles from './FitReport.module.css'
+import { countOf } from '../../../../app/format/count'
 
 const STANDARDS = 'ISO 286-1:2010, ISO 286-2:2010, ISO 1:2022 (20 °C reference temperature)'
 
@@ -69,7 +70,7 @@ export function FitReport({ fit, inputs, results, system }: FitReportProps) {
           <span className={styles.summaryLabel}>STATUS</span>
           <span className={styles.status}>{STATUS_HEADLINE[service.status]}</span>
           <span className={styles.summaryNote}>
-            {warnings.length === 0 ? 'No warnings' : `${warnings.length} warning${warnings.length > 1 ? 's' : ''}, see §4`}
+            {warnings.length === 0 ? 'No warnings' : `${countOf(warnings.length, 'warning')}, see §4`}
           </span>
         </div>
         <div>
