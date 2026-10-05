@@ -35,7 +35,7 @@ describe('formatQuantityRange', () => {
 
 describe('toDisplay / fromDisplay', () => {
   it('round-trips every quantity in both systems', () => {
-    for (const quantity of ['length', 'deviation', 'temperature', 'expansion', 'density', 'modulus', 'strength', 'conductivity'] as const) {
+    for (const quantity of ['length', 'deviation', 'temperature', 'expansion', 'density', 'modulus', 'strength', 'conductivity', 'force', 'torque'] as const) {
       for (const system of ['si', 'imperial'] as const) {
         expect(fromDisplay(quantity, system, toDisplay(quantity, system, 37.25))).toBeCloseTo(37.25, 9)
       }
@@ -71,6 +71,15 @@ describe('material properties', () => {
     expect(unitOf('modulus', 'imperial')).toBe('Msi')
     expect(unitOf('strength', 'imperial')).toBe('ksi')
     expect(unitOf('conductivity', 'si')).toBe('W/(m·K)')
+  })
+})
+
+describe('force and torque', () => {
+  it('shows forces stored in N as kN or lbf, torques as N·m or lbf·ft', () => {
+    expect(formatQuantity('force', 'si', 43480, { withUnit: true })).toBe('43.48 kN')
+    expect(formatQuantity('force', 'imperial', 4448.222, { withUnit: true })).toBe('1000 lbf')
+    expect(formatQuantity('torque', 'si', 71.2, { withUnit: true })).toBe('71.2 N·m')
+    expect(formatQuantity('torque', 'imperial', 1.355818)).toBe('1.0')
   })
 })
 
