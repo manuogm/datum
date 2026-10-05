@@ -1,7 +1,8 @@
 /**
- * Outcome of a calculation that can be asked something the standard does not
- * define (e.g. "t6 at 10 mm"). Instead of throwing, functions return either
- * the value or a plain-English explanation that the UI can show as-is.
+ * Outcome of a calculation or lookup that can be asked something undefined
+ * (e.g. "t6 at 10 mm" in ISO 286, or an unknown material id). Instead of
+ * throwing, functions return either the value or a plain-English explanation
+ * that the UI can show as-is. Shared by every tool.
  */
 export type Result<T> =
   | { readonly ok: true; readonly value: T }

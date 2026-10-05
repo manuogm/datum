@@ -1,0 +1,37 @@
+/* PageTitle: mono eyebrow over a large tight heading. */
+.title {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  min-width: 0;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-14);
+}
+
+.heading {
+  margin: 0;
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-tight);
+}
+
+.md .heading {
+  font-size: var(--fs-40);
+  letter-spacing: var(--tracking-heading);
+}
+
+.lg .heading {
+  font-size: var(--fs-48);
+  letter-spacing: var(--tracking-display);
+}
+
+@media (max-width: 640px) {
+  .md .heading,
+  .lg .heading {
+    font-size: var(--fs-30);
+  }
+}

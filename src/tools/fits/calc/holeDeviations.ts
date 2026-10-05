@@ -1,6 +1,6 @@
 import { notTabulatedMessage, type FundamentalDeviation } from './fundamentalDeviation'
 import type { DeviationLetter } from './letters'
-import { fail, ok, type Result } from './result'
+import { fail, ok, type Result } from '../../../core/result'
 import { isUpperDeviationLetter, K_IT4_TO_IT7_LOWER_DEVIATION_UM, shaftFundamentalDeviation } from './shaftDeviations'
 import { valueForSize, type SizeTable } from './sizeTable'
 import { SOURCE } from './sources'

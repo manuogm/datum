@@ -1,5 +1,5 @@
 import { formatFit, parseFitDesignation, type ZoneSpec } from './designation'
-import { fail, ok, type Result } from './result'
+import { fail, ok, type Result } from '../../../core/result'
 import { toleranceZoneFor, type ToleranceZone } from './toleranceZone'
 import { roundUm } from './units'
 

@@ -1,0 +1,71 @@
+/* Placeholder screen for tools and pages that are still being built. */
+.head {
+  padding: var(--space-36) var(--space-40) var(--space-24);
+  border-bottom: var(--border-width) solid var(--border);
+}
+
+.columns {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+.scope {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-10);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--fs-13);
+  color: var(--text-secondary);
+}
+
+.scopeItem {
+  display: flex;
+  align-items: center;
+  gap: var(--space-10);
+}
+
+.stage {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-14);
+  padding: var(--space-40) var(--space-24);
+  text-align: center;
+  background:
+    repeating-linear-gradient(135deg, transparent 0 9px, var(--hatch) 9px 10px),
+    var(--bg);
+}
+
+.message {
+  max-width: 420px;
+  margin: 0;
+  font-size: var(--fs-15);
+  line-height: var(--leading-relaxed);
+  color: var(--text-muted);
+  text-wrap: pretty;
+}
+
+.actions {
+  display: flex;
+  gap: var(--space-8);
+}
+
+@media (max-width: 900px) {
+  .head {
+    padding: var(--space-28) var(--space-16) var(--space-20);
+  }
+
+  .columns {
+    flex-direction: column-reverse;
+  }
+
+  .columns > section {
+    width: auto;
+    border-right: 0;
+  }
+}

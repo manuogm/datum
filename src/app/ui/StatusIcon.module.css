@@ -1,0 +1,41 @@
+/* StatusIcon: filled circle with a tick, bang or cross. */
+.icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  border-radius: 50%;
+  color: var(--accent-ink);
+  font-weight: var(--weight-bold);
+  line-height: 1;
+}
+
+.sm {
+  width: 18px;
+  height: 18px;
+  font-size: var(--fs-11);
+}
+
+.md {
+  width: 24px;
+  height: 24px;
+  font-size: var(--fs-13);
+}
+
+.lg {
+  width: 28px;
+  height: 28px;
+  font-size: var(--fs-14);
+}
+
+.ok {
+  background: var(--ok);
+}
+
+.warn {
+  background: var(--warn);
+}
+
+.bad {
+  background: var(--bad);
+}

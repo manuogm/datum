@@ -1,0 +1,56 @@
+/* Checkbox: accent square with a tick; the native input stays focusable. */
+.checkbox {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-8);
+  font-size: var(--fs-12-5);
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.checked {
+  color: var(--text);
+}
+
+.input {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
+  cursor: inherit;
+}
+
+.box {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  box-sizing: border-box;
+  border: var(--border-width) solid var(--text-faint);
+  border-radius: var(--radius-xs);
+  color: var(--accent-ink);
+  font-weight: var(--weight-bold);
+}
+
+.sm .box {
+  width: 14px;
+  height: 14px;
+  font-size: var(--fs-10);
+}
+
+.md .box {
+  width: 18px;
+  height: 18px;
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-12);
+}
+
+.checked .box {
+  border-color: var(--accent);
+  background: var(--accent);
+}
+
+.input:focus-visible + .box {
+  box-shadow: var(--focus-ring);
+}

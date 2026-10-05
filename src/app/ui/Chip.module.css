@@ -1,0 +1,70 @@
+/* Chips: toggles (application needs, material families), part tags and the
+   dashed "+ Add" chip. */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-6);
+  flex: none;
+  margin: 0;
+  padding: var(--space-5) var(--space-9);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: var(--fs-12);
+  white-space: nowrap;
+}
+
+button.chip {
+  cursor: pointer;
+}
+
+button.chip:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: var(--focus-ring);
+}
+
+/* check: selected chips turn accent with a tick */
+.check.selected {
+  border-color: var(--accent-border);
+  background: var(--accent-soft);
+  color: var(--accent-text);
+}
+
+/* filter: unselected chips recede */
+.filter {
+  border-color: var(--border-subtle);
+  color: var(--text-faint);
+}
+
+.filter.selected {
+  border-color: var(--border-strong);
+  color: var(--text);
+}
+
+.filter:not(.selected) .leading {
+  opacity: 0.35;
+}
+
+/* tag: static label such as a part name */
+.tag {
+  padding: var(--space-5) var(--space-10);
+  border-color: var(--border-strong);
+  color: var(--text);
+  font-size: var(--fs-12-5);
+}
+
+/* add: dashed call to action */
+.add {
+  padding: var(--space-5) var(--space-10);
+  border-style: dashed;
+  border-color: var(--text-faint);
+  color: var(--text-muted);
+  font-size: var(--fs-12-5);
+}
+
+.leading {
+  display: inline-flex;
+}

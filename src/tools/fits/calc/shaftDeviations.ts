@@ -1,6 +1,6 @@
 import { notTabulatedMessage, type FundamentalDeviation } from './fundamentalDeviation'
 import type { DeviationLetter } from './letters'
-import { fail, ok, type Result } from './result'
+import { fail, ok, type Result } from '../../../core/result'
 import { valueForSize, type SizeTable } from './sizeTable'
 import { SOURCE } from './sources'
 import { gradeNumber, type ToleranceGrade } from './toleranceGrades'

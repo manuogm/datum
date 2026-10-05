@@ -1,0 +1,58 @@
+/* Readout: the large result numbers that define the pit wall direction. */
+.readout {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+.value {
+  letter-spacing: var(--tracking-readout);
+  white-space: nowrap;
+}
+
+.mono {
+  font-family: var(--font-mono);
+  font-weight: var(--weight-medium);
+  line-height: var(--leading-readout);
+}
+
+.sans {
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-display);
+}
+
+.sm .value {
+  font-size: var(--fs-26);
+}
+
+.md .value {
+  font-size: var(--fs-56);
+}
+
+.lg .value {
+  font-size: var(--fs-64);
+}
+
+.unit {
+  margin-left: var(--space-4);
+  font-size: var(--fs-15);
+  color: var(--text-muted);
+  letter-spacing: 0;
+}
+
+.default {
+  color: var(--text);
+}
+
+.ok {
+  color: var(--ok-text);
+}
+
+.warn {
+  color: var(--warn-text);
+}
+
+.bad {
+  color: var(--bad-text);
+}

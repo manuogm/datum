@@ -1,5 +1,5 @@
 import { expect } from 'vitest'
-import type { Result } from './result'
+import type { Result } from '../../../core/result'
 import type { SizeTable } from './sizeTable'
 
 /** Unwraps a Result in tests, failing with the engine's own message if it is an error. */

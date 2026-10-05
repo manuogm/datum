@@ -1,4 +1,4 @@
-import { fail, ok, type Result } from './result'
+import { fail, ok, type Result } from '../../../core/result'
 import { SOURCE } from './sources'
 import { checkNominalSize, valueForSize, type SizeTable } from './sizeTable'
 

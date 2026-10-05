@@ -1,0 +1,36 @@
+/* ValueRow: label on the left, mono value and unit on the right. */
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-10);
+}
+
+.sm {
+  font-size: var(--fs-12-5);
+}
+
+.md {
+  font-size: var(--fs-13);
+}
+
+.label {
+  color: var(--text-secondary);
+}
+
+.value {
+  font-family: var(--font-mono);
+  white-space: nowrap;
+}
+
+.boxed {
+  padding: var(--space-6) var(--space-10);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-sunken);
+}
+
+.unit {
+  font-size: var(--fs-11);
+  color: var(--text-muted);
+}

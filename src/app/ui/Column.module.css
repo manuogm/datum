@@ -1,0 +1,53 @@
+/* Flush column of a tool screen, separated from its neighbour by a rule. */
+.column {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  box-sizing: border-box;
+}
+
+.divider {
+  border-right: var(--border-width) solid var(--border);
+}
+
+.fill {
+  flex: 1;
+}
+
+.filters,
+.inputs,
+.results,
+.sidebar,
+.drawer {
+  flex: none;
+}
+
+.filters {
+  width: var(--column-filters);
+}
+
+.inputs {
+  width: var(--column-inputs);
+}
+
+.results {
+  width: var(--column-results);
+}
+
+.sidebar {
+  width: var(--column-sidebar);
+}
+
+.drawer {
+  width: var(--drawer-width);
+  background: var(--surface-sunken);
+}
+
+.body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  overflow-y: auto;
+}

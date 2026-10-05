@@ -1,0 +1,42 @@
+/* ScoreBar: 4px track with a tone-coloured fill. */
+.track {
+  height: 4px;
+  border-radius: var(--radius-xs);
+  background: var(--surface-hover);
+  overflow: hidden;
+}
+
+.compact {
+  flex: none;
+  width: 30px;
+}
+
+.fill {
+  height: 100%;
+  border-radius: inherit;
+  background: var(--bar-color);
+}
+
+.ok {
+  --bar-color: var(--ok);
+}
+
+.warn {
+  --bar-color: var(--warn);
+}
+
+.bad {
+  --bar-color: var(--bad);
+}
+
+.hole {
+  --bar-color: var(--hole);
+}
+
+.accent {
+  --bar-color: var(--accent);
+}
+
+.neutral {
+  --bar-color: var(--text-muted);
+}

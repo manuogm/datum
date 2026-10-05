@@ -1,0 +1,90 @@
+/* Badges: status pills (PASS, REVIEW), emphasised fit types and references. */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-6);
+  flex: none;
+  font-family: var(--font-mono);
+  font-weight: var(--weight-regular);
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+}
+
+/* Variants */
+.soft,
+.outlined {
+  letter-spacing: var(--tracking-badge);
+  text-transform: uppercase;
+  background: var(--badge-soft);
+  color: var(--badge-text);
+}
+
+.soft {
+  font-size: var(--fs-10-5);
+}
+
+.soft.sm {
+  padding: var(--space-2) var(--space-6);
+}
+
+.soft.md {
+  padding: var(--space-3) var(--space-7);
+}
+
+.outlined {
+  font-size: var(--fs-11);
+  padding: var(--space-4) var(--space-8);
+  border: var(--border-width) solid var(--badge-border);
+}
+
+.reference {
+  font-size: var(--fs-11);
+  color: var(--text-muted);
+  border: var(--border-width) solid var(--border);
+}
+
+.reference.sm {
+  padding: var(--space-1) var(--space-6);
+  border-color: var(--border-strong);
+}
+
+.reference.md {
+  padding: var(--space-3) var(--space-8);
+}
+
+/* Tones */
+.ok {
+  --badge-soft: var(--ok-soft);
+  --badge-text: var(--ok-text);
+  --badge-border: var(--ok-border);
+}
+
+.warn {
+  --badge-soft: var(--warn-soft);
+  --badge-text: var(--warn-text);
+  --badge-border: var(--warn-border);
+}
+
+.bad {
+  --badge-soft: var(--bad-soft);
+  --badge-text: var(--bad-text);
+  --badge-border: var(--bad-border);
+}
+
+.hole {
+  --badge-soft: var(--hole-soft);
+  --badge-text: var(--hole);
+  --badge-border: var(--hole-border);
+}
+
+.accent {
+  --badge-soft: var(--accent-soft);
+  --badge-text: var(--accent-text);
+  --badge-border: var(--accent-border);
+}
+
+.neutral {
+  --badge-soft: var(--surface-muted);
+  --badge-text: var(--text-secondary);
+  --badge-border: var(--border-strong);
+}

@@ -1,4 +1,4 @@
-import { fail, ok, type Result } from './result'
+import { fail, ok, type Result } from '../../../core/result'
 
 /** ISO 286-1:2010 covers nominal sizes up to and including 3150 mm. */
 export const MAX_NOMINAL_SIZE_MM = 3150

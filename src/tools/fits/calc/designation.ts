@@ -1,5 +1,5 @@
 import { isDeviationLetter, letterSymbol, type DeviationLetter, type ZoneKind } from './letters'
-import { fail, ok, type Result } from './result'
+import { fail, ok, type Result } from '../../../core/result'
 import { isToleranceGrade, type ToleranceGrade } from './toleranceGrades'
 
 /** A tolerance class such as H7 or g6, without a size (ISO 286-1:2010 tolerance class). */

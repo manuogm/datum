@@ -1,0 +1,57 @@
+/* Tab bar with the accent underline on the active tab (header nav, page tabs). */
+.bar {
+  display: flex;
+  align-items: stretch;
+  font-size: var(--fs-13);
+  white-space: nowrap;
+}
+
+.header {
+  height: var(--header-height);
+}
+
+.page {
+  gap: var(--space-4);
+}
+
+.tab {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  margin: 0;
+  border: 0;
+  background: none;
+  color: var(--text-muted);
+  font: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.header .tab {
+  padding: 0 var(--space-12);
+}
+
+.page .tab {
+  padding: var(--space-10) var(--space-12);
+}
+
+.tab:hover {
+  color: var(--text);
+}
+
+.tab:focus-visible {
+  outline: var(--border-width) solid var(--accent);
+  outline-offset: -4px;
+}
+
+.active {
+  color: var(--text);
+  font-weight: var(--weight-semibold);
+  box-shadow: inset 0 calc(-1 * var(--underline-width)) 0 var(--accent);
+}
+
+.count {
+  font-family: var(--font-mono);
+  font-size: var(--fs-11);
+  font-weight: var(--weight-regular);
+}

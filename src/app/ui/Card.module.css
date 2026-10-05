@@ -1,0 +1,60 @@
+/* Card: bordered box for list items (recent projects, decisions, timeline). */
+.card {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  box-sizing: border-box;
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius-md);
+  color: inherit;
+  text-decoration: none;
+}
+
+.sunken {
+  background: var(--surface-sunken);
+}
+
+.surface {
+  background: var(--surface);
+}
+
+.raised {
+  background: var(--surface-raised);
+}
+
+.plain {
+  background: none;
+}
+
+.highlight {
+  border-color: var(--accent-border-subtle);
+}
+
+.sm {
+  gap: var(--space-8);
+  padding: var(--space-12) var(--space-14);
+}
+
+.md {
+  gap: var(--space-10);
+  padding: var(--space-16) var(--space-18);
+}
+
+.lg {
+  gap: var(--space-8);
+  padding: var(--space-14);
+}
+
+a.card {
+  transition: border-color 120ms ease;
+}
+
+a.card:hover {
+  border-color: var(--border-strong);
+}
+
+a.card:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: var(--focus-ring);
+}

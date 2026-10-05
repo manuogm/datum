@@ -1,0 +1,65 @@
+/* Shared look of every text-like control (Field, Select, SearchField):
+   sunken box, hairline border, accent focus ring. Those components apply
+   these classes alongside their own. */
+.box {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+  min-width: 0;
+  padding: 0 var(--space-12);
+  box-sizing: border-box;
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-sunken);
+  color: var(--text);
+  font-size: var(--fs-14);
+}
+
+.box:focus-within {
+  border-color: var(--accent);
+  box-shadow: var(--focus-ring);
+}
+
+.lg {
+  height: var(--input-height);
+}
+
+.md {
+  height: var(--input-height-sm);
+}
+
+.sm {
+  height: var(--control-height-sm);
+  font-size: var(--fs-13);
+}
+
+.warn {
+  border-color: var(--warn);
+}
+
+/* The native control inside the box. */
+.control {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  outline: none;
+  background: none;
+  color: inherit;
+  font: inherit;
+}
+
+.control::placeholder {
+  color: var(--text-faint);
+  opacity: 1;
+}
+
+/* Label stacked above a control. */
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  min-width: 0;
+}

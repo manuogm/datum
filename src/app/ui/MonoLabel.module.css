@@ -1,0 +1,33 @@
+/* Mono uppercase labels: the signature section headings of Direction B. */
+.label {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-weight: var(--weight-regular);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-label);
+}
+
+.sm {
+  font-size: var(--fs-10-5);
+}
+
+.md {
+  font-size: var(--fs-11);
+}
+
+.xs {
+  font-size: var(--fs-10);
+  letter-spacing: var(--tracking-badge);
+}
+
+.muted {
+  color: var(--text-muted);
+}
+
+.faint {
+  color: var(--text-faint);
+}
+
+.accent {
+  color: var(--accent);
+}
