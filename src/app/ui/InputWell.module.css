@@ -1,0 +1,25 @@
+/* Boxed mono well, matching ValueRow's boxed value, with the input focus ring. */
+.well {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--space-4);
+  flex: none;
+  padding: var(--space-6) var(--space-10);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--input-surface, var(--surface-sunken));
+  font-family: var(--font-mono);
+  font-size: var(--fs-13);
+  white-space: nowrap;
+}
+
+.well:focus-within {
+  border-color: var(--accent);
+  box-shadow: var(--focus-ring);
+}
+
+.unit {
+  margin-left: var(--space-2);
+  font-size: var(--fs-11);
+  color: var(--text-muted);
+}

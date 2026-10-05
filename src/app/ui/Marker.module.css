@@ -1,0 +1,20 @@
+/* Small coloured markers: status dots, legend swatches, project diamonds. */
+.marker {
+  display: inline-block;
+  flex: none;
+  width: var(--marker-size);
+  height: var(--marker-size);
+  background: var(--marker-color);
+}
+
+.dot {
+  border-radius: 50%;
+}
+
+.square {
+  border-radius: var(--radius-xs);
+}
+
+.diamond {
+  transform: rotate(45deg);
+}

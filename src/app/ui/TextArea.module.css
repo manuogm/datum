@@ -1,0 +1,12 @@
+/* TextArea: the input box grown to several lines. */
+.area {
+  align-items: stretch;
+  padding: var(--space-10) var(--space-12);
+  font-size: var(--fs-13);
+}
+
+.control {
+  min-height: calc(3 * var(--leading-body) * var(--fs-13));
+  line-height: var(--leading-body);
+  resize: vertical;
+}

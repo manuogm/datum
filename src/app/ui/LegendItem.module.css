@@ -1,0 +1,9 @@
+/* Legend entry in a column header bar. */
+.item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-6);
+  font-size: var(--fs-11);
+  color: var(--text-muted);
+  white-space: nowrap;
+}

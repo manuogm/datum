@@ -1,0 +1,18 @@
+/* Field: input box with optional prefix (Ø) and unit suffix (mm). */
+.mono {
+  font-family: var(--font-mono);
+}
+
+.affix {
+  flex: none;
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+}
+
+.prefix {
+  font-size: var(--fs-12);
+}
+
+.unit {
+  font-size: var(--fs-11);
+}

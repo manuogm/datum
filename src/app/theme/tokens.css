@@ -1,0 +1,271 @@
+/*
+ * Design tokens for Datum, "Direction B · pit wall".
+ * Every colour, font, size, radius, border and spacing value used by the UI
+ * lives here. Dark is the main theme (the :root default); the light theme
+ * follows the light variant of the Fit Tolerance design and is applied with
+ * <html data-theme="light">, or to one subtree with data-theme="light" (the
+ * printable report is always light). Components must only reference these tokens.
+ */
+
+:root {
+  color-scheme: dark;
+
+  /* Surfaces */
+  --bg: #0c0d0f; /* page behind flush columns (Home) */
+  --surface: #141619; /* header, columns, tool pages */
+  --surface-raised: #181a1e; /* highlighted row, timeline card */
+  --surface-sunken: #101215; /* inputs, cards, side drawers */
+  --surface-muted: #24272c; /* avatars, neutral badges */
+  --surface-selected: #24272c; /* selected segment */
+  --surface-hover: #1f2226; /* hovered / selected list row, bar track */
+  --hatch: #15171a; /* diagonal hatch on "coming" tiles */
+
+  /* Borders and lines */
+  --border: #262a2f; /* column dividers, control outlines */
+  --border-subtle: #1f2226; /* dividers inside a column */
+  --border-faint: #1a1c20; /* dense table rows */
+  --border-strong: #33373d; /* secondary buttons, chips */
+  --grid: #1c1f23; /* chart grid lines */
+
+  /* Text */
+  --text: #ecedef;
+  --text-secondary: #c2c5ca;
+  --text-muted: #8a8f96;
+  --text-faint: #7e838b; /* quietest text; still WCAG AA (4.5:1) on every surface */
+  --stroke-faint: #5b6067; /* quiet non-text: axes, dashed outlines, empty checkboxes */
+
+  /* Accent (also the shaft colour in fit diagrams) */
+  --accent: #ff6b2c;
+  --accent-hover: #ff8a55; /* hovered accent fill */
+  --accent-fg: #ff6b2c; /* accent as text: links, numbering, actions */
+  --accent-fg-hover: #ff8a55;
+  --accent-text: #ff8a55; /* accent-coloured text on --accent-soft */
+  --accent-ink: #0c0d0f; /* text on a solid accent fill */
+  --accent-soft: #2b1a11;
+  --accent-border: #5a2f18;
+  --accent-border-subtle: #3a2a20;
+  --accent-wash: rgba(255, 107, 44, 0.07);
+
+  /* Fit diagram: hole (blue) and shaft (accent) */
+  --hole: #86a6d6;
+  --hole-soft: #18202c;
+  --hole-border: #33465f;
+  --shaft: var(--accent);
+  --shaft-soft: #2a1a11;
+
+  /* Status */
+  --ok: #3cc57d;
+  --ok-soft: #11261a;
+  --ok-text: #7fe0aa;
+  --ok-border: #1f4a33;
+  --ok-wash: rgba(60, 197, 125, 0.09);
+  --warn: #e6a83a;
+  --warn-soft: #2a2111;
+  --warn-text: #f0c878;
+  --warn-border: #5a4318;
+  --warn-wash: rgba(230, 168, 58, 0.14);
+  --bad: #ef5f4c;
+  --bad-soft: #2a1512;
+  --bad-text: #f59a8c;
+  --bad-border: #5a231c;
+  --bad-wash: rgba(239, 95, 76, 0.14);
+
+  /* Material families (charts, legends) */
+  --cat-aluminium: #86a6d6;
+  --cat-titanium: #b49ce0;
+  --cat-steel: #c2c5ca;
+  --cat-cast-iron: #a39e93;
+  --cat-nickel: #e39bb8;
+  --cat-magnesium: #7fd1c6;
+  --cat-copper: #d9a36b;
+  --cat-composite: #e6c35a;
+  --cat-polymer: #9bd08a;
+
+  /* Elevation and focus */
+  --shadow-selected: none;
+  --shadow-dialog: 0 30px 80px -20px rgba(0, 0, 0, 0.6);
+  --backdrop: rgba(8, 9, 11, 0.72); /* behind dialogs */
+  --z-overlay: 100; /* dialogs and overlay drawers */
+  --focus-ring: 0 0 0 3px var(--accent-soft);
+
+  /* Typography */
+  --font-sans: Geist, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --font-mono: 'Geist Mono', ui-monospace, Menlo, Consolas, monospace;
+
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+
+  --fs-9: 9px; /* initials in the smallest avatar */
+  --fs-10: 10px; /* dense table headers */
+  --fs-10-5: 10.5px; /* mono uppercase section labels, status badges */
+  --fs-11: 11px; /* mono meta, codes */
+  --fs-11-5: 11.5px; /* footnotes */
+  --fs-12: 12px; /* chips, segmented controls */
+  --fs-12-5: 12.5px; /* list rows, project chip */
+  --fs-13: 13px; /* body, nav, buttons */
+  --fs-13-5: 13.5px; /* card descriptions */
+  --fs-14: 14px; /* column titles, inputs */
+  --fs-14-5: 14.5px; /* timeline titles */
+  --fs-15: 15px; /* lead text, card names */
+  --fs-16: 16px; /* logo, drawer titles, small readouts */
+  --fs-17: 17px; /* dialog titles */
+  --fs-22: 22px; /* tool card titles */
+  --fs-26: 26px; /* secondary readouts */
+  --fs-30: 30px; /* detail titles */
+  --fs-40: 40px; /* page titles */
+  --fs-48: 48px; /* section page titles */
+  --fs-56: 56px; /* main readouts */
+  --fs-64: 64px; /* hero readouts */
+  --fs-88: 88px; /* Home hero */
+
+  --leading-display: 0.9;
+  --leading-readout: 0.95;
+  --leading-tight: 1;
+  --leading-snug: 1.35;
+  --leading-normal: 1.45;
+  --leading-body: 1.5;
+  --leading-relaxed: 1.55;
+
+  --tracking-label: 0.08em; /* mono uppercase labels */
+  --tracking-badge: 0.06em;
+  --tracking-logo: -0.01em;
+  --tracking-title: -0.02em;
+  --tracking-heading: -0.03em;
+  --tracking-display: -0.035em;
+  --tracking-readout: -0.04em;
+  --tracking-hero: -0.05em;
+
+  /* Spacing (named by pixel value, as used in the designs) */
+  --space-1: 1px;
+  --space-2: 2px;
+  --space-3: 3px;
+  --space-4: 4px;
+  --space-5: 5px;
+  --space-6: 6px;
+  --space-7: 7px;
+  --space-8: 8px;
+  --space-9: 9px;
+  --space-10: 10px;
+  --space-12: 12px;
+  --space-14: 14px;
+  --space-16: 16px;
+  --space-18: 18px;
+  --space-20: 20px;
+  --space-22: 22px;
+  --space-24: 24px;
+  --space-28: 28px;
+  --space-32: 32px;
+  --space-36: 36px;
+  --space-40: 40px;
+  --space-44: 44px;
+  --space-56: 56px;
+
+  /* Radii */
+  --radius-xs: 2px; /* selected segment, checkbox, swatch */
+  --radius-sm: 3px; /* inputs, chips, badges */
+  --radius-md: 4px; /* buttons, cards, segmented track */
+  --radius-lg: 6px; /* dialogs */
+  --radius-pill: 999px;
+
+  /* Borders */
+  --border-width: 1px;
+  --underline-width: 2px; /* active tab underline */
+
+  /* Charts (SVG strokes; dash patterns are dash and gap lengths) */
+  --chart-stroke: 1.5px; /* zero line, zone outlines, bars, dimension lines */
+  --chart-stroke-thin: 1px; /* grid, guides, links */
+  --chart-dash-band: 4 2; /* bars at a service temperature */
+  --chart-dash-guide: 4 3; /* required window and limits */
+  --chart-dash-extension: 3 3; /* extension lines to a dimension */
+
+  /* Fixed sizes, as rendered (border included). The prototypes size most
+     boxes content-box, so "height: 52px" plus its 1px rule renders 53px. */
+  --header-height: 56px;
+  --bar-height: 53px; /* column header bar with its bottom rule */
+  --control-height: 36px; /* header controls: chip, toggle, buttons */
+  --control-height-sm: 34px; /* compact search and filters */
+  --input-height: 42px;
+  --input-height-sm: 40px;
+  --list-row-height: 41px;
+  --table-row-height: 61px;
+  --column-filters: 300px;
+  --column-inputs: 340px;
+  --column-results: 380px;
+  --column-sidebar: 280px;
+  --column-min-height: 600px; /* a column's height once the row wraps */
+  --chart-height-stacked: 520px; /* a chart's height once columns stack */
+  --drawer-width: 420px;
+}
+
+[data-theme='light'] {
+  color-scheme: light;
+
+  --bg: #f3f3f1;
+  --surface: #ffffff;
+  --surface-raised: #fbfbfa;
+  --surface-sunken: #f7f7f5;
+  --surface-muted: #eeeeea;
+  --surface-selected: #ffffff;
+  --surface-hover: #f1f1ee;
+  --hatch: #e6e6e2;
+
+  --border: #e2e2de;
+  --border-subtle: #eeeeea;
+  --border-faint: #f3f3f0;
+  --border-strong: #d3d3ce;
+  --grid: #efefeb;
+
+  --text: #141619;
+  --text-secondary: #3b3f45;
+  --text-muted: #5f646b;
+  --text-faint: #686d74;
+  --stroke-faint: #a3a7ac;
+
+  --accent: #e8561c;
+  --accent-hover: #f27140;
+  --accent-fg: #b8410f;
+  --accent-fg-hover: #8f320b;
+  --accent-text: #b8410f;
+  --accent-ink: #141619; /* dark ink keeps button text AA on the light accent */
+  --accent-soft: #fcebe2;
+  --accent-border: #f2c1a8;
+  --accent-border-subtle: #f7dccd;
+  --accent-wash: rgba(232, 86, 28, 0.06);
+
+  --hole: #4a6a98;
+  --hole-soft: #eaeff6;
+  --hole-border: #b9c8dd;
+  --shaft-soft: #fde9df;
+
+  --ok: #1e8e55;
+  --ok-soft: #e5f3ea;
+  --ok-text: #14603a;
+  --ok-border: #b5dcc4;
+  --ok-wash: rgba(30, 142, 85, 0.08);
+  --warn: #c2860a;
+  --warn-soft: #fbf2dd;
+  --warn-text: #7a5406;
+  --warn-border: #ebd49b;
+  --warn-wash: rgba(194, 134, 10, 0.12);
+  --bad: #c93d2c;
+  --bad-soft: #fbeae7;
+  --bad-text: #9e2d1f;
+  --bad-border: #f0c2ba;
+  --bad-wash: rgba(201, 61, 44, 0.1);
+
+  --cat-aluminium: #4a6a98;
+  --cat-titanium: #7a5fb0;
+  --cat-steel: #6c7178;
+  --cat-cast-iron: #7a746a;
+  --cat-nickel: #b0587c;
+  --cat-magnesium: #2f8f84;
+  --cat-copper: #a8692f;
+  --cat-composite: #a88a1e;
+  --cat-polymer: #4f8f3e;
+
+  --shadow-selected: 0 1px 2px rgba(0, 0, 0, 0.12);
+  --shadow-dialog: 0 30px 80px -20px rgba(20, 22, 25, 0.25);
+  --backdrop: rgba(20, 22, 25, 0.32);
+}

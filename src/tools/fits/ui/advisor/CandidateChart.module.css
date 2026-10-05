@@ -1,0 +1,112 @@
+/* Fit candidates chart. Text sizes are in the SVG's own units and scale with it. */
+.chart {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.grid {
+  stroke: var(--grid);
+  stroke-width: var(--chart-stroke-thin);
+}
+
+.tick {
+  fill: var(--text-faint);
+  font-family: var(--font-mono);
+  font-size: var(--fs-10-5);
+  text-anchor: end;
+}
+
+.zero {
+  stroke: var(--text);
+  stroke-width: var(--chart-stroke);
+}
+
+.zeroLabel {
+  fill: var(--text);
+  font-weight: var(--weight-semibold);
+}
+
+.window {
+  fill: var(--ok-wash);
+}
+
+.windowEdge {
+  stroke: var(--ok);
+  stroke-width: var(--chart-stroke-thin);
+  stroke-dasharray: var(--chart-dash-guide);
+}
+
+.windowLabel,
+.limitLabel {
+  font-family: var(--font-mono);
+  font-size: var(--fs-10-5);
+  text-anchor: end;
+  /* A halo in the background colour keeps the label readable over bars. */
+  paint-order: stroke;
+  stroke: var(--surface);
+  stroke-width: 4px;
+  stroke-linejoin: round;
+}
+
+.windowLabel {
+  fill: var(--ok-text);
+}
+
+.limit {
+  stroke: var(--bad);
+  stroke-width: var(--chart-stroke-thin);
+  stroke-dasharray: var(--chart-dash-guide);
+}
+
+.limitLabel {
+  fill: var(--bad-text);
+}
+
+.bestSlot {
+  fill: var(--accent-wash);
+  stroke: var(--accent-border);
+  stroke-width: var(--chart-stroke-thin);
+}
+
+.comparedSlot {
+  fill: none;
+  stroke: var(--hole-border);
+  stroke-width: var(--chart-stroke-thin);
+  stroke-dasharray: var(--chart-dash-guide);
+}
+
+.link {
+  stroke: var(--stroke-faint);
+  stroke-width: var(--chart-stroke-thin);
+}
+
+.name {
+  fill: var(--text);
+  font-family: var(--font-sans);
+  font-size: var(--fs-15);
+  font-weight: var(--weight-semibold);
+  text-anchor: middle;
+}
+
+.bestName {
+  fill: var(--accent-fg);
+}
+
+.tagline {
+  font-family: var(--font-mono);
+  font-size: var(--fs-10-5);
+  text-anchor: middle;
+}
+
+.ok {
+  fill: var(--ok-text);
+}
+
+.warn {
+  fill: var(--warn-text);
+}
+
+.bad {
+  fill: var(--bad-text);
+}

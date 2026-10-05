@@ -1,0 +1,28 @@
+/* Materials page: filters | chart and table | detail (layout from ColumnRow). */
+.axes {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-6);
+  font-family: var(--font-mono);
+  font-size: var(--fs-12);
+  color: var(--text-faint);
+}
+
+.scale {
+  font-size: var(--fs-12);
+  color: var(--text-muted);
+}
+
+.chart {
+  flex: none;
+  height: 420px;
+  padding: var(--space-8) var(--space-16) 0;
+  border-bottom: var(--border-width) solid var(--border-subtle);
+}
+
+@media (max-width: 900px) {
+  .chart {
+    height: 300px;
+    padding: var(--space-8) 0 0;
+  }
+}

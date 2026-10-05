@@ -1,0 +1,29 @@
+/* Select: native select inside the input box, with a chevron. */
+.select {
+  position: relative;
+  padding-right: var(--space-10);
+}
+
+.control {
+  appearance: none;
+  cursor: pointer;
+}
+
+.control option {
+  background: var(--surface);
+  color: var(--text);
+}
+
+.meta {
+  flex: none;
+  pointer-events: none;
+  font-family: var(--font-mono);
+  font-size: var(--fs-11);
+  color: var(--text-muted);
+}
+
+.chevron {
+  flex: none;
+  color: var(--text-muted);
+  pointer-events: none;
+}

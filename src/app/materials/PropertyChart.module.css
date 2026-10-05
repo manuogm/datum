@@ -1,0 +1,71 @@
+/* E–ρ chart: grid, axes, specific-stiffness guide and material dots. */
+.chart {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.grid {
+  stroke: var(--grid);
+}
+
+.axis {
+  stroke: var(--stroke-faint);
+}
+
+.tick,
+.axisLabel,
+.guideLabel,
+.label {
+  font-family: var(--font-mono);
+  font-size: var(--fs-10-5);
+}
+
+.tick {
+  fill: var(--text-faint);
+}
+
+.axisLabel {
+  fill: var(--text-muted);
+}
+
+.guide {
+  stroke: var(--border-strong);
+  stroke-dasharray: 5 4;
+}
+
+.guideLabel {
+  fill: var(--text-faint);
+  font-size: var(--fs-10);
+}
+
+.point {
+  cursor: pointer;
+  outline: none;
+}
+
+.point circle {
+  stroke: transparent;
+  stroke-width: 2;
+}
+
+.point:hover circle,
+.point:focus-visible circle {
+  stroke: var(--text-muted);
+}
+
+.label {
+  fill: var(--text-muted);
+}
+
+.faded {
+  opacity: 0.25;
+}
+
+.selected circle {
+  stroke: var(--text);
+}
+
+.selected .label {
+  fill: var(--text);
+}

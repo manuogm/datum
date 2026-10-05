@@ -1,0 +1,54 @@
+/* Datum logo: a square datum frame crossed by the accent datum line. */
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-10);
+  flex: none;
+  color: var(--text);
+  text-decoration: none;
+}
+
+.mark {
+  position: relative;
+  width: 20px;
+  height: 20px;
+  border: var(--underline-width) solid currentColor;
+  border-radius: var(--radius-sm);
+  box-sizing: border-box;
+}
+
+.mark::after {
+  content: '';
+  position: absolute;
+  left: -5px;
+  right: -5px;
+  top: 7px;
+  height: var(--underline-width);
+  background: var(--accent);
+}
+
+.word {
+  font-size: var(--fs-16);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-logo);
+}
+
+.small {
+  gap: var(--space-8);
+}
+
+.small .mark {
+  width: 16px;
+  height: 16px;
+  border-radius: var(--radius-xs);
+}
+
+.small .mark::after {
+  left: -4px;
+  right: -4px;
+  top: 5px;
+}
+
+.small .word {
+  font-size: var(--fs-13);
+}

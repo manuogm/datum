@@ -1,0 +1,13 @@
+/* Row of flush columns filling the space under the header. */
+.row {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+@media (max-width: 1200px) {
+  .row {
+    flex-wrap: wrap;
+    flex: 1 0 auto;
+  }
+}

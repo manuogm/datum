@@ -1,0 +1,36 @@
+/* Theme toggle: a half-filled disc in a square control. */
+.toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: var(--control-height);
+  height: var(--control-height);
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius-md);
+  background: none;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.toggle:hover {
+  background: var(--surface-hover);
+}
+
+.toggle:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: var(--focus-ring);
+}
+
+.disc {
+  width: 14px;
+  height: 14px;
+  box-sizing: border-box;
+  border: 1.5px solid currentColor;
+  border-radius: 50%;
+  background: linear-gradient(90deg, currentColor 50%, transparent 50%);
+}

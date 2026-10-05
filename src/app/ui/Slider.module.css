@@ -1,0 +1,131 @@
+/* Slider: 4px rail with an accent fill between --from and --to; native range
+   inputs are stacked on the rail and only their 14px ring thumbs take the pointer. */
+.slider {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+
+.head {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-10);
+  font-size: var(--fs-12-5);
+}
+
+.label {
+  color: var(--text-secondary);
+}
+
+.value {
+  font-family: var(--font-mono);
+  white-space: nowrap;
+}
+
+.rail {
+  position: relative;
+  height: 14px;
+}
+
+.rail::before,
+.rail::after {
+  content: '';
+  position: absolute;
+  top: 5px;
+  height: 4px;
+  border-radius: var(--radius-xs);
+}
+
+.rail::before {
+  left: 0;
+  right: 0;
+  background: var(--border);
+}
+
+.rail::after {
+  left: var(--from);
+  right: calc(100% - var(--to));
+  background: var(--accent);
+}
+
+.idle::after {
+  display: none;
+}
+
+.input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 14px;
+  margin: 0;
+  background: none;
+  appearance: none;
+  pointer-events: none;
+}
+
+.input:focus {
+  outline: none;
+}
+
+.input::-webkit-slider-thumb {
+  width: 14px;
+  height: 14px;
+  box-sizing: border-box;
+  border: var(--underline-width) solid var(--accent);
+  border-radius: 50%;
+  background: var(--surface);
+  appearance: none;
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.input::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  box-sizing: border-box;
+  border: var(--underline-width) solid var(--accent);
+  border-radius: 50%;
+  background: var(--surface);
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.idle .input::-webkit-slider-thumb {
+  border-color: var(--text-faint);
+}
+
+.idle .input::-moz-range-thumb {
+  border-color: var(--text-faint);
+}
+
+.input:focus-visible::-webkit-slider-thumb {
+  box-shadow: var(--focus-ring);
+}
+
+.input:focus-visible::-moz-range-thumb {
+  box-shadow: var(--focus-ring);
+}
+
+/* Labels centred on their position; the first and last stay inside the track. */
+.ticks {
+  position: relative;
+  height: 12px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-10-5);
+  color: var(--text-faint);
+}
+
+.tick {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+
+.tick:first-child {
+  transform: none;
+}
+
+.tick:last-child {
+  transform: translateX(-100%);
+}

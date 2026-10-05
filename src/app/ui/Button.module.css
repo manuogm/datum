@@ -1,0 +1,96 @@
+/* Buttons: solid accent primary, outlined secondary, quiet ghost and inline link. */
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-7);
+  flex: none;
+  box-sizing: border-box;
+  margin: 0;
+  border: var(--border-width) solid transparent;
+  border-radius: var(--radius-md);
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: var(--fs-13);
+  font-weight: var(--weight-semibold);
+  white-space: nowrap;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background-color 120ms ease,
+    border-color 120ms ease,
+    color 120ms ease;
+}
+
+.button:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+  border-color: var(--accent);
+}
+
+.button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* Sizes */
+.sm {
+  padding: var(--space-6) var(--space-12);
+}
+
+.md {
+  height: var(--control-height);
+  padding: 0 var(--space-12);
+}
+
+.lg {
+  padding: var(--space-10) var(--space-14);
+}
+
+.block {
+  flex: 1;
+}
+
+/* Variants */
+.primary {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+.primary:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+
+.secondary {
+  border-color: var(--border-strong);
+  color: var(--text);
+}
+
+.secondary:hover:not(:disabled) {
+  background: var(--surface-hover);
+}
+
+.ghost {
+  font-weight: var(--weight-regular);
+  color: var(--text-secondary);
+}
+
+.ghost:hover:not(:disabled) {
+  color: var(--text);
+}
+
+.link {
+  padding: 0;
+  height: auto;
+  border: 0;
+  color: var(--accent-fg);
+}
+
+.link.sm {
+  font-size: var(--fs-12);
+}
+
+.link:hover {
+  color: var(--accent-fg-hover);
+}

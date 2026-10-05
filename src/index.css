@@ -1,0 +1,49 @@
+/* Global base styles: design tokens, document defaults and a minimal reset. */
+@import './app/theme/tokens.css';
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+}
+
+body {
+  font-family: var(--font-sans);
+  font-size: var(--fs-13);
+  font-feature-settings: 'tnum' 1;
+  font-variant-numeric: tabular-nums;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+#root {
+  min-height: 100dvh;
+}
+
+a {
+  color: var(--accent-fg);
+  text-decoration: none;
+}
+
+/* Keyboard focus for anything without its own focus style. */
+:focus-visible {
+  outline: var(--underline-width) solid var(--accent);
+  outline-offset: var(--space-2);
+}
+
+a:hover {
+  color: var(--accent-fg-hover);
+}
+
+::selection {
+  background: var(--accent-soft);
+  color: var(--text);
+}

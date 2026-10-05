@@ -1,0 +1,96 @@
+/* Segmented control: inset track with a raised selected segment, or a joined
+   bordered strip (Projects status filter). */
+.group {
+  display: flex;
+  flex: none;
+  box-sizing: border-box;
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.fill {
+  flex: 1;
+}
+
+.segment {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-6);
+  margin: 0;
+  border: 0;
+  background: none;
+  color: var(--text-muted);
+  font: inherit;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.segment:hover {
+  color: var(--text);
+}
+
+.segment:focus-visible {
+  outline: var(--border-width) solid var(--accent);
+  outline-offset: -1px;
+}
+
+.selected {
+  color: var(--text);
+}
+
+.fill .segment {
+  flex: 1;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+/* Inset variant */
+.inset {
+  padding: var(--space-3);
+  background: var(--surface-sunken);
+  font-weight: var(--weight-medium);
+}
+
+.inset .segment {
+  border-radius: var(--radius-xs);
+}
+
+.inset .selected {
+  background: var(--surface-selected);
+  box-shadow: var(--shadow-selected);
+}
+
+.inset.sm {
+  font-size: var(--fs-12);
+}
+
+.inset.sm .segment {
+  padding: var(--space-5) var(--space-10);
+}
+
+.inset.md {
+  font-size: var(--fs-12-5);
+}
+
+.inset.md .segment {
+  padding: var(--space-6) var(--space-12);
+}
+
+/* Joined variant */
+.joined {
+  overflow: hidden;
+  font-size: var(--fs-12-5);
+}
+
+.joined .segment {
+  padding: var(--space-7) var(--space-12);
+}
+
+.joined .segment + .segment {
+  border-left: var(--border-width) solid var(--border);
+}
+
+.joined .selected {
+  background: var(--surface-selected);
+}

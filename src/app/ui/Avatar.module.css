@@ -1,0 +1,35 @@
+/* Round initials avatar. */
+.avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  border-radius: 50%;
+  background: var(--surface-muted);
+  color: var(--text-secondary);
+  font-weight: var(--weight-semibold);
+}
+
+.xs {
+  width: 20px;
+  height: 20px;
+  font-size: var(--fs-9);
+}
+
+.sm {
+  width: 26px;
+  height: 26px;
+  font-size: var(--fs-10);
+}
+
+.md {
+  width: 28px;
+  height: 28px;
+  font-size: var(--fs-10-5);
+}
+
+.lg {
+  width: 30px;
+  height: 30px;
+  font-size: var(--fs-11);
+}

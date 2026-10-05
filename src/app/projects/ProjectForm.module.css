@@ -1,0 +1,10 @@
+/* Project form: code and programme side by side. */
+.pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-10);
+}
+
+.code input {
+  color: var(--text-muted);
+}

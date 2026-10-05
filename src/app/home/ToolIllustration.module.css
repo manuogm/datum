@@ -1,0 +1,90 @@
+/* Colours of the tool card diagrams; all strokes and fills are theme tokens. */
+.svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  fill: none;
+}
+
+.strokeText {
+  stroke: var(--text);
+}
+
+.strokeMuted {
+  stroke: var(--text-muted);
+}
+
+.strokeFaint {
+  stroke: var(--stroke-faint);
+}
+
+.strokeStrong {
+  stroke: var(--border-strong);
+}
+
+.strokeHole {
+  stroke: var(--hole);
+}
+
+.strokeAccent {
+  stroke: var(--accent);
+}
+
+.strokeOk {
+  stroke: var(--ok);
+}
+
+.strokeWarn {
+  stroke: var(--warn);
+}
+
+.strokeBad {
+  stroke: var(--bad);
+}
+
+.strokeAluminium {
+  stroke: var(--cat-aluminium);
+}
+
+.strokeTitanium {
+  stroke: var(--cat-titanium);
+}
+
+.strokeSteel {
+  stroke: var(--cat-steel);
+}
+
+.strokeComposite {
+  stroke: var(--cat-composite);
+}
+
+.fillSurface {
+  fill: var(--surface);
+}
+
+.fillHoleSoft {
+  fill: var(--hole-soft);
+}
+
+.fillShaftSoft {
+  fill: var(--shaft-soft);
+}
+
+.fillAccent {
+  fill: var(--accent);
+}
+
+.zoneLabel {
+  font-family: var(--font-sans);
+  font-size: 18px;
+  font-weight: var(--weight-semibold);
+  text-anchor: middle;
+}
+
+.holeLabel {
+  fill: var(--hole);
+}
+
+.shaftLabel {
+  fill: var(--accent);
+}

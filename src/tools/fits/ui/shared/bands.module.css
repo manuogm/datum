@@ -1,0 +1,43 @@
+/* One look per temperature band, shared by the advisor chart, the fit
+   spectrum and their legends: cold dashed blue outline, 20 °C solid blue,
+   hot dashed accent. SVG marks use .mark, HTML strips use .strip. */
+.cold {
+  --band-fill: transparent;
+  --band-stroke: var(--hole);
+  --band-dash: var(--chart-dash-band);
+  --band-border-style: dashed;
+}
+
+.reference {
+  --band-fill: var(--hole-soft);
+  --band-stroke: var(--hole);
+  --band-dash: none;
+  --band-border-style: solid;
+}
+
+.hot {
+  --band-fill: var(--accent-soft);
+  --band-stroke: var(--accent);
+  --band-dash: var(--chart-dash-band);
+  --band-border-style: dashed;
+}
+
+.mark {
+  fill: var(--band-fill);
+  stroke: var(--band-stroke);
+  stroke-width: var(--chart-stroke);
+  stroke-dasharray: var(--band-dash);
+}
+
+.strip {
+  box-sizing: border-box;
+  border: var(--chart-stroke) var(--band-border-style) var(--band-stroke);
+  background: var(--band-fill);
+}
+
+.swatch {
+  display: inline-block;
+  flex: none;
+  width: 10px;
+  height: 10px;
+}

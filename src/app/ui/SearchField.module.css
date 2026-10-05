@@ -1,0 +1,16 @@
+/* SearchField: magnifier, query input and an optional shortcut hint. */
+.search {
+  font-size: var(--fs-13);
+}
+
+.icon {
+  flex: none;
+  color: var(--text-muted);
+}
+
+.shortcut {
+  flex: none;
+  font-family: var(--font-mono);
+  font-size: var(--fs-11);
+  color: var(--text-faint);
+}

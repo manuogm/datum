@@ -1,0 +1,26 @@
+/* Quiet square button holding the × icon. */
+.close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: var(--border-width) solid transparent;
+  border-radius: var(--radius-md);
+  background: none;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.close:hover {
+  color: var(--text);
+  background: var(--surface-hover);
+}
+
+.close:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: var(--focus-ring);
+}
