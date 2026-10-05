@@ -1,0 +1,63 @@
+/* Drawer: 420px sunken panel with a fixed head and foot and a scrolling body. */
+.drawer {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  width: var(--drawer-width);
+  min-height: 0;
+  margin: 0;
+  border-left: var(--border-width) solid var(--border);
+  background: var(--surface-sunken);
+  color: var(--text);
+  /* Inputs sit on the page colour inside the sunken drawer. */
+  --input-surface: var(--surface);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex: none;
+  height: calc(60px + var(--border-width));
+  padding: 0 var(--space-24);
+  border-bottom: var(--border-width) solid var(--border);
+}
+
+.title {
+  margin: 0;
+  font-size: var(--fs-16);
+  font-weight: var(--weight-semibold);
+}
+
+.body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--space-18);
+  min-height: 0;
+  padding: var(--space-20) var(--space-24);
+  overflow-y: auto;
+}
+
+.footer {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: var(--space-10);
+  flex: none;
+  padding: var(--space-16) var(--space-24);
+  border-top: var(--border-width) solid var(--border);
+}
+
+/* Narrow screens: cover the page below the header. */
+@media (max-width: 900px) {
+  .drawer {
+    position: fixed;
+    top: var(--header-height);
+    right: 0;
+    bottom: 0;
+    z-index: var(--z-overlay);
+    width: min(100%, var(--drawer-width));
+    box-shadow: var(--shadow-dialog);
+  }
+}

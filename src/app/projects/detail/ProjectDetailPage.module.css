@@ -1,0 +1,101 @@
+/* Project page: header with tabs, then sidebar + content columns. */
+.head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-18);
+  flex: none;
+  padding: var(--space-24) var(--space-32) 0;
+  border-bottom: var(--border-width) solid var(--border);
+}
+
+.titleRow {
+  display: flex;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: var(--space-20);
+}
+
+.titleRow > :first-child {
+  flex: 1 1 320px;
+}
+
+/* The tabs scroll sideways rather than wrap on narrow screens. */
+.tabs {
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.crumb {
+  color: inherit;
+}
+
+.crumb:hover {
+  color: var(--text);
+}
+
+.actions {
+  display: flex;
+  gap: var(--space-10);
+}
+
+.timelineBody,
+.body {
+  display: grid;
+  flex: 1;
+  min-height: 0;
+}
+
+.timelineBody {
+  grid-template-columns: var(--column-sidebar) minmax(0, 1fr) var(--column-results);
+}
+
+.body {
+  grid-template-columns: var(--column-sidebar) minmax(0, 1fr);
+}
+
+/* Settings has no sidebar. */
+.body:has(> :only-child) {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.pane {
+  min-width: 0;
+  padding: var(--space-20) var(--space-32);
+  overflow-y: auto;
+}
+
+/* Narrower: decisions move below the history and the page scrolls as a whole. */
+@media (max-width: 1200px) {
+  .timelineBody {
+    flex: 1 0 auto;
+    grid-template-columns: var(--column-sidebar) minmax(0, 1fr);
+  }
+
+  .timelineBody > * {
+    overflow: visible;
+  }
+
+  .timelineBody > :last-child {
+    grid-column: 1 / -1;
+    border-top: var(--border-width) solid var(--border);
+    border-left: 0;
+  }
+}
+
+@media (max-width: 900px) {
+  .head {
+    padding: var(--space-20) var(--space-16) 0;
+  }
+
+  .timelineBody,
+  .body {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .timelineBody > *,
+  .body > * {
+    border-right: 0;
+    overflow: visible;
+  }
+}

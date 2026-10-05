@@ -10,6 +10,10 @@ export type IconName =
   | 'download'
   | 'close'
   | 'arrow-right'
+  | 'tool-fit'
+  | 'tool-bolt'
+  | 'tool-lam'
+  | 'tool-mat'
 
 interface IconProps {
   name: IconName
@@ -34,6 +38,19 @@ const ICONS: Record<IconName, { box: number; body: ReactElement }> = {
   download: { box: 12, body: <path d="M6 1v7M3 5l3 3 3-3M1.5 11h9" strokeWidth="1.6" /> },
   close: { box: 12, body: <path d="M2.5 2.5l7 7M9.5 2.5l-7 7" strokeWidth="1.4" /> },
   'arrow-right': { box: 12, body: <path d="M1.5 6h8.5M6.5 2.5L10 6l-3.5 3.5" strokeWidth="1.4" /> },
+  // Tool glyphs (drawn on a 20px grid, shown at 12px in the projects table).
+  'tool-fit': {
+    box: 20,
+    body: (
+      <g strokeWidth="2">
+        <circle cx="10" cy="10" r="8" />
+        <circle cx="10" cy="10" r="4" />
+      </g>
+    ),
+  },
+  'tool-bolt': { box: 20, body: <polygon points="10,2 17,6 17,14 10,18 3,14 3,6" strokeWidth="2" /> },
+  'tool-lam': { box: 20, body: <path d="M6 4h12l-4 5H2Z M6 12h12l-4 5H2Z" strokeWidth="2" /> },
+  'tool-mat': { box: 20, body: <path d="M4 3h12v14H4Z M7 7.5h6M7 11h6M7 14.5h3" strokeWidth="2" /> },
 }
 
 export function Icon({ name, size, className }: IconProps) {

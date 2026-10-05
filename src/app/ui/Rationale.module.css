@@ -1,0 +1,24 @@
+/* Rationale strip: pinned under the chart, above a subtle rule. */
+.strip {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-14);
+  flex: none;
+  padding: var(--space-14) var(--space-20) var(--space-18);
+  border-top: var(--border-width) solid var(--border-subtle);
+}
+
+.label {
+  flex: none;
+  padding-top: var(--space-2);
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  font-size: var(--fs-13);
+  line-height: var(--leading-relaxed);
+  color: var(--text-secondary);
+  text-wrap: pretty;
+}

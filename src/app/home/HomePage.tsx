@@ -1,21 +1,23 @@
 // Home ("Home v2" design): hero with search, the four tools as flush
-// columns, and recent projects. Content comes from HomeData.
+// columns, and recent projects, all derived from the stored projects.
+import { useMemo } from 'react'
 import styles from './HomePage.module.css'
+import { MATERIALS } from '../../core/materials'
 import { AppLayout } from '../AppLayout'
+import { NEW_PROJECT_HREF } from '../projects/newProjectLink'
+import { useProjects } from '../projects/useProjects'
 import { routeHref } from '../router/routes'
 import { Button, MonoLabel, SearchField } from '../ui'
-import type { HomeData } from './homeData'
+import { buildHomeData } from './homeData'
 import { ProjectCard } from './ProjectCard'
 import { ToolCard } from './ToolCard'
 import { toolCards } from './toolCards'
 
 const REQUEST_TOOL_URL = 'https://github.com/manuogm/datum/issues/new'
 
-interface HomePageProps {
-  data: HomeData
-}
-
-export function HomePage({ data }: HomePageProps) {
+export function HomePage() {
+  const { projects } = useProjects()
+  const data = useMemo(() => buildHomeData(projects, MATERIALS), [projects])
   return (
     <AppLayout section="home" background="page">
       <div className={styles.page}>
@@ -55,7 +57,7 @@ export function HomePage({ data }: HomePageProps) {
             <a className={styles.allProjects} href={routeHref({ name: 'projects' })}>
               All projects →
             </a>
-            <Button size="sm" href={routeHref({ name: 'projects' })}>
+            <Button size="sm" href={NEW_PROJECT_HREF}>
               + New project
             </Button>
           </div>

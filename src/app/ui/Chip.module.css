@@ -68,3 +68,7 @@ button.chip:focus-visible {
 .leading {
   display: inline-flex;
 }
+
+.mono {
+  font-family: var(--font-mono);
+}

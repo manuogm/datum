@@ -3,7 +3,8 @@
  * Every colour, font, size, radius, border and spacing value used by the UI
  * lives here. Dark is the main theme (the :root default); the light theme
  * follows the light variant of the Fit Tolerance design and is applied with
- * <html data-theme="light">. Components must only reference these tokens.
+ * <html data-theme="light">, or to one subtree with data-theme="light" (the
+ * printable report is always light). Components must only reference these tokens.
  */
 
 :root {
@@ -80,6 +81,8 @@
   /* Elevation and focus */
   --shadow-selected: none;
   --shadow-dialog: 0 30px 80px -20px rgba(0, 0, 0, 0.6);
+  --backdrop: rgba(8, 9, 11, 0.72); /* behind dialogs */
+  --z-overlay: 100; /* dialogs and overlay drawers */
   --focus-ring: 0 0 0 3px var(--accent-soft);
 
   /* Typography */
@@ -167,6 +170,13 @@
   --border-width: 1px;
   --underline-width: 2px; /* active tab underline */
 
+  /* Charts (SVG strokes; dash patterns are dash and gap lengths) */
+  --chart-stroke: 1.5px; /* zero line, zone outlines, bars, dimension lines */
+  --chart-stroke-thin: 1px; /* grid, guides, links */
+  --chart-dash-band: 4 2; /* bars at a service temperature */
+  --chart-dash-guide: 4 3; /* required window and limits */
+  --chart-dash-extension: 3 3; /* extension lines to a dimension */
+
   /* Fixed sizes, as rendered (border included). The prototypes size most
      boxes content-box, so "height: 52px" plus its 1px rule renders 53px. */
   --header-height: 56px;
@@ -184,7 +194,7 @@
   --drawer-width: 420px;
 }
 
-:root[data-theme='light'] {
+[data-theme='light'] {
   color-scheme: light;
 
   --bg: #f3f3f1;
@@ -249,4 +259,5 @@
 
   --shadow-selected: 0 1px 2px rgba(0, 0, 0, 0.12);
   --shadow-dialog: 0 30px 80px -20px rgba(20, 22, 25, 0.25);
+  --backdrop: rgba(20, 22, 25, 0.32);
 }

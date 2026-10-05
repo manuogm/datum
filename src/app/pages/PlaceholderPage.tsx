@@ -10,7 +10,6 @@ import type { PlaceholderContent } from './placeholders'
 
 const STATUS_BADGE = {
   next: { tone: 'accent', text: 'Coming next' },
-  building: { tone: 'hole', text: 'In progress' },
   missing: { tone: 'bad', text: 'Not found' },
 } as const
 

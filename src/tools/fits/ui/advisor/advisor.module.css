@@ -1,0 +1,125 @@
+/* Advisor mode: inputs, recommendation and ranked list. */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-6);
+}
+
+.chartArea {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  padding: var(--space-12) var(--space-16) 0;
+}
+
+.notes {
+  color: var(--warn-text);
+}
+
+.problem {
+  padding: var(--space-20);
+}
+
+.designation {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--space-14);
+}
+
+.checks {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+
+.actions {
+  display: flex;
+  gap: var(--space-8);
+}
+
+/* Ranked list */
+.ranked {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rankRow {
+  display: grid;
+  grid-template-columns: 18px 58px 1fr 34px;
+  align-items: center;
+  gap: var(--space-10);
+  width: 100%;
+  min-height: var(--list-row-height);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-bottom: var(--border-width) solid var(--border-subtle);
+  background: none;
+  color: var(--text);
+  font: inherit;
+  font-size: var(--fs-13);
+  text-align: left;
+  cursor: pointer;
+}
+
+.rankRow:disabled {
+  cursor: default;
+}
+
+.rankRow:hover:not(:disabled),
+.rankCompared {
+  background: var(--surface-hover);
+}
+
+.rankRow:focus-visible {
+  outline: var(--border-width) solid var(--accent);
+  outline-offset: -1px;
+}
+
+.rank {
+  font-family: var(--font-mono);
+  font-size: var(--fs-11);
+  color: var(--text-faint);
+}
+
+.rankName {
+  font-weight: var(--weight-semibold);
+  white-space: nowrap;
+}
+
+.rankDetail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+.rankRange {
+  overflow: hidden;
+  font-family: var(--font-mono);
+  font-size: var(--fs-11);
+  color: var(--text-muted);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.rankScore {
+  font-family: var(--font-mono);
+  text-align: right;
+}
+
+.ok {
+  color: var(--ok-text);
+}
+
+.warn {
+  color: var(--warn-text);
+}
+
+.bad {
+  color: var(--bad-text);
+}

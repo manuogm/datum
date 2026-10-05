@@ -1,0 +1,86 @@
+/* Slider: 4px track, accent fill to the thumb, 16px ring thumb. */
+.slider {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.input {
+  --track: 4px;
+  --thumb: 16px;
+  width: 100%;
+  height: var(--thumb);
+  margin: 0;
+  padding: 0;
+  background: none;
+  appearance: none;
+  cursor: pointer;
+}
+
+.input:focus-visible {
+  outline: none;
+}
+
+.input::-webkit-slider-runnable-track {
+  height: var(--track);
+  border-radius: var(--radius-xs);
+  background: linear-gradient(to right, var(--accent) var(--fill), var(--border) var(--fill));
+}
+
+.input::-moz-range-track {
+  height: var(--track);
+  border-radius: var(--radius-xs);
+  background: linear-gradient(to right, var(--accent) var(--fill), var(--border) var(--fill));
+}
+
+.input::-webkit-slider-thumb {
+  width: var(--thumb);
+  height: var(--thumb);
+  margin-top: calc((var(--track) - var(--thumb)) / 2);
+  box-sizing: border-box;
+  border: var(--underline-width) solid var(--accent);
+  border-radius: 50%;
+  background: var(--surface);
+  appearance: none;
+}
+
+.input::-moz-range-thumb {
+  width: var(--thumb);
+  height: var(--thumb);
+  box-sizing: border-box;
+  border: var(--underline-width) solid var(--accent);
+  border-radius: 50%;
+  background: var(--surface);
+}
+
+.input:focus-visible::-webkit-slider-thumb {
+  box-shadow: var(--focus-ring);
+}
+
+.input:focus-visible::-moz-range-thumb {
+  box-shadow: var(--focus-ring);
+}
+
+/* Labels centred on their position; the first and last stay inside the track. */
+.ticks {
+  position: relative;
+  height: 12px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-10-5);
+  color: var(--text-faint);
+}
+
+.tick {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+
+.tick:first-child {
+  transform: none;
+}
+
+.tick:last-child {
+  transform: translateX(-100%);
+}

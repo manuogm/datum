@@ -1,4 +1,4 @@
-/* Shared look of every text-like control (Field, Select, SearchField):
+/* Shared look of every text-like control (Field, Select, SearchField, TextArea):
    sunken box, hairline border, accent focus ring. Those components apply
    these classes alongside their own. */
 .box {
@@ -10,7 +10,7 @@
   box-sizing: border-box;
   border: var(--border-width) solid var(--border);
   border-radius: var(--radius-sm);
-  background: var(--surface-sunken);
+  background: var(--input-surface, var(--surface-sunken));
   color: var(--text);
   font-size: var(--fs-14);
 }

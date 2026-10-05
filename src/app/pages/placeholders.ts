@@ -6,13 +6,16 @@ export interface PlaceholderContent {
   section: Section | null
   eyebrow: string
   title: string
-  status: 'next' | 'building' | 'missing'
+  status: 'next' | 'missing'
   message: string
   scope: string[]
   tool?: ToolSection
 }
 
-export function placeholderFor(route: Exclude<Route, { name: 'home' }>): PlaceholderContent {
+/** Routes that still show a placeholder (every other route has its own page). */
+type PlaceholderRoute = Extract<Route, { name: 'bolt' | 'lam' | 'notFound' }>
+
+export function placeholderFor(route: PlaceholderRoute): PlaceholderContent {
   switch (route.name) {
     case 'bolt':
       return {
@@ -44,44 +47,6 @@ export function placeholderFor(route: Exclude<Route, { name: 'home' }>): Placeho
           'First-ply failure and reserve factors',
         ],
         tool: 'lam',
-      }
-    case 'fit':
-      return {
-        section: 'fit',
-        eyebrow: 'ISO 286-1 · 286-2',
-        title: 'Fit Tolerance',
-        status: 'building',
-        message: 'The calculator and fit advisor are being built on the ISO 286 engine.',
-        scope: [],
-        tool: 'fit',
-      }
-    case 'mat':
-      return {
-        section: 'mat',
-        eyebrow: 'MMPDS · EN · ASTM',
-        title: 'Materials Database',
-        status: 'building',
-        message: 'Traceable material properties shared by every tool are being added.',
-        scope: [],
-        tool: 'mat',
-      }
-    case 'projects':
-      return {
-        section: 'projects',
-        eyebrow: 'Projects',
-        title: 'Projects',
-        status: 'building',
-        message: 'Projects with design targets, calculation history and decisions are being built.',
-        scope: [],
-      }
-    case 'project':
-      return {
-        section: 'projects',
-        eyebrow: `Projects / ${route.id}`,
-        title: route.id,
-        status: 'building',
-        message: 'Project pages with history and design decisions are being built.',
-        scope: [],
       }
     case 'notFound':
       return {

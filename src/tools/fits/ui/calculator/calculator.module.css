@@ -1,0 +1,212 @@
+/* Calculator mode: inputs, diagram area, fit spectrum and results summary. */
+
+/* Inputs */
+.nominal {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.nominalHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: var(--fs-13);
+  color: var(--text-secondary);
+}
+
+.hint {
+  font-family: var(--font-mono);
+  font-size: var(--fs-11);
+  color: var(--text-faint);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-6);
+}
+
+.zones {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-10);
+}
+
+.zone {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  min-width: 0;
+}
+
+.zoneLabel {
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
+  font-size: var(--fs-13);
+  color: var(--text-secondary);
+}
+
+.zoneSelects {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+}
+
+.zoneSelect {
+  font-family: var(--font-mono);
+  font-size: var(--fs-15);
+  font-weight: var(--weight-semibold);
+}
+
+/* Centre */
+.diagramArea {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  padding: var(--space-16) var(--space-20) 0;
+}
+
+.problem {
+  margin: 0;
+  padding: var(--space-20);
+  color: var(--text-muted);
+}
+
+.spectrum {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-10);
+  flex: none;
+  padding: var(--space-16) var(--space-20) var(--space-20);
+  border-top: var(--border-width) solid var(--border-subtle);
+}
+
+.spectrumHead {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-12);
+}
+
+.legend {
+  display: flex;
+  gap: var(--space-12);
+  margin-left: auto;
+}
+
+/* A lane for the INTERFERENCE / CLR labels, then one 10px row per band,
+   4px apart, and 6px below. */
+.track {
+  --lane: 20px;
+  --row-height: 10px;
+  --row-gap: 4px;
+  position: relative;
+  height: calc(var(--lane) + var(--rows) * (var(--row-height) + var(--row-gap)) - var(--row-gap) + var(--space-6));
+  overflow: hidden;
+  border: var(--border-width) solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--surface-sunken);
+}
+
+.interferenceZone {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  overflow: hidden;
+  padding: var(--space-4);
+  background: var(--bad-soft);
+  color: var(--bad);
+  font-family: var(--font-mono);
+  font-size: var(--fs-10-5);
+  white-space: nowrap;
+}
+
+.clearanceLabel {
+  position: absolute;
+  top: var(--space-4);
+  margin-left: var(--space-6);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--fs-10-5);
+}
+
+.window {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: var(--ok-wash);
+}
+
+.zeroLine {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: var(--chart-stroke);
+  background: var(--text);
+}
+
+.bar {
+  position: absolute;
+  top: calc(var(--lane) + var(--row) * (var(--row-height) + var(--row-gap)));
+  height: var(--row-height);
+  border-radius: var(--radius-xs);
+}
+
+.axis {
+  position: relative;
+  height: 12px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-10-5);
+  color: var(--text-faint);
+}
+
+.axisTick {
+  position: absolute;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+
+.axisTick:first-child {
+  transform: none;
+}
+
+.axisTick:last-child {
+  transform: translateX(-100%);
+}
+
+.axisZero {
+  color: var(--text);
+}
+
+/* Results summary */
+.summary {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-16);
+  padding: var(--space-18) var(--space-20);
+  border-bottom: var(--border-width) solid var(--border-subtle);
+}
+
+.fitLine {
+  display: flex;
+  align-items: center;
+  gap: var(--space-10);
+}
+
+.fitName {
+  font-family: var(--font-mono);
+  font-size: var(--fs-13);
+  color: var(--text-secondary);
+}
+
+.readouts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-12);
+}
+
+.readouts.stacked {
+  grid-template-columns: 1fr;
+}

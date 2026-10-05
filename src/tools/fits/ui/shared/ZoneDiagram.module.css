@@ -1,0 +1,152 @@
+/* Tolerance zone diagram. Text sizes are in the SVG's own units. */
+.diagram {
+  display: block;
+  width: 100%;
+}
+
+.screen {
+  height: 100%;
+}
+
+.grid {
+  stroke: var(--grid);
+  stroke-width: var(--chart-stroke-thin);
+}
+
+.tick {
+  fill: var(--text-faint);
+  font-family: var(--font-mono);
+  font-size: var(--fs-11);
+  text-anchor: end;
+}
+
+.report .tick {
+  font-size: var(--fs-9);
+}
+
+.zero {
+  stroke: var(--text);
+  stroke-width: var(--chart-stroke);
+}
+
+.zeroLabel {
+  fill: var(--text);
+  font-weight: var(--weight-semibold);
+}
+
+.note {
+  fill: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: var(--fs-11);
+}
+
+.extension {
+  stroke: var(--text-muted);
+  stroke-width: var(--chart-stroke-thin);
+  stroke-dasharray: var(--chart-dash-extension);
+}
+
+/* Zones: colour set by .hole / .shaft */
+.hole {
+  --zone: var(--hole);
+  --zone-soft: var(--hole-soft);
+}
+
+.shaft {
+  --zone: var(--shaft);
+  --zone-soft: var(--shaft-soft);
+}
+
+.hatch {
+  stroke: var(--hole);
+  stroke-width: var(--chart-stroke-thin);
+  opacity: 0.45;
+}
+
+.zoneFill {
+  fill: var(--zone-soft);
+}
+
+.zoneEdge {
+  fill: none;
+  stroke: var(--zone);
+  stroke-width: var(--chart-stroke);
+}
+
+.zoneName {
+  fill: var(--zone);
+  font-family: var(--font-sans);
+  font-size: var(--fs-16);
+  font-weight: var(--weight-semibold);
+  text-anchor: middle;
+}
+
+.zoneName.large {
+  font-size: var(--fs-26);
+}
+
+.zoneDetail {
+  fill: var(--zone);
+  font-family: var(--font-mono);
+  font-size: var(--fs-11);
+  text-anchor: middle;
+}
+
+.limitLabel {
+  fill: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: var(--fs-11);
+  text-anchor: end;
+}
+
+.caption {
+  fill: var(--zone);
+  font-family: var(--font-mono);
+  font-size: var(--fs-11);
+  letter-spacing: var(--tracking-badge);
+  text-anchor: middle;
+}
+
+.report .caption {
+  font-size: var(--fs-9);
+  letter-spacing: 0;
+}
+
+/* Dimension lines: green for clearance, red for interference */
+.clearance {
+  --dimension: var(--ok);
+}
+
+.interference {
+  --dimension: var(--bad);
+}
+
+.dimension {
+  stroke: var(--dimension);
+  stroke-width: var(--chart-stroke);
+}
+
+.labelBackground {
+  fill: var(--surface);
+}
+
+.dimensionName {
+  fill: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--fs-10);
+}
+
+.dimensionValue {
+  fill: var(--dimension);
+  font-family: var(--font-mono);
+  font-size: var(--fs-13);
+  font-weight: var(--weight-semibold);
+}
+
+.report .dimensionValue {
+  font-size: var(--fs-10);
+}
+
+.centred {
+  text-anchor: middle;
+}

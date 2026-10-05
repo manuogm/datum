@@ -1,12 +1,12 @@
 // App-wide viewer preferences (colour theme and unit system) and the hook
 // screens use to read or change them.
 import { createContext, useContext } from 'react'
+import type { UnitSystem } from '../../core/units'
 
 export const THEMES = ['dark', 'light'] as const
 export type Theme = (typeof THEMES)[number]
 
-export const UNIT_SYSTEMS = ['si', 'imperial'] as const
-export type UnitSystem = (typeof UNIT_SYSTEMS)[number]
+export { UNIT_SYSTEMS, type UnitSystem } from '../../core/units'
 
 export interface Settings {
   theme: Theme

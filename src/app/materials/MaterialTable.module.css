@@ -1,0 +1,116 @@
+/* Dense materials table under the chart. */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-size: var(--fs-12-5);
+}
+
+.nameCol {
+  width: 34%;
+}
+
+.specCol {
+  width: 22%;
+}
+
+.numberCol {
+  width: 8.8%;
+}
+
+.table th {
+  padding: var(--space-10) var(--space-10) var(--space-10) 0;
+  border-bottom: var(--border-width) solid var(--border-subtle);
+  font-family: var(--font-mono);
+  font-size: var(--fs-10);
+  font-weight: var(--weight-regular);
+  letter-spacing: var(--tracking-badge);
+  text-align: left;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  white-space: nowrap;
+}
+
+.table td {
+  height: 34px;
+  padding: 0 var(--space-10) 0 0;
+  border-bottom: var(--border-width) solid var(--border-faint);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.table th:first-child,
+.table td:first-child {
+  padding-left: var(--space-20);
+}
+
+.table th:last-child,
+.table td:last-child {
+  padding-right: var(--space-20);
+}
+
+.table tbody tr {
+  cursor: pointer;
+}
+
+.table tbody tr:hover {
+  background: var(--surface-hover);
+}
+
+.selected,
+.table tbody tr.selected:hover {
+  background: var(--accent-soft);
+  box-shadow: inset var(--underline-width) 0 0 var(--accent);
+}
+
+.name {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text);
+  font: inherit;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.name:focus-visible {
+  outline: var(--border-width) solid var(--accent);
+  outline-offset: 2px;
+}
+
+.spec {
+  font-family: var(--font-mono);
+  font-size: var(--fs-11-5);
+  color: var(--text-muted);
+}
+
+.number {
+  font-family: var(--font-mono);
+  text-align: right;
+}
+
+.table th.number {
+  text-align: right;
+}
+
+.unit {
+  display: block;
+  margin-top: var(--space-2);
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+@media (max-width: 640px) {
+  .table th:nth-child(2),
+  .table td:nth-child(2),
+  .table th:nth-child(6),
+  .table td:nth-child(6) {
+    display: none;
+  }
+}

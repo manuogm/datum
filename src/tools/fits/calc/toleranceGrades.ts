@@ -69,6 +69,21 @@ export const STANDARD_TOLERANCE_TABLE_UM: SizeTable<readonly (number | null)[]> 
   [3150, [null, null, 26,  36,  50,  68,  96, 135, 210, 330, 540,  860, 1350, 2100, 3300, 5400, 8600, 13500, 21000, 33000]],
 ]
 
+/** A nominal size range of ISO 286-1 Table 1: over `overMm` up to and including `upToMm`. */
+export interface NominalSizeRange {
+  readonly overMm: number
+  readonly upToMm: number
+}
+
+/** The Table 1 size range containing a nominal size, e.g. 25 mm → over 18 up to 30 mm. */
+export function nominalSizeRange(nominalMm: number): Result<NominalSizeRange> {
+  const size = checkNominalSize(nominalMm)
+  if (!size.ok) return size
+  const index = STANDARD_TOLERANCE_TABLE_UM.findIndex(([upToMm]) => nominalMm <= upToMm)
+  const overMm = index === 0 ? 0 : STANDARD_TOLERANCE_TABLE_UM[index - 1][0]
+  return ok({ overMm, upToMm: STANDARD_TOLERANCE_TABLE_UM[index][0] })
+}
+
 /** The standard tolerance IT (µm) of a grade at a nominal size. */
 export function standardToleranceUm(grade: ToleranceGrade, nominalMm: number): Result<number> {
   const size = checkNominalSize(nominalMm)

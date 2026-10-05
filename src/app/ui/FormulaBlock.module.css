@@ -1,0 +1,30 @@
+/* FormulaBlock: sunken mono box; continuation lines indented under the "=". */
+.block {
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-10) var(--space-12);
+  border: var(--border-width) solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  background: var(--surface-sunken);
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: var(--fs-12-5);
+  line-height: 1.75;
+}
+
+.block > :not(:first-child) {
+  padding-left: 2ch;
+}
+
+.definition {
+  color: var(--text);
+}
+
+.equals {
+  color: var(--text-faint);
+}
+
+.result {
+  color: var(--ok);
+  font-weight: var(--weight-semibold);
+}

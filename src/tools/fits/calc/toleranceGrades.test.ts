@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import { rowsWithMeanSize, expectError, expectOk, relativeDifference } from './testHelpers'
-import { STANDARD_TOLERANCE_TABLE_UM, TOLERANCE_GRADES, standardToleranceUm, type ToleranceGrade } from './toleranceGrades'
+import {
+  STANDARD_TOLERANCE_TABLE_UM, TOLERANCE_GRADES, nominalSizeRange, standardToleranceUm, type ToleranceGrade,
+} from './toleranceGrades'
 
 const it_ = (grade: ToleranceGrade, sizeMm: number) => expectOk(standardToleranceUm(grade, sizeMm))
 
@@ -71,5 +73,19 @@ describe('standard tolerances (ISO 286-1 Table 1)', () => {
           .toBeLessThan(row.upToMm === 3 ? 0.16 : 0.1)
       })
     }
+  })
+})
+
+describe('nominalSizeRange (ISO 286-1 Table 1 ranges)', () => {
+  it('finds the range a size belongs to, boundaries in the lower range', () => {
+    expect(expectOk(nominalSizeRange(25))).toEqual({ overMm: 18, upToMm: 30 })
+    expect(expectOk(nominalSizeRange(30))).toEqual({ overMm: 18, upToMm: 30 })
+    expect(expectOk(nominalSizeRange(2))).toEqual({ overMm: 0, upToMm: 3 })
+    expect(expectOk(nominalSizeRange(3150))).toEqual({ overMm: 2500, upToMm: 3150 })
+  })
+
+  it('explains sizes outside ISO 286', () => {
+    expect(expectError(nominalSizeRange(0))).toMatch(/greater than 0/)
+    expect(expectError(nominalSizeRange(4000))).toMatch(/3150/)
   })
 })

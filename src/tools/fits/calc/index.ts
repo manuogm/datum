@@ -7,7 +7,9 @@
  */
 export type { Result } from '../../../core/result'
 export { DEVIATION_LETTERS, type DeviationLetter, type ZoneKind } from './letters'
-export { TOLERANCE_GRADES, standardToleranceUm, type ToleranceGrade } from './toleranceGrades'
+export {
+  TOLERANCE_GRADES, nominalSizeRange, standardToleranceUm, type NominalSizeRange, type ToleranceGrade,
+} from './toleranceGrades'
 export { MAX_NOMINAL_SIZE_MM } from './sizeTable'
 export {
   formatFit, formatZone, parseFitDesignation, parseZone, zoneSpec,

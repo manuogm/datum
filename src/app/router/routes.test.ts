@@ -21,6 +21,15 @@ describe('parseHash', () => {
     expect(parseHash('#/projects/P-0142')).toEqual({ name: 'project', id: 'P-0142' })
   })
 
+  it('parses the fit report page', () => {
+    expect(parseHash('#/fit/report')).toEqual({ name: 'fitReport' })
+  })
+
+  it('ignores the query that carries tool inputs', () => {
+    expect(parseHash('#/fit?d=25&h=H7')).toEqual({ name: 'fit' })
+    expect(parseHash('#/fit/report?d=25&print=1')).toEqual({ name: 'fitReport' })
+  })
+
   it('reports unknown paths', () => {
     expect(parseHash('#/fit/extra')).toEqual({ name: 'notFound', path: 'fit/extra' })
     expect(parseHash('#/nope')).toEqual({ name: 'notFound', path: 'nope' })
@@ -32,6 +41,7 @@ describe('routeHref', () => {
     const routes = [
       { name: 'home' },
       { name: 'fit' },
+      { name: 'fitReport' },
       { name: 'project', id: 'P 01/a' },
     ] as const
     for (const route of routes) expect(parseHash(routeHref(route))).toEqual(route)
@@ -41,6 +51,7 @@ describe('routeHref', () => {
 describe('sectionOf', () => {
   it('puts a project page under Projects', () => {
     expect(sectionOf({ name: 'project', id: 'P-0142' })).toBe('projects')
+    expect(sectionOf({ name: 'fitReport' })).toBe('fit')
     expect(sectionOf({ name: 'notFound', path: 'x' })).toBeNull()
   })
 })
