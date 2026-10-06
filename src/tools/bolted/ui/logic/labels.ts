@@ -1,16 +1,15 @@
 // Words for the engine's choices, and the short names of a joint ("M12 10.9
 // steel", "Insert in Al 7075-T6") used in lists, the plan legend and the
 // engine's own messages.
-import type { SegmentOption, Status } from '../../../../app/ui'
+import type { MarkerColor, SegmentOption } from '../../../../app/ui'
 import { materialById, type MaterialFamily } from '../../../../core/materials'
 import {
   pitchesForMm, type HeadType, type InsertType, type JointType, type LoadIntroductionPosition,
-  type SurfaceRoughness, type ThreadSize, type TighteningMethod,
+  type StepStatus, type SurfaceRoughness, type ThreadSize, type TighteningMethod,
 } from '../../calc'
 import type { BoltMode, JointDesignSpec, JointKindSpec } from '../state/boltInputs'
-import type { CheckStatus } from './verdict'
 
-/** The modes of the switch heading the inputs. */
+/** The modes, chosen on the first step. */
 export const BOLT_MODES: readonly SegmentOption<BoltMode>[] = [
   { value: 'joint', label: 'Single joint' },
   { value: 'pattern', label: 'Bolt pattern' },
@@ -45,8 +44,11 @@ export const LOAD_INTRODUCTION_LABELS: Record<LoadIntroductionPosition, string> 
   'near-interface': 'Near the interface',
 }
 
-/** Status icon of a check result. */
-export const CHECK_ICON: Record<CheckStatus, Status> = { pass: 'ok', warn: 'warn', fail: 'bad' }
+/** The dot of a calculation step by its status; a step that only calculates is faint. */
+export const STEP_MARKER: Record<StepStatus, MarkerColor> = { pass: 'ok', warn: 'warn', fail: 'bad', info: 'faint' }
+
+/** Select options from a label table, in its order. */
+export const optionsOf = <T extends string>(labels: Record<T, string>) => (Object.keys(labels) as T[]).map((value) => ({ value, label: labels[value] }))
 
 /** 'M10' for the coarse pitch, 'M10×1.25' for a fine one. */
 export function threadLabel(thread: Required<ThreadSize>): string {

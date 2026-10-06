@@ -1,5 +1,7 @@
-// Centre column: the exploded ply stack beside the chosen ply value through
-// the thickness, with the colour key of the reserve factors under it.
+// Results details: the exploded ply stack beside the chosen ply value through
+// the thickness, with the switch of that value in its title row and the
+// colour key of the reserve factors under it.
+import type { ReactNode } from 'react'
 import { LegendItem, Marker } from '../../../../app/ui'
 import type { UnitSystem } from '../../../../core/units'
 import type { LaminateAnalysis } from '../../calc'
@@ -16,15 +18,20 @@ interface LaminateDrawingsProps {
   system: UnitSystem
   selectedPly: number | null
   onSelectPly: (index: number) => void
+  /** The σx / σ1 / … / FI switch, beside the thickness plot's title. */
+  componentSwitch?: ReactNode
 }
 
-export function LaminateDrawings({ analysis, component, system, selectedPly, onSelectPly }: LaminateDrawingsProps) {
+export function LaminateDrawings({ analysis, component, system, selectedPly, onSelectPly, componentSwitch }: LaminateDrawingsProps) {
   const target = formatFactor(analysis.firstPlyFailure.targetReserveFactor)
   const label = PLOT_COMPONENTS.find((c) => c.value === component)?.label
   return (
     <div className={styles.drawings}>
       <figure className={styles.drawing}>
-        <figcaption className={styles.title}>Exploded ply stack</figcaption>
+        <figcaption className={styles.head}>
+          <span className={styles.title}>Exploded ply stack</span>
+          <span className={styles.meta}>{analysis.layup.notation}</span>
+        </figcaption>
         <div className={styles.plot}>
           <StackPlot
             anglesDeg={analysis.plies.map((p) => p.angleDeg)}
@@ -36,7 +43,10 @@ export function LaminateDrawings({ analysis, component, system, selectedPly, onS
         </div>
       </figure>
       <figure className={styles.drawing}>
-        <figcaption className={styles.title}>{component === 'fi' ? 'Failure index' : label} through the thickness</figcaption>
+        <figcaption className={styles.head}>
+          <span className={styles.title}>{component === 'fi' ? 'Failure index' : label} through the thickness</span>
+          {componentSwitch}
+        </figcaption>
         <div className={styles.plot}>
           <ThicknessPlot analysis={analysis} component={component} system={system} selectedPly={selectedPly} />
         </div>

@@ -1,0 +1,6 @@
+/* ProblemCallout: the callout, then the link back to the step at fault. */
+.problem {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}

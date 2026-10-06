@@ -1,58 +1,83 @@
 // Root component: viewer settings around the screen chosen by the hash route.
-// Home is in the main chunk; each tool, Projects and Materials load on first
-// visit as their own chunk, under the app header while they load.
-import { lazy, Suspense } from 'react'
+// Home is in the main chunk; each tool and Materials load on first visit as
+// their own chunk, under the top bar while they load.
+import { lazy, Suspense, useEffect, type ComponentType } from 'react'
+import { findCalculation, findFolder, type Calculation, type ToolId } from './core/library'
 import { AppLayout } from './app/AppLayout'
 import { HomePage } from './app/home/HomePage'
+import { useLibrary } from './app/library/useLibrary'
 import { NotFoundPage } from './app/pages/NotFoundPage'
-import { sectionOf, type Route } from './app/router/routes'
+import type { Route } from './app/router/routes'
 import { useRoute } from './app/router/useRoute'
 import { SettingsProvider } from './app/settings/SettingsProvider'
+import { openTab } from './app/shell/openTabs'
+import { loadBolt, loadFit, loadLaminate } from './app/tools/toolModules'
 import { LoadingState } from './app/ui'
 
-// One loader per chunk: a module's screens share it, so it loads once.
-const loadFit = () => import('./tools/fits/ui')
-const loadBolt = () => import('./tools/bolted/ui')
-const loadLaminate = () => import('./tools/laminate/ui')
-const loadProjects = () => import('./app/projects/screens')
 const loadMaterials = () => import('./app/materials/MaterialsPage')
 
-const FitTolerancePage = lazy(() => loadFit().then((m) => ({ default: m.FitTolerancePage })))
-const FitReportPage = lazy(() => loadFit().then((m) => ({ default: m.FitReportPage })))
-const BoltedJointPage = lazy(() => loadBolt().then((m) => ({ default: m.BoltedJointPage })))
-const BoltReportPage = lazy(() => loadBolt().then((m) => ({ default: m.BoltReportPage })))
-const LaminatePage = lazy(() => loadLaminate().then((m) => ({ default: m.LaminatePage })))
-const LaminateReportPage = lazy(() => loadLaminate().then((m) => ({ default: m.LaminateReportPage })))
-const ProjectsPage = lazy(() => loadProjects().then((m) => ({ default: m.ProjectsPage })))
-const ProjectDetailPage = lazy(() => loadProjects().then((m) => ({ default: m.ProjectDetailPage })))
+type CalculationScreen = ComponentType<{ calculation: Calculation }>
+
+/** Each tool's page and report, by the tool a calculation belongs to. */
+const TOOL_SCREENS: Record<ToolId, { page: CalculationScreen; report: CalculationScreen }> = {
+  fit: {
+    page: lazy(() => loadFit().then((m) => ({ default: m.FitTolerancePage }))),
+    report: lazy(() => loadFit().then((m) => ({ default: m.FitReportPage }))),
+  },
+  bolt: {
+    page: lazy(() => loadBolt().then((m) => ({ default: m.BoltedJointPage }))),
+    report: lazy(() => loadBolt().then((m) => ({ default: m.BoltReportPage }))),
+  },
+  lam: {
+    page: lazy(() => loadLaminate().then((m) => ({ default: m.LaminatePage }))),
+    report: lazy(() => loadLaminate().then((m) => ({ default: m.LaminateReportPage }))),
+  },
+}
 const MaterialsPage = lazy(() => loadMaterials().then((m) => ({ default: m.MaterialsPage })))
 
-function Screen({ route }: { route: Route }) {
-  if (route.name === 'home') return <HomePage />
-  if (route.name === 'projects') return <ProjectsPage />
-  if (route.name === 'project') return <ProjectDetailPage id={route.id} />
-  if (route.name === 'mat') return <MaterialsPage />
-  if (route.name === 'fit') return <FitTolerancePage />
-  if (route.name === 'fitReport') return <FitReportPage />
-  if (route.name === 'bolt') return <BoltedJointPage />
-  if (route.name === 'boltReport') return <BoltReportPage />
-  if (route.name === 'lam') return <LaminatePage />
-  if (route.name === 'lamReport') return <LaminateReportPage />
-  return (
-    <NotFoundPage
-      section={null}
-      eyebrow={`#/${route.path}`}
-      title="Page not found"
-      message="There is no screen at this address. Pick a tool from the tabs above or go back to Home."
-    />
-  )
+const MISSING_CALCULATION = {
+  title: 'Calculation not found',
+  message: 'This calculation is not in your library: it may have been deleted. Your other calculations are on Home.',
 }
 
-/** While a screen loads: reports show the note alone, other screens under the header. */
+function Screen({ route }: { route: Route }) {
+  const { library } = useLibrary()
+  if (route.name === 'materials') return <MaterialsPage />
+  if (route.name === 'home') {
+    if (route.folderId !== null && !findFolder(library, route.folderId)) {
+      return (
+        <NotFoundPage
+          eyebrow="Folder"
+          title="Folder not found"
+          message="This folder is not in your library: it may have been deleted or moved away with its parent."
+        />
+      )
+    }
+    return <HomePage folderId={route.folderId} />
+  }
+  const calculation = findCalculation(library, route.id)
+  if (!calculation) return <NotFoundPage eyebrow="Calculation" {...MISSING_CALCULATION} />
+  if (route.name === 'report') {
+    const Report = TOOL_SCREENS[calculation.tool].report
+    return <Report calculation={calculation} />
+  }
+  return <OpenCalculation calculation={calculation} />
+}
+
+/** A calculation open in its tool; showing it opens its tab in the top bar. */
+function OpenCalculation({ calculation }: { calculation: Calculation }) {
+  const Page = TOOL_SCREENS[calculation.tool].page
+  useEffect(() => openTab(calculation.id), [calculation.id])
+  // Keyed, so each calculation gets a fresh screen with its own inputs.
+  return <Page key={calculation.id} calculation={calculation} />
+}
+
+/** While a screen loads: reports show the note alone, other screens under the top bar. */
 function Loading({ route }: { route: Route }) {
   const note = <LoadingState label="Loading…" />
-  if (route.name === 'fitReport' || route.name === 'boltReport' || route.name === 'lamReport') return note
-  return <AppLayout section={sectionOf(route)}>{note}</AppLayout>
+  if (route.name === 'report') return note
+  if (route.name === 'calc') return <AppLayout current={{ tab: 'calc', id: route.id }}>{note}</AppLayout>
+  return <AppLayout current={route.name === 'home' ? { tab: 'home' } : 'materials'}>{note}</AppLayout>
 }
 
 function Routed() {

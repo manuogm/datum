@@ -34,6 +34,11 @@
   .stiffness {
     grid-template-columns: minmax(0, 1fr);
   }
+
+  /* Each matrix fits a phone: no sheet-wide minimum as for the long tables. */
+  .stiffness table {
+    min-width: 0;
+  }
 }
 
 .couplings {

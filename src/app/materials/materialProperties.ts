@@ -1,9 +1,7 @@
 // The properties shown for a material, each with its value in the viewer's
 // units and the reference it comes from (and, for a composite ply, its
-// lamina data), plus the snapshot saved when a material is chosen for a
-// project part.
+// lamina data).
 import { sourceOf, type LaminaProperties, type Material, type MaterialProperty, type MaterialSource } from '../../core/materials'
-import type { SnapshotFigure, ToolSnapshot } from '../../core/projects'
 import { formatDecimal, formatQuantity, unitOf, type Quantity, type UnitSystem } from '../../core/units'
 
 interface PropertyDefinition {
@@ -103,21 +101,4 @@ function laminaDetails(lamina: LaminaProperties, sourceNumber: number, system: U
     sourceNumber,
   }))
   return { form: lamina.form, rows }
-}
-
-/** What the Materials page saves as a revision when a material is chosen for a part (values in SI). */
-export function materialSnapshot(material: Material): ToolSnapshot<{ materialId: string }> {
-  const figures: SnapshotFigure[] = [
-    { label: 'Material', value: material.name },
-    ...(material.yieldStrengthMPa === null ? [] : [{ label: 'Rp0.2', value: String(material.yieldStrengthMPa), unit: 'MPa' }]),
-    { label: 'α', value: String(material.thermalExpansionUmPerMK), unit: 'µm/(m·K)' },
-  ]
-  return {
-    tool: 'mat',
-    title: material.name,
-    status: 'pass',
-    figures,
-    inputs: { materialId: material.id },
-    materialIds: [material.id],
-  }
 }

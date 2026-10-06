@@ -1,22 +1,16 @@
-// PitHeader: the 56px top bar of every screen. Tool pages pass toolActions to
-// show "Save revision" and "PDF report"; screens tied to a project pass it to
-// show the project chip.
+// PitHeader: the 56px top bar of every screen. The logo, then the document
+// tabs (Home and the open calculations, passed in by the shell), then the
+// current screen's actions (e.g. a calculation's Report), the Materials
+// button and the viewer's units and theme.
+import type { ReactNode } from 'react'
 import type { Theme, UnitSystem } from '../settings/settings'
 import styles from './PitHeader.module.css'
-import { Avatar } from './Avatar'
 import { Button } from './Button'
+import { cx } from './cx'
+import { Icon } from './Icon'
 import { Logo } from './Logo'
-import { ProjectChip, type ProjectContext } from './ProjectChip'
 import { SegmentedControl } from './SegmentedControl'
-import { TabBar, type TabItem } from './TabBar'
 import { ThemeToggle } from './ThemeToggle'
-
-export interface ToolActions {
-  onSaveRevision: () => void
-  onDownloadReport: () => void
-  /** Why there is nothing to save yet; disables "Save revision" and shows as its tooltip. */
-  saveBlockedReason?: string
-}
 
 const UNIT_OPTIONS: readonly { value: UnitSystem; label: string }[] = [
   { value: 'si', label: 'SI' },
@@ -24,42 +18,42 @@ const UNIT_OPTIONS: readonly { value: UnitSystem; label: string }[] = [
 ]
 
 interface PitHeaderProps {
-  nav: readonly TabItem[]
-  activeKey: string | null
   homeHref: string
-  project?: ProjectContext
-  onProjectClick?: () => void
+  /** The document tabs. */
+  tabs: ReactNode
+  /** Actions of the current screen, shown before the Materials button. */
+  actions?: ReactNode
+  materialsHref: string
+  /** The Materials page is the one shown. */
+  materialsActive: boolean
   unitSystem: UnitSystem
   onUnitSystemChange: (system: UnitSystem) => void
   theme: Theme
   onToggleTheme: () => void
-  toolActions?: ToolActions
-  user: { initials: string; name: string }
 }
 
 export function PitHeader({
-  nav,
-  activeKey,
   homeHref,
-  project,
-  onProjectClick,
+  tabs,
+  actions,
+  materialsHref,
+  materialsActive,
   unitSystem,
   onUnitSystemChange,
   theme,
   onToggleTheme,
-  toolActions,
-  user,
 }: PitHeaderProps) {
   return (
     <header className={styles.header}>
-      <Logo href={homeHref} />
-      <TabBar className={styles.nav} items={nav} activeKey={activeKey} label="Main" size="header" />
-      <div className={styles.spacer} />
-      {project && (
-        <div className={styles.project}>
-          <ProjectChip {...project} onClick={onProjectClick} />
-        </div>
-      )}
+      <Logo href={homeHref} markOnPhone />
+      <div className={styles.tabs}>{tabs}</div>
+      {actions && <div className={styles.actions}>{actions}</div>}
+      <span className={cx(styles.materials, materialsActive && styles.materialsActive)}>
+        <Button size="md" variant="ghost" href={materialsHref}>
+          <Icon name="tool-mat" size={14} />
+          <span className={styles.actionLabel}>Materials</span>
+        </Button>
+      </span>
       <SegmentedControl
         className={styles.units}
         options={UNIT_OPTIONS}
@@ -68,23 +62,6 @@ export function PitHeader({
         label="Unit system"
       />
       <ThemeToggle theme={theme} onToggle={onToggleTheme} />
-      {toolActions && (
-        <div className={styles.actions}>
-          <Button
-            size="md"
-            icon="save"
-            onClick={toolActions.onSaveRevision}
-            disabled={toolActions.saveBlockedReason !== undefined}
-            title={toolActions.saveBlockedReason}
-          >
-            <span className={styles.actionLabel}>Save revision</span>
-          </Button>
-          <Button size="md" variant="primary" icon="download" onClick={toolActions.onDownloadReport}>
-            <span className={styles.actionLabel}>PDF report</span>
-          </Button>
-        </div>
-      )}
-      <Avatar initials={user.initials} name={user.name} size="lg" />
     </header>
   )
 }

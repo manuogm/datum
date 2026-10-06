@@ -1,0 +1,25 @@
+/* Breadcrumb: mono uppercase steps, like a page eyebrow. */
+.breadcrumb {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--space-6);
+  min-width: 0;
+}
+
+.step {
+  color: var(--text-muted);
+  text-decoration: none;
+}
+
+.step:hover {
+  color: var(--accent-fg);
+}
+
+.separator {
+  color: var(--text-faint);
+}
+
+.current {
+  color: var(--text-secondary);
+}

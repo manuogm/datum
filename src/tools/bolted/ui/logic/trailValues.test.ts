@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { expectOk } from '../../../../core/testing'
 import { DEFAULT_BOLT_INPUTS } from '../state/boltInputs'
 import { analyseJoint } from './boltResults'
-import { shownText, shownValue, stepHeadline } from './trailValues'
+import { safetyFactorText, shownText, shownValue, stepHeadline } from './trailValues'
 
 describe('shownValue', () => {
   it('shows each trail unit in the viewer’s system', () => {
@@ -30,5 +30,11 @@ describe('stepHeadline', () => {
     expect(headline('preload-range')).toEqual({ symbol: 'FM', value: expect.stringMatching(/^\d+\.\d\d – \d+\.\d\d$/), unit: 'kN' })
     expect(headline('tightening-torque')).toMatchObject({ symbol: 'MA', unit: 'N·m' })
     expect(headline('engagement')).toEqual({ symbol: '', value: '—', unit: '' })
+  })
+})
+
+describe('safetyFactorText', () => {
+  it('shows the safety factor against its requirement', () => {
+    expect(safetyFactorText({ safetyFactor: 0.888, requiredSafetyFactor: 1.8 })).toBe('SF 0.89 / ≥ 1.80')
   })
 })

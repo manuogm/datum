@@ -1,7 +1,7 @@
 // The content of the A4 fit report: title block, summary, inputs, zone
-// diagram, results with formulas and sources, warnings and sign-off.
+// diagram, results with formulas and sources, warnings and footer.
 import {
-  Report, ReportFacts, ReportFigure, ReportSection, ReportSignOff, ReportSummary, ReportSummaryCell, ReportTitleBlock,
+  Report, ReportFacts, ReportFigure, ReportSection, ReportFooter, ReportSummary, ReportSummaryCell, ReportTitleBlock,
   ReportWarnings, reportStyles as styles, type ReportStatus,
 } from '../../../../app/report'
 import { MathText } from '../../../../app/ui'
@@ -12,6 +12,7 @@ import { fitQuantities, thermalQuantities } from '../logic/fitQuantities'
 import { candidateFor, type FitResults } from '../logic/fitResults'
 import { serviceClearance } from '../logic/serviceClearance'
 import { reportWarnings } from '../logic/serviceSummary'
+import { presentedStatus } from '../logic/verdict'
 import { FIT_TYPE_LABEL, nominalLabel } from '../shared/labels'
 import { ZoneDiagram } from '../shared/ZoneDiagram'
 import type { FitInputs } from '../state/fitInputs'
@@ -24,32 +25,51 @@ const STATUS_HEADLINE: Record<ReportStatus, string> = {
   fail: 'Fail in service',
 }
 
+/** Advisor mode: the status is the best match's checks, assembly and application included. */
+const ADVISOR_HEADLINE: Record<ReportStatus, string> = {
+  pass: 'Passes every check',
+  review: 'Review: a check warns',
+  fail: 'Fail: a check fails',
+}
+
+/** The summary's headline: what the status judges, or that nothing was judged. */
+function headline(inputs: FitInputs, status: ReportStatus, advised: boolean): string {
+  if (advised) return ADVISOR_HEADLINE[status]
+  return inputs.requiredClearanceUm === null ? 'Not judged: no required window' : STATUS_HEADLINE[status]
+}
+
 interface FitReportProps {
+  /** The calculation's name in the library. */
+  name: string
   fit: FitAnalysis
   inputs: FitInputs
   results: FitResults
   system: UnitSystem
 }
 
-export function FitReport({ fit, inputs, results, system }: FitReportProps) {
+export function FitReport({ name, fit, inputs, results, system }: FitReportProps) {
   const service = serviceClearance(fit, inputs, results.housing, results.shaft)
   const candidate = candidateFor(results, fit.designation)
-  const materialNotes = results.advice.ok ? results.advice.value.materialNotes : []
+  const { materialNotes } = results
   const warnings = reportWarnings(service, inputs, system, candidate, materialNotes)
   const preferred = PREFERRED_FITS.find((p) => p.designation === fit.designation)
-  const source = inputs.mode === 'advisor' && candidate ? `Fit advisor best match, score ${candidate.score}` : 'Calculator'
+  const advised = inputs.mode === 'advisor' && candidate !== undefined
+  const source = advised ? `Fit advisor best match, score ${candidate.score}` : 'Calculator'
+  const status = presentedStatus(inputs, results, fit, service)
   const deviation = (um: number) => formatQuantity('deviation', system, um)
-  const material = (m: FitResults['housing']) => `${m.name} (α ${formatQuantity('expansion', system, m.thermalExpansionUmPerMK)})`
+  const material = (m: FitResults['housing']) => `${m.name} (α ${formatQuantity('expansion', system, m.thermalExpansionUmPerMK, { withUnit: true })})`
+  const window = inputs.requiredClearanceUm
 
   return (
     <Report>
       <ReportTitleBlock
         title="Fit Tolerance Report"
+        calculation={name}
         subtitle={`${nominalLabel(fit.nominalMm, system)} ${fit.designation}${preferred ? ` · ${preferred.name}` : ''}`}
         meta={[['Selected by', source], ['Units', system === 'si' ? 'SI (mm, µm, °C)' : 'Imperial (in, thou, °F)']]}
       />
 
-      <ReportSummary status={service.status} headline={STATUS_HEADLINE[service.status]} warnings={warnings.length} warningsSection={4}>
+      <ReportSummary status={status} headline={headline(inputs, status, advised)} warnings={warnings.length} warningsSection={4}>
         <ReportSummaryCell label="FIT TYPE AT 20 °C" value={FIT_TYPE_LABEL[fit.fitType]} note={preferred?.name} />
         <ReportFigure label="MIN CLEARANCE" value={deviation(fit.minClearanceUm)} unit={unitOf('deviation', system)} />
         <ReportFigure label="MAX CLEARANCE" value={deviation(fit.maxClearanceUm)} unit={unitOf('deviation', system)} />
@@ -72,7 +92,7 @@ export function FitReport({ fit, inputs, results, system }: FitReportProps) {
               },
               {
                 label: 'Required clearance',
-                value: formatQuantityRange('deviation', system, inputs.requiredClearanceUm.minUm, inputs.requiredClearanceUm.maxUm),
+                value: window === null ? 'None set' : formatQuantityRange('deviation', system, window.minUm, window.maxUm),
                 mono: true,
               },
               { label: 'Assembly', value: ASSEMBLY_LABELS[inputs.assembly] },
@@ -116,7 +136,7 @@ export function FitReport({ fit, inputs, results, system }: FitReportProps) {
       </ReportSection>
 
       <ReportWarnings heading="4 · Warnings" warnings={warnings} />
-      <ReportSignOff standards={STANDARDS} />
+      <ReportFooter standards={STANDARDS} />
     </Report>
   )
 }

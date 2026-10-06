@@ -1,4 +1,10 @@
 /* The optimiser panel: direction chips, the running state and the result. */
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-12);
+}
+
 .note {
   margin: 0;
   font-size: var(--fs-11-5);

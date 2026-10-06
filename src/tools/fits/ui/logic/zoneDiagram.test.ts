@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { REPORT_FRAME, SCREEN_FRAME, zoneDiagramLayout } from './zoneDiagram'
+import { COMPACT_FRAME, REPORT_FRAME, SCREEN_FRAME, zoneDiagramLayout } from './zoneDiagram'
 
 // Ø25 H7/g6: hole +21 / 0 µm, shaft −7 / −20 µm.
 const h7 = { upper: 21, lower: 0 }
@@ -48,5 +48,15 @@ describe('zoneDiagramLayout', () => {
     const report = zoneDiagramLayout(h7, g6, REPORT_FRAME)
     expect(report.ticks[0].y).toBe(REPORT_FRAME.valueBottom)
     expect(report.hole.x).toBe(REPORT_FRAME.holeX)
+  })
+})
+
+describe('COMPACT_FRAME', () => {
+  it('keeps the room the screen labels need: shaft limit labels clear of the hole, dimension labels inside the frame', () => {
+    const f = COMPACT_FRAME
+    expect(f.shaftX - (f.holeX + f.zoneWidth)).toBeGreaterThanOrEqual(50)
+    expect(f.minDimensionX).toBeGreaterThan(f.shaftX + f.zoneWidth)
+    expect(f.maxDimensionX - f.minDimensionX).toBeGreaterThanOrEqual(56)
+    expect(f.maxDimensionX + 50).toBeLessThanOrEqual(f.width)
   })
 })

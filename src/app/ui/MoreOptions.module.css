@@ -1,0 +1,86 @@
+/* MoreOptions: a mono disclosure row; opened, its inputs sit on a raised band. */
+.more {
+  display: flex;
+  flex-direction: column;
+  border-bottom: var(--border-width) solid var(--border-subtle);
+}
+
+.more:last-child {
+  border-bottom: 0;
+}
+
+.toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+  width: 100%;
+  min-height: 44px;
+  margin: 0;
+  padding: var(--space-12) var(--space-20);
+  border: 0;
+  background: none;
+  color: var(--text-muted);
+  font: inherit;
+  font-family: var(--font-mono);
+  font-size: var(--fs-10-5);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  text-align: left;
+  cursor: pointer;
+}
+
+.toggle:hover {
+  color: var(--text);
+}
+
+.toggle:focus-visible {
+  outline: var(--border-width) solid var(--accent);
+  outline-offset: -4px;
+}
+
+.chevron {
+  flex: none;
+  color: var(--text-faint);
+  transition: transform 120ms ease;
+}
+
+.open .chevron {
+  transform: rotate(90deg);
+  color: var(--text-secondary);
+}
+
+.label {
+  flex: none;
+}
+
+.count {
+  padding: var(--space-1) var(--space-5);
+  border: var(--border-width) solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  color: var(--text-faint);
+  letter-spacing: 0;
+}
+
+.changed {
+  margin-left: auto;
+  color: var(--accent-fg);
+  letter-spacing: var(--tracking-badge);
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  background: var(--surface-raised);
+  border-top: var(--border-width) solid var(--border-subtle);
+}
+
+.panel[hidden] {
+  display: none;
+}
+
+@media (max-width: 640px) {
+  .toggle {
+    padding-left: var(--space-16);
+    padding-right: var(--space-16);
+  }
+}

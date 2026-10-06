@@ -1,13 +1,15 @@
 // The tolerance zone diagram, drawn to scale from the ISO 286 analysis: the
 // hole zone (blue, hatched) and shaft zone (accent) against the zero line,
 // with the min and max clearance dimensioned. The screen variant labels every
-// limit deviation; the report variant is the compact drawing of the PDF.
+// limit deviation (in a narrower frame on a phone); the report variant is the
+// compact drawing of the PDF.
 import { useId } from 'react'
-import { cx } from '../../../../app/ui'
+import { cx, useMediaQuery } from '../../../../app/ui'
 import { formatQuantity, fromDisplay, toDisplay, unitOf, type UnitSystem } from '../../../../core/units'
 import type { FitAnalysis, ToleranceZone } from '../../calc'
 import type { Segment } from '../../../../app/charts'
-import { REPORT_FRAME, SCREEN_FRAME, zoneDiagramLayout, type DiagramZone, type Dimension } from '../logic/zoneDiagram'
+import { limitOfSize } from '../logic/fitQuantities'
+import { COMPACT_FRAME, REPORT_FRAME, SCREEN_FRAME, zoneDiagramLayout, type DiagramZone, type Dimension } from '../logic/zoneDiagram'
 import styles from './ZoneDiagram.module.css'
 
 interface ZoneDiagramProps {
@@ -18,7 +20,8 @@ interface ZoneDiagramProps {
 
 export function ZoneDiagram({ fit, system, variant }: ZoneDiagramProps) {
   const hatchId = useId()
-  const frame = variant === 'screen' ? SCREEN_FRAME : REPORT_FRAME
+  const phone = useMediaQuery('(max-width: 640px)')
+  const frame = variant === 'report' ? REPORT_FRAME : phone ? COMPACT_FRAME : SCREEN_FRAME
   const shown = (um: number) => toDisplay('deviation', system, um)
   const limits = (zone: ToleranceZone) => ({ upper: shown(zone.upperDeviationUm), lower: shown(zone.lowerDeviationUm) })
   const layout = zoneDiagramLayout(limits(fit.hole), limits(fit.shaft), frame)
@@ -27,13 +30,17 @@ export function ZoneDiagram({ fit, system, variant }: ZoneDiagramProps) {
   const tickLabel = (displayValue: number) => um(fromDisplay('deviation', system, displayValue))
   const screen = variant === 'screen'
   const sizes = (zone: ToleranceZone) =>
-    [formatQuantity('length', system, zone.minSizeMm), formatQuantity('length', system, zone.maxSizeMm)].join(screen ? ' – ' : '–')
+    [limitOfSize(zone.minSizeMm, system, 'lower'), limitOfSize(zone.maxSizeMm, system, 'upper')].join(screen ? ' – ' : '–')
   // Captions go on the outer side of each zone, clear of the gap between them:
   // above the higher zone (the hole in a clearance fit), below the lower one.
   const holeHigher = layout.hole.y + layout.hole.height / 2 <= layout.shaft.y + layout.shaft.height / 2
   const zeroNoteY = layout.zeroY + 16
+  // The report's captions share one line under the zones; inch limits (5 decimals)
+  // are too long for that, so the shaft's goes a line lower.
+  const reportCaptionY = (zone: DiagramZone) =>
+    system === 'imperial' ? (zone === layout.shaft ? frame.height - 6 : frame.height - 20) : frame.height - 14
   const captionY = (zone: DiagramZone, above: boolean) => {
-    if (!screen) return frame.height - 14
+    if (!screen) return reportCaptionY(zone)
     if (above) return zone.y - 13
     // A zone ending at the zero line puts its caption a line below the zero-line note.
     const below = zone.y + zone.height + 24

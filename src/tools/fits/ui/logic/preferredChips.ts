@@ -10,3 +10,8 @@ export function preferredFitsOfType(nominalMm: number, fitType: FitType): readon
     return fit.ok && fit.value.fitType === fitType
   })
 }
+
+/** Whether a designation ('H7/g6') is one of the ISO preferred fits. */
+export function isPreferredFit(designation: string): boolean {
+  return PREFERRED_FITS.some((preferred) => preferred.designation === designation)
+}

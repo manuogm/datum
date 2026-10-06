@@ -22,6 +22,3 @@ export function analyse(inputs: LaminateInputs): Result<LaminateAnalysis> {
   const input = laminateInput(inputs)
   return input.ok ? analyseLaminate(input.value) : input
 }
-
-/** The distinct ply materials, in stacking order, for "Used in" on the Materials page. */
-export const materialIdsOf = (inputs: LaminateInputs): string[] => [...new Set(inputs.plies.map((ply) => ply.materialId))]

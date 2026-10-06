@@ -28,6 +28,12 @@ export const SCREEN_FRAME: ZoneDiagramFrame = {
   holeX: 190, shaftX: 380, zoneWidth: 140, minDimensionX: 560, maxDimensionX: 620, maxTicks: 12, nameInsideMinHeight: 48,
 }
 
+/** The screen drawing on a phone: narrower, so it is drawn larger and its labels stay readable. */
+export const COMPACT_FRAME: ZoneDiagramFrame = {
+  width: 440, height: 400, left: 52, right: 432, valueTop: 46, valueBottom: 350,
+  holeX: 100, shaftX: 232, zoneWidth: 80, minDimensionX: 322, maxDimensionX: 380, maxTicks: 8, nameInsideMinHeight: 48,
+}
+
 export const REPORT_FRAME: ZoneDiagramFrame = {
   width: 400, height: 215, left: 40, right: 390, valueTop: 22, valueBottom: 178,
   holeX: 100, shaftX: 210, zoneWidth: 90, minDimensionX: 320, maxDimensionX: 364, maxTicks: 6, nameInsideMinHeight: 22,

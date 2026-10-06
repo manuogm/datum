@@ -1,5 +1,5 @@
 // The pattern's joint types as cards (symbol, name, what it screws into, how
-// many bolts use it); choosing one opens it for editing below the list.
+// many bolts use it); the one chosen is edited beside the list.
 import { Button, cx, PanelSection } from '../../../../app/ui'
 import { needsOuterThread } from '../logic/designEdits'
 import { jointDetail, jointSymbolKind, jointTitle } from '../logic/labels'
@@ -9,8 +9,9 @@ import styles from './pattern.module.css'
 
 interface JointTypeListProps {
   pattern: PatternSpec
-  editing: string | null
-  onEdit: (id: string | null) => void
+  /** The joint type being edited. */
+  editing: string
+  onEdit: (id: string) => void
   onAdd: () => void
 }
 
@@ -24,8 +25,8 @@ export function JointTypeList({ pattern, editing, onEdit, onAdd }: JointTypeList
             key={id}
             type="button"
             className={cx(styles.type, editing === id && styles.typeSelected)}
-            aria-expanded={editing === id}
-            onClick={() => onEdit(editing === id ? null : id)}
+            aria-pressed={editing === id}
+            onClick={() => onEdit(id)}
           >
             <JointSymbolIcon kind={jointSymbolKind(design)} />
             <span>

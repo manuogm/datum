@@ -10,8 +10,6 @@ interface MaterialFiltersProps {
   filter: MaterialFilter
   onChange: (filter: MaterialFilter) => void
   unitSystem: UnitSystem
-  /** Shown beside PROPERTIES while the temperature still comes from the active project. */
-  temperatureNote?: string
 }
 
 function toggled<T>(set: ReadonlySet<T>, item: T): Set<T> {
@@ -21,7 +19,7 @@ function toggled<T>(set: ReadonlySet<T>, item: T): Set<T> {
   return next
 }
 
-export function MaterialFilters({ filter, onChange, unitSystem, temperatureNote }: MaterialFiltersProps) {
+export function MaterialFilters({ filter, onChange, unitSystem }: MaterialFiltersProps) {
   const set = <K extends keyof MaterialFilter>(key: K, value: MaterialFilter[K]) => onChange({ ...filter, [key]: value })
   const [minDensity, maxDensity] = filter.densityGPerCm3
   const density = (value: number) => formatQuantity('density', unitSystem, value)
@@ -51,7 +49,7 @@ export function MaterialFilters({ filter, onChange, unitSystem, temperatureNote 
           ))}
         </div>
       </PanelSection>
-      <PanelSection label="Properties" aside={temperatureNote}>
+      <PanelSection label="Properties">
         <div className={styles.sliders}>
           <Slider
             mode="atLeast"

@@ -1,6 +1,6 @@
 // Reading Bolted Joint inputs that come from outside the screen: a shared
-// link or a revision saved in a project. A malformed field keeps its default,
-// so an old link or revision always opens; a malformed pattern (joint types,
+// calculation stored in the library. A malformed field keeps its default,
+// so a calculation saved by an older Datum always opens; a malformed pattern (joint types,
 // bolts and load cases belong together) falls back to the default pattern.
 // Numbers are only checked for being numbers: the engine explains values it
 // cannot use, next to the inputs.
@@ -137,7 +137,7 @@ function patternFrom(value: unknown): PatternSpec {
   return { jointTypes, bolts, loadCases, loadCaseId }
 }
 
-/** Inputs stored in a saved revision or carried by a link (normally a complete BoltInputs). */
+/** Inputs stored in the library (normally a complete BoltInputs; null for the example). */
 export function boltInputsFrom(value: unknown): BoltInputs {
   const saved = fields(value)
   const d = DEFAULT_BOLT_INPUTS

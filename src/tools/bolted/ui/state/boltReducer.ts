@@ -6,7 +6,7 @@ import type { BoltInputs, JointDesignSpec, JointLoadSpec, LoadCaseSpec, PatternB
 export type DesignTarget = { readonly scope: 'joint' } | { readonly scope: 'jointType'; readonly id: string }
 
 export type BoltAction =
-  /** Plain edits of top-level fields (mode, service temperature), or all inputs at once (a reopened revision). */
+  /** Plain edits of top-level fields (mode, service temperature), or all inputs at once. */
   | { type: 'change'; changes: Partial<BoltInputs> }
   | { type: 'design'; target: DesignTarget; changes: Partial<JointDesignSpec> }
   | { type: 'loads'; changes: Partial<JointLoadSpec> }

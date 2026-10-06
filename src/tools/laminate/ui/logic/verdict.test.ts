@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { expectOk } from '../../../../core/testing'
 import { DEFAULT_LAMINATE_INPUTS, NO_LOADS, pliesAt } from '../state/lamInputs'
 import { analyse } from './lamResults'
-import { laminateHeadline, laminateStatus, plyTally, plyTones } from './verdict'
+import { laminateHeadline, laminateStatus, plyCountText, plyTally, plyTones, shownStatus, verdictSentence } from './verdict'
 
 const headlineOf = (changes: Partial<typeof DEFAULT_LAMINATE_INPUTS>) => laminateHeadline(expectOk(analyse({ ...DEFAULT_LAMINATE_INPUTS, ...changes })))
 
@@ -10,7 +10,7 @@ describe('laminateHeadline', () => {
   it('names the critical plies against the target', () => {
     expect(headlineOf({})).toEqual({
       tone: 'warn',
-      title: 'Reserve factor 1.27',
+      title: 'Reserve factor 1.26',
       detail: 'Below the 1.50 target · Plies 4–5 (90°) critical · dominant stress: matrix tension',
     })
     expect(headlineOf({ targetReserveFactor: 1.2 })).toMatchObject({ tone: 'ok', detail: expect.stringMatching(/^Meets the 1.20 target/) })
@@ -36,6 +36,14 @@ describe('plyTones and plyTally', () => {
     expect(plyTally(tones)).toEqual({ tone: 'warn', text: '4 below target' })
   })
 
+  it('judges a ply on its RF as shown: 1.497 shows 1.49 and is below a 1.50 target, 1.50 meets it', () => {
+    expect(shownStatus(1.497, 1.5)).toBe('warn')
+    expect(shownStatus(1.5, 1.5)).toBe('pass')
+    expect(shownStatus(0.999, 1.5)).toBe('fail')
+    // A target with more decimals than are shown: RF 1.256 shows 1.25, below 1.255.
+    expect(shownStatus(1.256, 1.255)).toBe('warn')
+  })
+
   it('counts failing plies first', () => {
     expect(plyTally(['ok', 'bad', 'warn', 'bad'])).toEqual({ tone: 'bad', text: '2 fail' })
     expect(plyTally(['ok', 'ok'])).toEqual({ tone: 'ok', text: 'all meet target' })
@@ -47,5 +55,22 @@ describe('laminateStatus', () => {
   it('is review, not pass, when nothing loads the laminate', () => {
     expect(laminateStatus(expectOk(analyse({ ...DEFAULT_LAMINATE_INPUTS, loads: NO_LOADS })).firstPlyFailure)).toBe('review')
     expect(laminateStatus(expectOk(analyse({ ...DEFAULT_LAMINATE_INPUTS, targetReserveFactor: 1.2 })).firstPlyFailure)).toBe('pass')
+  })
+})
+
+describe('verdictSentence', () => {
+  const sentenceOf = (changes: Partial<typeof DEFAULT_LAMINATE_INPUTS>) => verdictSentence(expectOk(analyse({ ...DEFAULT_LAMINATE_INPUTS, ...changes })))
+  it('says what governs in one sentence', () => {
+    expect(sentenceOf({})).toBe('Plies 4–5 (90°) are below the 1.50 target and govern, in matrix tension.')
+    expect(sentenceOf({ targetReserveFactor: 1.2 })).toBe('Every ply meets the 1.20 target; plies 4–5 (90°) govern, in matrix tension.')
+    expect(sentenceOf({ loads: { ...NO_LOADS, nxNPerMm: 2000 } })).toMatch(/^Pl(y|ies) .* fails? first, in .*, under the applied loads\.$/)
+    expect(sentenceOf({ loads: NO_LOADS })).toBe('No load is applied: enter running loads to check first-ply failure.')
+  })
+})
+
+describe('plyCountText', () => {
+  it('counts the plies that meet the target, and those that fail', () => {
+    expect(plyCountText(['ok', 'warn', 'warn', 'ok'])).toBe('2 of 4 plies meet the target')
+    expect(plyCountText(['ok', 'bad', 'bad', 'warn'])).toBe('1 of 4 plies meet the target · 2 fail')
   })
 })

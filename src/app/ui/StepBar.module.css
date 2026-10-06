@@ -1,0 +1,194 @@
+/* StepBar: flush bar of numbered steps joined by hairlines, with the accent
+   underline on the step on screen. It stays in view while a step scrolls. */
+.bar {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  align-items: stretch;
+  min-height: var(--bar-height);
+  box-sizing: border-box;
+  padding: 0 var(--space-20);
+  border-bottom: var(--border-width) solid var(--border);
+  background: var(--surface);
+}
+
+.list {
+  display: flex;
+  align-items: stretch;
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.item {
+  display: flex;
+  align-items: stretch;
+  min-width: 0;
+}
+
+/* Hairline joining a step to the next one. */
+.item:not(:last-child)::after {
+  content: '';
+  flex: 1;
+  min-width: var(--space-12);
+  max-width: var(--space-56);
+  align-self: center;
+  height: var(--border-width);
+  margin: 0 var(--space-4);
+  background: var(--border-strong);
+}
+
+.item.done:not(:last-child)::after {
+  background: var(--stroke-faint);
+}
+
+.step {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+  min-width: 0;
+  margin: 0;
+  padding: 0 var(--space-8);
+  border: 0;
+  background: none;
+  color: var(--text-faint);
+  font: inherit;
+  font-family: var(--font-mono);
+  font-size: var(--fs-11);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  white-space: nowrap;
+  cursor: default;
+}
+
+.item:first-child .step {
+  padding-left: 0;
+}
+
+.step:focus-visible {
+  outline: var(--border-width) solid var(--accent);
+  outline-offset: -6px;
+  border-radius: var(--radius-sm);
+}
+
+.number {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 var(--space-4);
+  box-sizing: border-box;
+  border: var(--border-width) solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-10-5);
+  letter-spacing: 0;
+}
+
+.label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Reached: green number, clickable. */
+.done .step {
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.done .number {
+  border-color: var(--ok-border);
+  background: var(--ok-soft);
+  color: var(--ok-text);
+}
+
+.done .step:hover {
+  color: var(--text);
+}
+
+.done .step:hover .number {
+  border-color: var(--ok);
+}
+
+/* On screen: accent number and underline. */
+.current .step {
+  color: var(--text);
+  font-weight: var(--weight-medium);
+  box-shadow: inset 0 calc(-1 * var(--underline-width)) 0 var(--accent);
+}
+
+.current .number {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-weight: var(--weight-semibold);
+}
+
+/* Input problem on this step. */
+.invalid .number,
+.invalid.done .number,
+.invalid.current .number {
+  border-color: var(--bad-border);
+  background: var(--bad-soft);
+  color: var(--bad-text);
+  font-weight: var(--weight-bold);
+}
+
+.invalid.current .number {
+  border-color: var(--bad);
+}
+
+.invalid .number::after {
+  content: '!';
+  position: absolute;
+  top: -7px;
+  right: -7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: var(--bad);
+  color: var(--accent-ink);
+  font-size: var(--fs-9);
+  font-weight: var(--weight-bold);
+  line-height: 1;
+}
+
+.invalid .label {
+  color: var(--bad-text);
+}
+
+.hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+  .bar {
+    padding: 0 var(--space-16);
+  }
+
+  /* Only the step on screen keeps its label. */
+  .item:not(.current) .label {
+    display: none;
+  }
+
+  .item.current {
+    flex: 0 1 auto;
+  }
+
+  .item:not(:last-child)::after {
+    min-width: var(--space-8);
+  }
+}

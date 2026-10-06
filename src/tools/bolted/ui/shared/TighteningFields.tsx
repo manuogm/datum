@@ -1,27 +1,21 @@
-// Tightening and contact: the method (with its tightening factor αA), the
-// lowest expected friction coefficients and the number of interfaces that
-// carry shear by friction, the surface roughness behind embedding, and where
-// the axial load enters the clamped parts.
+// Tightening (advanced inputs of the bolt): the method with its tightening
+// factor αA and the lowest expected thread and head friction. The friction
+// against slip (µT, qF) sits with the transverse load (SlipFields), and the
+// washers with the clamped parts (PlatesFields).
 import { InputWell, NumberInput, PanelSection, Select, ValueRow } from '../../../../app/ui'
 import { formatDecimal } from '../../../../core/units'
-import {
-  LOAD_INTRODUCTION_FACTOR, TIGHTENING_METHODS, type LoadIntroductionPosition, type SurfaceRoughness, type TighteningMethod,
-} from '../../calc'
-import { LOAD_INTRODUCTION_LABELS, ROUGHNESS_LABELS, TIGHTENING_LABELS } from '../logic/labels'
+import { TIGHTENING_METHODS, type TighteningMethod } from '../../calc'
+import { optionsOf, TIGHTENING_LABELS } from '../logic/labels'
 import type { JointDesignSpec } from '../state/boltInputs'
 import styles from './design.module.css'
 
-const optionsOf = <T extends string>(labels: Record<T, string>) => (Object.keys(labels) as T[]).map((value) => ({ value, label: labels[value] }))
 const METHODS = optionsOf<TighteningMethod>(TIGHTENING_LABELS)
-const ROUGHNESS = optionsOf<SurfaceRoughness>(ROUGHNESS_LABELS)
-const POSITIONS = optionsOf<LoadIntroductionPosition>(LOAD_INTRODUCTION_LABELS)
 
-type FrictionKey = 'threadFriction' | 'headFriction' | 'interfaceFriction'
+type FrictionKey = 'threadFriction' | 'headFriction'
 
 const FRICTIONS: readonly { key: FrictionKey; label: string }[] = [
   { key: 'threadFriction', label: 'Thread friction µG' },
   { key: 'headFriction', label: 'Head friction µK' },
-  { key: 'interfaceFriction', label: 'Interface friction µT' },
 ]
 
 interface TighteningFieldsProps {
@@ -52,36 +46,7 @@ export function TighteningFields({ design, onChange }: TighteningFieldsProps) {
             }
           />
         ))}
-        <ValueRow
-          label="Slip interfaces qF"
-          value={
-            <InputWell>
-              <NumberInput
-                label="Slip interfaces qF"
-                decimals={0}
-                value={design.frictionInterfaces}
-                onChange={(value) => onChange({ frictionInterfaces: Math.max(1, Math.round(value)) })}
-              />
-            </InputWell>
-          }
-        />
       </div>
-      <Select
-        size="md"
-        aria-label="Surface roughness"
-        options={ROUGHNESS}
-        value={design.surfaceRoughness}
-        onChange={(surfaceRoughness) => onChange({ surfaceRoughness })}
-        meta="embedding"
-      />
-      <Select
-        size="md"
-        aria-label="Load introduction"
-        options={POSITIONS}
-        value={design.loadIntroduction}
-        onChange={(loadIntroduction) => onChange({ loadIntroduction })}
-        meta={`n ${formatDecimal(LOAD_INTRODUCTION_FACTOR[design.loadIntroduction], 1, true)}`}
-      />
     </PanelSection>
   )
 }

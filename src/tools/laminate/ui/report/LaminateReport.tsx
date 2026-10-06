@@ -1,14 +1,14 @@
 // The A4 report of a laminate: title block, first-ply failure verdict,
 // inputs, the ply stack and failure index through the thickness, the
-// laminate stiffness, every ply at its critical face, warnings and sign-off.
+// laminate stiffness, every ply at its critical face, warnings and footer.
 import {
-  Report, ReportFacts, ReportFigure, ReportSection, ReportSignOff, ReportSummary, ReportSummaryCell, ReportTitleBlock,
+  Report, ReportFacts, ReportFigure, ReportSection, ReportFooter, ReportSummary, ReportSummaryCell, ReportTitleBlock,
   ReportWarnings, reportStyles as styles, type ReportStatus,
 } from '../../../../app/report'
 import { cx } from '../../../../app/ui'
 import { formatQuantity, unitOf, type UnitSystem } from '../../../../core/units'
 import type { LaminateAnalysis } from '../../calc'
-import { CRITERION_LABELS, formatFactor, modeText, plyMaterialName, plyRangeText } from '../logic/labels'
+import { CRITERION_LABELS, formatFactor, formatReserveFactor, LAMINATE_STANDARDS, modeText, plyMaterialName, plyRangeText } from '../logic/labels'
 import { leadingLoad } from '../logic/loads'
 import { laminateFacts, laminateWarnings, plyRows, unitsLine } from '../logic/reportContent'
 import { laminateStatus, plyTones } from '../logic/verdict'
@@ -18,8 +18,6 @@ import type { LaminateInputs } from '../state/lamInputs'
 import report from './report.module.css'
 import { StiffnessTables } from './StiffnessTables'
 
-const STANDARDS = 'CLT (Jones 1999; Daniel & Ishai 2006), Tsai & Hahn (1980)'
-
 const STATUS_HEADLINE: Record<ReportStatus, string> = {
   pass: 'Meets RF target',
   review: 'Below RF target',
@@ -27,12 +25,14 @@ const STATUS_HEADLINE: Record<ReportStatus, string> = {
 }
 
 interface LaminateReportProps {
+  /** The calculation's name in the library. */
+  name: string
   analysis: LaminateAnalysis
   inputs: LaminateInputs
   system: UnitSystem
 }
 
-export function LaminateReport({ analysis, inputs, system }: LaminateReportProps) {
+export function LaminateReport({ name, analysis, inputs, system }: LaminateReportProps) {
   const { layup, firstPlyFailure } = analysis
   const status = laminateStatus(firstPlyFailure)
   const warnings = laminateWarnings(analysis)
@@ -43,12 +43,13 @@ export function LaminateReport({ analysis, inputs, system }: LaminateReportProps
     <Report>
       <ReportTitleBlock
         title="Composite Laminate Report"
+        calculation={name}
         subtitle={`${layup.notation} · ${materials}`}
         meta={[['Criterion', CRITERION_LABELS[inputs.criterion]], ['Units', unitsLine(system)]]}
       />
 
       <ReportSummary status={status} headline={STATUS_HEADLINE[status]} warnings={warnings.length} warningsSection={5}>
-        <ReportFigure label={`RF MIN · TARGET ${formatFactor(firstPlyFailure.targetReserveFactor)}`} value={formatFactor(firstPlyFailure.reserveFactor)} unit="" />
+        <ReportFigure label={`RF MIN · TARGET ${formatFactor(firstPlyFailure.targetReserveFactor)}`} value={formatReserveFactor(firstPlyFailure.reserveFactor)} unit="" />
         <ReportSummaryCell
           label="CRITICAL PLIES"
           value={critical.length > 0 ? plyRangeText(critical) : '—'}
@@ -90,7 +91,7 @@ export function LaminateReport({ analysis, inputs, system }: LaminateReportProps
       </ReportSection>
 
       <ReportWarnings heading="5 · Warnings" warnings={warnings} />
-      <ReportSignOff standards={STANDARDS} />
+      <ReportFooter standards={LAMINATE_STANDARDS} />
     </Report>
   )
 }

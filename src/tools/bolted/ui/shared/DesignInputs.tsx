@@ -1,26 +1,42 @@
-// Every input of one joint design, shared by the single joint and the joint
-// types of a pattern.
+// Every input of one joint design, for a joint type of a pattern: the bolt,
+// what it screws into and the clamped parts (with the washers), with the
+// tightening, friction against slip and contact inputs under More options. (The single joint spreads the same fields over
+// its Bolt and Joint steps.)
+import { MoreOptions } from '../../../../app/ui'
 import type { UnitSystem } from '../../../../core/units'
+import { contactOptions, slipOptions, tighteningOptions } from '../logic/designOptions'
 import type { JointDesignSpec } from '../state/boltInputs'
 import { BoltFields } from './BoltFields'
+import { ContactFields } from './ContactFields'
 import { JointKindFields } from './JointKindFields'
 import { PlatesFields } from './PlatesFields'
+import { SlipFields } from './SlipFields'
 import { TighteningFields } from './TighteningFields'
 
 interface DesignInputsProps {
   design: JointDesignSpec
   system: UnitSystem
-  clampLengthMm: number | null
   onChange: (changes: Partial<JointDesignSpec>) => void
 }
 
-export function DesignInputs({ design, system, clampLengthMm, onChange }: DesignInputsProps) {
+export function DesignInputs({ design, system, onChange }: DesignInputsProps) {
+  const tightening = tighteningOptions(design)
+  const slip = slipOptions(design)
+  const contact = contactOptions(design)
   return (
     <>
       <BoltFields design={design} onChange={onChange} />
       <JointKindFields design={design} system={system} onChange={onChange} />
-      <PlatesFields design={design} system={system} clampLengthMm={clampLengthMm} onChange={onChange} />
-      <TighteningFields design={design} onChange={onChange} />
+      <PlatesFields design={design} system={system} clampLengthMm={null} onChange={onChange} />
+      <MoreOptions
+        count={tightening.count + slip.count + contact.count}
+        changed={tightening.changed + slip.changed + contact.changed}
+        memoryKey="bolt:design"
+      >
+        <TighteningFields design={design} onChange={onChange} />
+        <SlipFields design={design} onChange={onChange} />
+        <ContactFields design={design} system={system} onChange={onChange} />
+      </MoreOptions>
     </>
   )
 }

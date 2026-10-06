@@ -1,73 +1,113 @@
-// Home ("Home v2" design): hero with search, the four tools as flush
-// columns, and recent projects, all derived from the stored projects.
-import { useMemo } from 'react'
-import styles from './HomePage.module.css'
-import { MATERIALS } from '../../core/materials'
+// Home: the library as a folder directory. A breadcrumb down to the folder
+// shown, its folders first and then its calculations, and the actions to add
+// a folder or a calculation here. Each row has a menu to rename, duplicate,
+// move or delete it; clicking a calculation opens it as a tab.
+import { useEffect, useState } from 'react'
+import { calculationsIn, findFolder, folderPath, subfolders } from '../../core/library'
 import { AppLayout } from '../AppLayout'
-import { NEW_PROJECT_HREF } from '../projects/newProjectLink'
-import { useProjects } from '../projects/useProjects'
-import { routeHref } from '../router/routes'
-import { Button, MonoLabel, SearchField } from '../ui'
-import { buildHomeData } from './homeData'
-import { ProjectCard } from './ProjectCard'
-import { ToolCard } from './ToolCard'
-import { toolCards } from './toolCards'
+import { countOf } from '../format/count'
+import { libraryActions, useLibrary } from '../library/useLibrary'
+import { rememberHomeFolder } from '../shell/openTabs'
+import { Button, Callout, EmptyState, PageTitle } from '../ui'
+import { Breadcrumb } from './Breadcrumb'
+import { DeleteDialog } from './DeleteDialog'
+import { DirectoryList } from './DirectoryList'
+import { entryName, type Entry } from './entry'
+import styles from './HomePage.module.css'
+import { MoveDialog } from './MoveDialog'
+import { NameDialog } from './NameDialog'
+import { NewCalculationDialog } from './NewCalculationDialog'
 
-const REQUEST_TOOL_URL = 'https://github.com/manuogm/datum/issues/new'
+/** The dialog open over Home, if any. */
+type OpenDialog =
+  | { kind: 'new-folder' }
+  | { kind: 'new-calculation' }
+  | { kind: 'rename' | 'move' | 'delete'; entry: Entry }
 
-export function HomePage() {
-  const { projects } = useProjects()
-  const data = useMemo(() => buildHomeData(projects, MATERIALS), [projects])
+export function HomePage({ folderId }: { folderId: string | null }) {
+  const { library, problem } = useLibrary()
+  const [dialog, setDialog] = useState<OpenDialog | null>(null)
+  const folder = folderId === null ? undefined : findFolder(library, folderId)
+  const folders = subfolders(library, folderId)
+  const calculations = calculationsIn(library, folderId)
+  const close = () => setDialog(null)
+
+  useEffect(() => rememberHomeFolder(folderId), [folderId])
+
+  const duplicate = (entry: Entry) => {
+    if (entry.kind === 'calculation') libraryActions.duplicateCalculation(entry.calculation.id)
+  }
+
   return (
-    <AppLayout section="home" background="page">
+    <AppLayout current={{ tab: 'home' }}>
       <div className={styles.page}>
-        <section className={styles.hero}>
-          <h1 className={styles.title}>
-            Engineering <span className={styles.titleAccent}>tools</span>
-          </h1>
-          <div className={styles.intro}>
-            <p className={styles.lead}>
-              Live diagrams in place of spreadsheet cells. Every number traces back to its formula and standard,
-              and every result can be saved to a project.
-            </p>
-            <SearchField label="Search" placeholder="Search tools, projects, materials" shortcut="⌘K" />
-          </div>
-        </section>
-
-        <section className={styles.tools} aria-label="Tools">
-          {toolCards(data).map((card) => (
-            <ToolCard key={card.tool} content={card} featured={card.tool === data.lastUsedTool} />
-          ))}
-          <div className={styles.more}>
-            <MonoLabel size="md" tone="faint">
-              05 —
-            </MonoLabel>
-            <h2 className={styles.moreTitle}>More tools coming</h2>
-            <a className={styles.request} href={REQUEST_TOOL_URL} target="_blank" rel="noreferrer">
-              Request →
-            </a>
-          </div>
-        </section>
-
-        <section className={styles.recent} aria-labelledby="recent-projects">
-          <div className={styles.recentHead}>
-            <MonoLabel as="h2" size="md" id="recent-projects">
-              Recent projects
-            </MonoLabel>
-            <a className={styles.allProjects} href={routeHref({ name: 'projects' })}>
-              All projects →
-            </a>
-            <Button size="sm" href={NEW_PROJECT_HREF}>
-              + New project
+        <header className={styles.head}>
+          <PageTitle eyebrow={<Breadcrumb path={folderPath(library, folderId)} />} title={folder?.name ?? 'Home'} size="md" />
+          <div className={styles.actions}>
+            <span className={styles.count}>
+              {countOf(folders.length, 'folder')} · {countOf(calculations.length, 'calculation')}
+            </span>
+            <Button size="md" icon="plus" onClick={() => setDialog({ kind: 'new-folder' })}>
+              New folder
+            </Button>
+            <Button size="md" variant="primary" icon="plus" onClick={() => setDialog({ kind: 'new-calculation' })}>
+              New calculation
             </Button>
           </div>
-          <div className={styles.projects}>
-            {data.recentProjects.map((project) => (
-              <ProjectCard key={project.id} project={project} />
-            ))}
+        </header>
+        {problem && (
+          <div className={styles.notice}>
+            <Callout status="warn" title="Library storage">
+              {problem}
+            </Callout>
           </div>
-        </section>
+        )}
+        {folders.length + calculations.length > 0 ? (
+          <DirectoryList
+            library={library}
+            folders={folders}
+            calculations={calculations}
+            onRename={(entry) => setDialog({ kind: 'rename', entry })}
+            onDuplicate={duplicate}
+            onMove={(entry) => setDialog({ kind: 'move', entry })}
+            onDelete={(entry) => setDialog({ kind: 'delete', entry })}
+          />
+        ) : (
+          <EmptyState inset="page">
+            {folderId === null ? 'Nothing here yet.' : 'This folder is empty.'} Create a calculation, or a folder to group
+            calculations in.
+          </EmptyState>
+        )}
       </div>
+
+      {dialog?.kind === 'new-folder' && (
+        <NameDialog
+          title="New folder"
+          subtitle={`In ${folder?.name ?? 'Home'}`}
+          label="Folder name"
+          initialName=""
+          submitLabel="Create folder"
+          onSubmit={(name) => libraryActions.createFolder(name, folderId)}
+          onClose={close}
+        />
+      )}
+      {dialog?.kind === 'new-calculation' && <NewCalculationDialog library={library} folderId={folderId} onClose={close} />}
+      {dialog?.kind === 'rename' && (
+        <NameDialog
+          title={dialog.entry.kind === 'folder' ? 'Rename folder' : 'Rename calculation'}
+          label="Name"
+          initialName={entryName(dialog.entry)}
+          submitLabel="Rename"
+          onSubmit={(name) =>
+            dialog.entry.kind === 'folder'
+              ? libraryActions.renameFolder(dialog.entry.folder.id, name)
+              : libraryActions.renameCalculation(dialog.entry.calculation.id, name)
+          }
+          onClose={close}
+        />
+      )}
+      {dialog?.kind === 'move' && <MoveDialog library={library} entry={dialog.entry} onClose={close} />}
+      {dialog?.kind === 'delete' && <DeleteDialog library={library} entry={dialog.entry} onClose={close} />}
     </AppLayout>
   )
 }

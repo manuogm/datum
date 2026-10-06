@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { DEFAULT_FIT_INPUTS, type FitInputs } from './fitInputs'
+import { EXAMPLE_FIT_INPUTS, NEW_FIT_INPUTS, type FitInputs } from './fitInputs'
 import { asFunctions, asZone, fitInputsFrom } from './readInputs'
 
 const saved: FitInputs = {
@@ -21,13 +21,18 @@ describe('fitInputsFrom', () => {
     expect(fitInputsFrom(JSON.parse(JSON.stringify(saved)))).toEqual(saved)
   })
 
+  it('reads a calculation without a required window back without one', () => {
+    expect(fitInputsFrom(JSON.parse(JSON.stringify(NEW_FIT_INPUTS)))).toEqual(NEW_FIT_INPUTS)
+    expect(fitInputsFrom({ ...saved, requiredClearanceUm: null }).requiredClearanceUm).toBeNull()
+  })
+
   it('keeps the default for each missing or malformed field', () => {
     expect(fitInputsFrom({ nominalMm: 40, hole: { letter: 'g', grade: '6' }, assembly: 'glue', serviceTempC: { minC: 0 } })).toEqual({
-      ...DEFAULT_FIT_INPUTS,
+      ...EXAMPLE_FIT_INPUTS,
       nominalMm: 40,
     })
-    expect(fitInputsFrom(null)).toEqual(DEFAULT_FIT_INPUTS)
-    expect(fitInputsFrom('H7/g6')).toEqual(DEFAULT_FIT_INPUTS)
+    expect(fitInputsFrom(null)).toEqual(EXAMPLE_FIT_INPUTS)
+    expect(fitInputsFrom('H7/g6')).toEqual(EXAMPLE_FIT_INPUTS)
   })
 })
 

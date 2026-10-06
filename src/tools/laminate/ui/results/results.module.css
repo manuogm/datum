@@ -1,45 +1,8 @@
-/* The laminate results column: summary, failure index per ply, couplings,
-   ABD matrix and engineering constants. */
-.summary {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-16);
-  padding: var(--space-18) var(--space-20);
-  border-bottom: var(--border-width) solid var(--border-subtle);
-}
-
-.readouts {
-  display: flex;
-  align-items: flex-end;
-  gap: var(--space-24);
-}
-
-.loadNote {
-  margin: calc(-1 * var(--space-8)) 0 0;
-  font-family: var(--font-mono);
-  font-size: var(--fs-11-5);
-  color: var(--text-muted);
-}
-
-.constants {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: var(--space-8);
-  margin: 0;
-}
-
-.constants dd {
-  margin: 0;
-}
-
+/* The laminate results: failure index per ply (details), couplings, ABD
+   matrix and engineering constants (calculation). */
 .constantSymbol {
   font-size: var(--fs-11);
   color: var(--text-muted);
-}
-
-.constantValue {
-  font-family: var(--font-mono);
-  font-size: var(--fs-16);
 }
 
 .constantUnit {
@@ -57,12 +20,14 @@
 }
 
 .sectionHead {
+  max-width: 920px; /* inside the section's padding: ends with the verdict card */
   display: flex;
   justify-content: space-between;
   gap: var(--space-8);
 }
 
 .plies {
+  max-width: 920px; /* as .sectionHead */
   display: flex;
   flex-direction: column;
   gap: var(--space-2);

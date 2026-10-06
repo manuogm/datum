@@ -1,6 +1,6 @@
 // Printable A4 calculation reports: the page frame and the report building blocks.
 export {
-  Report, ReportFacts, ReportFigure, ReportSection, ReportSignOff, ReportSummary, ReportSummaryCell, ReportTitleBlock,
+  Report, ReportFacts, ReportFigure, ReportSection, ReportFooter, ReportSummary, ReportSummaryCell, ReportTitleBlock,
   ReportWarnings, type ReportFact, type ReportStatus,
 } from './Report'
 /** Classes for tables, two-column rows and diagram frames inside a report section. */

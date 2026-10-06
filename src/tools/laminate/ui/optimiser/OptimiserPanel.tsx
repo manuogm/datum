@@ -1,16 +1,16 @@
-// Optimise layup: searches, on request and off the main thread, for the
-// symmetric, balanced laminate of the top ply's material with the fewest
-// plies that reaches the target under the loads on screen. The best
-// sequence and its alternatives can each replace the layup being edited:
-// every ply then takes the material searched, so a hybrid stack becomes one
-// the optimiser analysed. The design rules the search applied are listed under
-// the result.
+// Optimise layup, in a dialog over the results: searches, on request and off
+// the main thread, for the symmetric, balanced laminate of the top ply's
+// material with the fewest plies that reaches the target under the loads on
+// screen. The best sequence and its alternatives can each replace the layup
+// being edited: every ply then takes the material searched, so a hybrid
+// stack becomes one the optimiser analysed. The design rules the search
+// applied are listed under the result.
 import { useState } from 'react'
 import { countOf } from '../../../../app/format/count'
-import { Button, Chip, InputWell, MonoLabel, NumberInput, PanelSection, ValueRow } from '../../../../app/ui'
+import { Button, Chip, InputWell, MonoLabel, NumberInput, ValueRow } from '../../../../app/ui'
 import { formatQuantity, type UnitSystem } from '../../../../core/units'
 import type { LayupCandidate } from '../../optimise'
-import { formatFactor, plyMaterialName } from '../logic/labels'
+import { formatFactor, formatReserveFactor, plyMaterialName, shownReserveFactor } from '../logic/labels'
 import { appliedRules, DEFAULT_OPTIMISER_SETTINGS, DIRECTION_CHOICES, directionLabel, optimiseRequest, type OptimiserSettings } from '../logic/optimiserRequest'
 import type { LaminateInputs } from '../state/lamInputs'
 import styles from './optimiser.module.css'
@@ -39,7 +39,7 @@ export function OptimiserPanel({ inputs, system, onUse }: OptimiserPanelProps) {
     setSettings({ ...settings, directions })
   }
   return (
-    <PanelSection label="Optimise layup" aside="symmetric · balanced">
+    <div className={styles.panel}>
       <p className={styles.note}>
         Fewest plies of {plyMaterialName(inputs.plies[0].materialId)} that reach RF {formatFactor(inputs.targetReserveFactor)} under these loads.
       </p>
@@ -73,7 +73,7 @@ export function OptimiserPanel({ inputs, system, onUse }: OptimiserPanelProps) {
       )}
       {!request.ok && <p className={styles.warnNote}>{request.error}</p>}
       {run.status === 'done' && <OptimiserResult run={run} current={current} system={system} onUse={onUse} />}
-    </PanelSection>
+    </div>
   )
 }
 
@@ -117,7 +117,9 @@ function OptimiserResult({ run, current, system, onUse }: OptimiserResultProps) 
             {others.map((candidate) => (
               <li key={candidate.notation} className={styles.candidate}>
                 <span className={styles.candidateNotation}>{candidate.notation}</span>
-                <span className={candidate.reserveFactor < targetReserveFactor ? styles.candidateRfBelow : styles.candidateRf}>RF {formatFactor(candidate.reserveFactor)}</span>
+                <span className={shownReserveFactor(candidate.reserveFactor) < targetReserveFactor ? styles.candidateRfBelow : styles.candidateRf}>
+                  RF {formatReserveFactor(candidate.reserveFactor)}
+                </span>
                 <Button variant="link" size="sm" disabled={!current} onClick={() => use(candidate.anglesDeg)}>
                   Use
                 </Button>
@@ -154,7 +156,7 @@ function CandidateCard({ candidate, system, disabled, onUse }: CandidateCardProp
     <div className={styles.best}>
       <span className={styles.bestNotation}>{candidate.notation}</span>
       <span className={styles.bestFacts}>
-        {candidate.plyCount} plies · RF {formatFactor(candidate.reserveFactor)} · h {formatQuantity('length', system, candidate.thicknessMm, { withUnit: true })} ·{' '}
+        {candidate.plyCount} plies · RF {formatReserveFactor(candidate.reserveFactor)} · h {formatQuantity('length', system, candidate.thicknessMm, { withUnit: true })} ·{' '}
         {formatQuantity('arealMass', system, candidate.arealMassKgPerM2, { withUnit: true })}
       </span>
       <Button variant="primary" size="sm" disabled={disabled} onClick={() => onUse(candidate.anglesDeg)}>

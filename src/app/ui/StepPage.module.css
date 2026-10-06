@@ -1,0 +1,228 @@
+/* StepPage: header, inputs and footer in a column of reading width; with a
+   side visual, a flush column on the right holds the chart. The footer sticks
+   to the bottom of the scrolling area so Next is always in reach. Below 900px
+   the visual drops under the inputs. The page fills the height left under
+   the step bar (it sits in the app's flex column), so the footer is at the
+   bottom even on a short step. */
+.page {
+  flex: 1 0 auto;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas:
+    'head'
+    'body'
+    'foot';
+  grid-template-rows: auto 1fr auto;
+  min-height: 100%;
+  background: var(--surface);
+}
+
+.withAside {
+  grid-template-columns: minmax(0, 520px) minmax(0, 1fr);
+  grid-template-areas:
+    'head aside'
+    'body aside'
+    'foot aside';
+}
+
+.head {
+  grid-area: head;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space-16);
+  padding: var(--space-24) var(--space-20) var(--space-16);
+}
+
+.titles {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  min-width: 0;
+}
+
+.title {
+  margin: 0;
+  font-size: var(--fs-22);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-snug);
+  letter-spacing: var(--tracking-title);
+  color: var(--text);
+}
+
+.title:focus {
+  outline: none;
+}
+
+.title:focus-visible {
+  outline: var(--border-width) solid var(--accent);
+  outline-offset: var(--space-4);
+}
+
+.hint {
+  margin: 0;
+  max-width: 60ch;
+  font-size: var(--fs-13-5);
+  line-height: var(--leading-normal);
+  color: var(--text-muted);
+}
+
+/* Results: the hint says what was checked; it may run to the verdict's width. */
+.wide .hint {
+  max-width: 100ch;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-12);
+  flex: none;
+}
+
+.body {
+  grid-area: body;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  border-top: var(--border-width) solid var(--border-subtle);
+}
+
+/* The engine's explanation, above the inputs of the step at fault. */
+.problem {
+  padding: var(--space-16) var(--space-20);
+  border-bottom: var(--border-width) solid var(--border-subtle);
+}
+
+/* Without a side visual, inputs keep a reading width. */
+.page:not(.withAside):not(.wide) .body,
+.page:not(.withAside):not(.wide) .foot {
+  max-width: 560px;
+}
+
+.aside {
+  grid-area: aside;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  border-left: var(--border-width) solid var(--border);
+  background: var(--surface);
+}
+
+.asideHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--space-12);
+  min-height: var(--bar-height);
+  box-sizing: border-box;
+  padding: var(--space-20) var(--space-20) var(--space-12);
+  border-bottom: var(--border-width) solid var(--border-subtle);
+}
+
+.asideMeta {
+  font-family: var(--font-mono);
+  font-size: var(--fs-11);
+  color: var(--text-faint);
+  text-align: right;
+}
+
+.visual {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 0;
+  padding: var(--space-20);
+}
+
+/* Inputs in the side column: PanelSections bring their own padding. */
+.asideInputs {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  max-width: 640px;
+}
+
+.foot {
+  grid-area: foot;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-12);
+  padding: var(--space-16) var(--space-20);
+  border-top: var(--border-width) solid var(--border);
+  background: var(--surface);
+  position: sticky;
+  bottom: 0;
+  z-index: 1;
+}
+
+.footEnd {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-12);
+  min-width: 0;
+}
+
+.nextNote {
+  font-size: var(--fs-12);
+  color: var(--text-muted);
+  text-align: right;
+}
+
+@media (max-width: 900px) {
+  .withAside {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      'head'
+      'body'
+      'aside'
+      'foot';
+    grid-template-rows: auto auto 1fr auto;
+  }
+
+  .aside {
+    border-left: 0;
+    border-top: var(--border-width) solid var(--border);
+  }
+
+  .visual {
+    min-height: 260px;
+  }
+
+  .page:not(.withAside):not(.wide) .body,
+  .page:not(.withAside):not(.wide) .foot {
+    max-width: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .head {
+    padding: var(--space-20) var(--space-16) var(--space-14);
+  }
+
+  .title {
+    font-size: var(--fs-17);
+  }
+
+  .asideHead,
+  .visual {
+    padding-left: var(--space-16);
+    padding-right: var(--space-16);
+  }
+
+  .foot {
+    padding: var(--space-12) var(--space-16);
+  }
+
+  /* The note goes above the buttons rather than squeezing them. */
+  .footEnd {
+    flex-wrap: wrap;
+  }
+
+  .nextNote {
+    flex-basis: 100%;
+    order: -1;
+  }
+}

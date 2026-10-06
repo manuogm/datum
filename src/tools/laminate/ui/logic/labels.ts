@@ -10,6 +10,9 @@ export const CRITERION_LABELS: Record<FailureCriterion, string> = {
   'tsai-wu': 'Tsai-Wu',
 }
 
+/** The sources of the analysis: laminate theory and the failure criteria. */
+export const LAMINATE_STANDARDS = 'CLT (Jones 1999; Daniel & Ishai 2006), Tsai & Hahn (1980)'
+
 export const MODE_LABELS: Record<FailureMode, string> = {
   'fibre-tension': 'fibre tension',
   'fibre-compression': 'fibre compression',
@@ -37,10 +40,24 @@ export function plyRangeText(plies: readonly number[]): string {
   return runs.map(([first, end]) => (first === end ? String(first) : `${first}–${end}`)).join(', ')
 }
 
-/** A reserve factor or failure index to two decimals; ∞ when nothing loads the laminate. */
+/** A target reserve factor or a failure index to two decimals; ∞ when nothing loads the laminate. */
 export function formatFactor(value: number): string {
   return Number.isFinite(value) ? formatDecimal(value, 2, true) : '∞'
 }
+
+/**
+ * A reserve factor as it is shown: cut down (floored) to two decimals, so it
+ * never reads better than it is (1.497 shows 1.49, not 1.50). Every verdict,
+ * colour and count is judged on this shown value, so a ply reading "1.50"
+ * always meets a 1.50 target. (The 1e-9 keeps an RF of exactly 1.29, stored
+ * as 1.2899999…, from showing 1.28.)
+ */
+export function shownReserveFactor(reserveFactor: number): number {
+  return Number.isFinite(reserveFactor) ? Math.floor(reserveFactor * 100 + 1e-9) / 100 : reserveFactor
+}
+
+/** A reserve factor as shown (see shownReserveFactor): '1.49'; ∞ when nothing loads the laminate. */
+export const formatReserveFactor = (reserveFactor: number): string => formatFactor(shownReserveFactor(reserveFactor))
 
 /** The material's name, or its id when it is not a ply material. */
 export function plyMaterialName(materialId: string): string {

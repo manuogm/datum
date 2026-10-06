@@ -52,3 +52,9 @@
 .small .word {
   font-size: var(--fs-13);
 }
+
+@media (max-width: 640px) {
+  .markOnPhone .word {
+    display: none;
+  }
+}

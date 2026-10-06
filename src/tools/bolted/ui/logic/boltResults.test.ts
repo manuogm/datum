@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import { expectError, expectOk } from '../../../../core/testing'
-import { DEFAULT_BOLT_INPUTS, DEFAULT_PATTERN } from '../state/boltInputs'
+import { DEFAULT_BOLT_INPUTS } from '../state/boltInputs'
 import { PATTERN_MISSING_THREAD, PATTERN_WITH_KEENSERT } from '../testFixtures'
-import { boltResults, jointDesign, materialIdsOf } from './boltResults'
+import { boltResults, jointDesign } from './boltResults'
 
 describe('boltResults', () => {
   it('analyses the default joint', () => {
@@ -31,11 +31,5 @@ describe('jointDesign', () => {
   it('fails on an unknown material', () => {
     const spec = { ...DEFAULT_BOLT_INPUTS.joint.design, plates: [{ materialId: 'unobtainium', thicknessMm: 5 }] }
     expect(jointDesign(spec, DEFAULT_BOLT_INPUTS.serviceTempC).ok).toBe(false)
-  })
-})
-
-describe('materialIdsOf', () => {
-  it('lists plate and tapped-part materials once', () => {
-    expect(materialIdsOf(DEFAULT_PATTERN.jointTypes.map((j) => j.design))).toEqual(['ti-6al-4v', 'al-7075-t6'])
   })
 })

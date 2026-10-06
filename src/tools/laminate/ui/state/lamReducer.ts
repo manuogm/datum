@@ -4,7 +4,7 @@ import { MAX_PLIES, normaliseAngleDeg } from '../../calc'
 import type { LaminateInputs, LoadSpec, PlySpec } from './lamInputs'
 
 export type LamAction =
-  /** Plain edits of top-level fields (criterion, target), or all inputs at once (a reopened revision). */
+  /** Plain edits of top-level fields (criterion, target), or all inputs at once (Reset). */
   | { type: 'change'; changes: Partial<LaminateInputs> }
   | { type: 'loads'; changes: Partial<LoadSpec> }
   /** New ply angles from the stacking notation, top ply first; with a material (an optimiser result), every ply is of it. */

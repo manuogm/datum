@@ -1,12 +1,12 @@
-// Reading Fit Tolerance inputs that come from outside the screen: a shared
-// link or a revision saved in a project. Each field is checked on its own;
-// a missing or malformed field keeps its default, so an old link or an old
-// revision always opens.
+// Reading Fit Tolerance inputs that come from outside the screen: a
+// calculation stored in the library. Each field is checked on its own; a
+// missing or malformed field keeps its default, so a calculation saved by an
+// older Datum always opens.
 import { materialById } from '../../../../core/materials'
-import type { ApplicationFunction, AssemblyMethod } from '../../advisor'
+import type { ApplicationFunction, AssemblyMethod, ClearanceRangeUm } from '../../advisor'
 import { parseZone, type ZoneKind, type ZoneSpec } from '../../calc'
 import { APPLICATION_FUNCTIONS, ASSEMBLY_METHODS } from '../logic/applications'
-import { DEFAULT_FIT_INPUTS, type FitInputs, type FitMode } from './fitInputs'
+import { EXAMPLE_FIT_INPUTS, type FitInputs, type FitMode } from './fitInputs'
 
 const MODES: readonly FitMode[] = ['advisor', 'calculator']
 
@@ -47,16 +47,18 @@ export function asMaterialId(value: unknown): string | null {
   return typeof value === 'string' && materialById(value).ok ? value : null
 }
 
-/** Inputs stored in a saved revision (normally a complete FitInputs). */
+/**
+ * Inputs stored in the library (normally a complete FitInputs; null for the
+ * example). A new calculation is stored complete (NEW_FIT_INPUTS), so only
+ * the example and older calculations take the example's values.
+ */
 export function fitInputsFrom(value: unknown): FitInputs {
   const saved = isRecord(value) ? value : {}
-  const d = DEFAULT_FIT_INPUTS
+  const d = EXAMPLE_FIT_INPUTS
   const temp = isRecord(saved.serviceTempC) ? saved.serviceTempC : {}
-  const clearance = isRecord(saved.requiredClearanceUm) ? saved.requiredClearanceUm : {}
   const minC = asNumber(temp.minC)
   const maxC = asNumber(temp.maxC)
-  const minUm = asNumber(clearance.minUm)
-  const maxUm = asNumber(clearance.maxUm)
+  const window = asWindow(saved.requiredClearanceUm)
   return {
     mode: asMode(saved.mode) ?? d.mode,
     nominalMm: asNumber(saved.nominalMm) ?? d.nominalMm,
@@ -67,9 +69,18 @@ export function fitInputsFrom(value: unknown): FitInputs {
     shaftMaterialId: asMaterialId(saved.shaftMaterialId) ?? d.shaftMaterialId,
     assembly: asAssembly(saved.assembly) ?? d.assembly,
     serviceTempC: minC !== null && maxC !== null ? { minC, maxC } : d.serviceTempC,
-    requiredClearanceUm: minUm !== null && maxUm !== null ? { minUm, maxUm } : d.requiredClearanceUm,
+    requiredClearanceUm: window === undefined ? d.requiredClearanceUm : window,
     maxAssemblyInterferenceUm: asNumber(saved.maxAssemblyInterferenceUm) ?? d.maxAssemblyInterferenceUm,
   }
+}
+
+/** A stored clearance window; null stays null (no window set), undefined when malformed. */
+export function asWindow(value: unknown): ClearanceRangeUm | null | undefined {
+  if (value === null) return null
+  const window = isRecord(value) ? value : {}
+  const minUm = asNumber(window.minUm)
+  const maxUm = asNumber(window.maxUm)
+  return minUm !== null && maxUm !== null ? { minUm, maxUm } : undefined
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

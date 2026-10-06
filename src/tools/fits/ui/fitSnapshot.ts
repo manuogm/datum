@@ -1,21 +1,25 @@
-// What "Save revision" hands to a project: the fit on screen, its verdict
-// against the required in-service window, its headline numbers in SI, and the
-// complete inputs so the revision reopens exactly as saved, and the materials
-// it uses for "Used in" on the Materials page.
-import type { SnapshotFigure, ToolSnapshot } from '../../../core/projects/revision'
-import { ok, type Result } from '../../../core/result'
+// What the library lists about a fit calculation: the fit on screen (in the
+// title), its verdict (see presentedStatus: the advisor's checks of the best
+// match, or the clearance in service against the required window, pass
+// without one), the clearance at each service temperature in SI, and the
+// complete inputs.
+import type { SnapshotFigure, ToolSnapshot } from '../../../core/library'
+import { fail, ok, type Result } from '../../../core/result'
 import { formatDecimal, formatQuantity, formatQuantityRange } from '../../../core/units'
 import { fitResults, presentedFit } from './logic/fitResults'
+import { serviceRangeError } from './logic/fitSteps'
 import { serviceClearance } from './logic/serviceClearance'
+import { presentedStatus } from './logic/verdict'
 import type { FitInputs } from './state/fitInputs'
 
-/** Fails, with the engine's explanation, when the inputs give no valid fit. */
+/** Fails, with the engine's explanation, when the inputs give no valid fit or a service range is the wrong way round. */
 export function fitSnapshot(inputs: FitInputs): Result<ToolSnapshot<FitInputs>> {
   const results = fitResults(inputs, 'si')
   const fit = presentedFit(inputs, results)
   if (!fit.ok) return fit
+  const serviceError = inputs.mode === 'calculator' ? serviceRangeError(inputs) : null
+  if (serviceError !== null) return fail(serviceError)
   const service = serviceClearance(fit.value, inputs, results.housing, results.shaft)
-  const nominal = formatQuantity('length', 'si', inputs.nominalMm)
   const clearanceFigures: SnapshotFigure[] = service.bands.map((band) => ({
     label: `C at ${formatQuantity('temperature', 'si', band.tempC, { withUnit: true })}`,
     value: formatQuantityRange('deviation', 'si', band.minUm, band.maxUm, false),
@@ -24,13 +28,8 @@ export function fitSnapshot(inputs: FitInputs): Result<ToolSnapshot<FitInputs>> 
   return ok({
     tool: 'fit',
     title: `Ø${formatDecimal(inputs.nominalMm, 3)} ${fit.value.designation}`,
-    status: service.status,
-    figures: [
-      { label: 'Fit', value: fit.value.designation },
-      { label: 'Nominal', value: nominal, unit: 'mm' },
-      ...clearanceFigures,
-    ],
+    status: presentedStatus(inputs, results, fit.value, service),
+    figures: clearanceFigures,
     inputs,
-    materialIds: [...new Set([inputs.housingMaterialId, inputs.shaftMaterialId])],
   })
 }

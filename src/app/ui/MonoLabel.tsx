@@ -1,5 +1,5 @@
 // MonoLabel: 10.5px mono uppercase section label ("APPLICATION",
-// "RECENT PROJECTS"), plus the 11px and 10px variants used for page eyebrows
+// "NAME"), plus the 11px and 10px variants used for page eyebrows
 // and dense table headers.
 import type { ReactNode } from 'react'
 import styles from './MonoLabel.module.css'

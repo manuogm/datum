@@ -1,4 +1,4 @@
-/* Card: bordered box for list items (recent projects, decisions, timeline). */
+/* Card: bordered box for list items. */
 .card {
   display: flex;
   flex-direction: column;

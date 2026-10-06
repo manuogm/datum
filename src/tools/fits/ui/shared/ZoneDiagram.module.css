@@ -8,6 +8,13 @@
   height: 100%;
 }
 
+/* Once the step's columns stack, the drawing takes its own height from its width. */
+@media (max-width: 900px) {
+  .screen {
+    height: auto;
+  }
+}
+
 .grid {
   stroke: var(--grid);
   stroke-width: var(--chart-stroke-thin);

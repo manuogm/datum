@@ -5,10 +5,12 @@ import { cx } from './cx'
 interface LogoProps {
   size?: 'md' | 'sm'
   href?: string
+  /** Show only the mark on a phone, so the header's tabs keep their room. */
+  markOnPhone?: boolean
 }
 
-export function Logo({ size = 'md', href }: LogoProps) {
-  const className = cx(styles.logo, size === 'sm' && styles.small)
+export function Logo({ size = 'md', href, markOnPhone = false }: LogoProps) {
+  const className = cx(styles.logo, size === 'sm' && styles.small, markOnPhone && styles.markOnPhone)
   const content = (
     <>
       <span className={styles.mark} aria-hidden="true" />

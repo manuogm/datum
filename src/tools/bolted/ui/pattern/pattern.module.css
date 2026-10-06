@@ -1,5 +1,5 @@
-/* Bolt pattern mode: joint type cards, load case fields, the bolt list, the
-   plan and the results table. */
+/* Bolt pattern mode: joint type cards, load case fields, the bolt list, and
+   on Results the plan beside the by-type summary and the bolt table. */
 .types {
   display: flex;
   flex-direction: column;
@@ -101,7 +101,6 @@
   font-weight: var(--weight-semibold);
 }
 
-/* Centre */
 .tabs {
   display: flex;
   flex-wrap: wrap;
@@ -125,25 +124,42 @@
   color: var(--bad);
 }
 
+/* The Load cases step: the tabs above the fields. */
+.caseTabs {
+  padding: var(--space-16) var(--space-20) 0;
+}
+
+/* Results: plan on the left, by joint type and the table on the right. */
+.details {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+
+.planColumn,
+.tableColumn {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.tableColumn {
+  border-left: var(--border-width) solid var(--border-subtle);
+}
+
+@media (max-width: 1000px) {
+  .details {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .tableColumn {
+    border-left: 0;
+    border-top: var(--border-width) solid var(--border-subtle);
+  }
+}
+
 .plan {
   display: flex;
-  flex: 1;
-  min-height: 0;
   padding: var(--space-16) var(--space-20);
-}
-
-/* Once the columns wrap, the plan takes its drawn height instead of
-   stretching to the tallest column. */
-@media (max-width: 1200px) {
-  .plan {
-    flex: none;
-  }
-}
-
-@media (max-width: 900px) {
-  .plan {
-    min-height: var(--chart-height-stacked);
-  }
 }
 
 .legend {
@@ -153,19 +169,19 @@
   padding: 0 var(--space-20) var(--space-16);
 }
 
-/* Results */
+.tableNote {
+  margin: 0;
+  padding: var(--space-12) var(--space-20) var(--space-16);
+  font-size: var(--fs-12);
+  color: var(--text-faint);
+}
+
 .summary {
   display: flex;
   flex-direction: column;
   gap: var(--space-16);
   padding: var(--space-18) var(--space-20);
   border-bottom: var(--border-width) solid var(--border-subtle);
-}
-
-.readouts {
-  display: flex;
-  align-items: flex-end;
-  gap: var(--space-24);
 }
 
 .byType {
@@ -258,14 +274,30 @@
 
 .trailHead {
   padding: var(--space-16) var(--space-20) var(--space-6);
-  border-top: var(--border-width) solid var(--border-subtle);
-}
-
-.problem {
-  padding: var(--space-20);
 }
 
 /* One row of the by-joint-type grid. */
 .entry {
   display: contents;
+}
+
+/* The selected load case in words, across the top of the details. */
+.caseVerdict {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-8);
+  margin: 0;
+  padding: var(--space-14) var(--space-20);
+  border-bottom: var(--border-width) solid var(--border-subtle);
+  font-size: var(--fs-12-5);
+}
+
+.caseDetail {
+  color: var(--text-faint);
+}
+
+/* The check behind a bolt's verdict, e.g. R12: its title on hover. */
+.checkCell {
+  color: var(--text-muted);
 }

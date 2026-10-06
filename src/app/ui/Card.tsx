@@ -1,5 +1,4 @@
-// Card: bordered container for list items (recent projects, history entries,
-// decisions). Becomes a link when given href.
+// Card: bordered container for a list item. Becomes a link when given href.
 import type { ReactNode } from 'react'
 import styles from './Card.module.css'
 import { cx } from './cx'

@@ -1,8 +1,7 @@
 // Everything the engineer enters in the Bolted Joint tool, in SI units (mm, N,
 // N·m, °C), with materials by their Materials Database id. Both modes keep
 // their inputs, so switching between a single joint and a bolt pattern loses
-// nothing. This record is what a saved revision stores and what the shareable
-// URL carries.
+// nothing. This record is what a calculation in the library stores.
 import type {
   HeadType, InsertType, LoadIntroductionPosition, LoadVariation, PropertyClass, SurfaceRoughness, TemperatureRangeC,
   ThreadSize, TighteningMethod,

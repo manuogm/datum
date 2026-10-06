@@ -4,9 +4,9 @@ import type { ReportFact } from '../../../../app/report'
 import { formatDecimal, formatQuantity, unitOf, type UnitSystem } from '../../../../core/units'
 import { DEFAULT_TSAI_WU_F12_STAR, type LaminateAnalysis, type PlyResult } from '../../calc'
 import type { LaminateInputs } from '../state/lamInputs'
-import { angleText, CRITERION_LABELS, formatFactor, MODE_LABELS, modeText, plyMaterialName } from './labels'
+import { angleText, CRITERION_LABELS, formatFactor, formatReserveFactor, MODE_LABELS, modeText, plyMaterialName } from './labels'
 import { LOAD_COMPONENTS } from './loads'
-import { criticalText } from './verdict'
+import { criticalText, laminateReserveStatus } from './verdict'
 
 export function laminateFacts(inputs: LaminateInputs, { layup }: Pick<LaminateAnalysis, 'layup'>, system: UnitSystem): ReportFact[] {
   const applied = LOAD_COMPONENTS.filter((c) => inputs.loads[c.key] !== 0)
@@ -30,14 +30,15 @@ export function laminateFacts(inputs: LaminateInputs, { layup }: Pick<LaminateAn
 }
 
 export function laminateWarnings({ coupling, firstPlyFailure, plies, criterion }: Pick<LaminateAnalysis, 'coupling' | 'firstPlyFailure' | 'plies' | 'criterion'>): string[] {
-  const { reserveFactor, targetReserveFactor, status, mode } = firstPlyFailure
+  const { reserveFactor, targetReserveFactor, mode } = firstPlyFailure
+  const status = laminateReserveStatus(firstPlyFailure)
   const warnings: string[] = []
   if (!Number.isFinite(reserveFactor)) warnings.push('No load is applied: first-ply failure is not checked.')
   else if (status === 'fail') {
     const verb = firstPlyFailure.criticalPlies.length === 1 ? 'fails' : 'fail'
     const how = criterion === 'tsai-wu' ? ` (${modeText(criterion, mode)})` : ` in ${MODE_LABELS[mode]}`
-    warnings.push(`${criticalText({ firstPlyFailure, plies })} ${verb}${how} under the applied loads (RF ${formatFactor(reserveFactor)}).`)
-  } else if (status === 'warn') warnings.push(`RF ${formatFactor(reserveFactor)} is below the target of ${formatFactor(targetReserveFactor)}.`)
+    warnings.push(`${criticalText({ firstPlyFailure, plies })} ${verb}${how} under the applied loads (RF ${formatReserveFactor(reserveFactor)}).`)
+  } else if (status === 'warn') warnings.push(`RF ${formatReserveFactor(reserveFactor)} is below the target of ${formatFactor(targetReserveFactor)}.`)
   // The engine's coupling flags, read off the matrices (a stack can be unsymmetric and still have B = 0).
   if (coupling.bendingExtension) warnings.push('Bending–extension coupling (B ≠ 0): the laminate warps on cure and bends under in-plane load. Its engineering constants are apparent values.')
   if (coupling.shearExtension) warnings.push('Shear–extension coupling (A16, A26 ≠ 0): tension or compression shears the laminate.')
@@ -66,7 +67,7 @@ export function plyRows({ plies, firstPlyFailure }: Pick<LaminateAnalysis, 'plie
     thickness: formatQuantity('length', system, ply.thicknessMm),
     stresses: face(ply).stressMaterialMPa.map((mpa) => formatQuantity('strength', system, mpa)),
     failureIndex: formatFactor(ply.failureIndex),
-    reserveFactor: formatFactor(ply.reserveFactor),
+    reserveFactor: formatReserveFactor(ply.reserveFactor),
     mode: MODE_LABELS[ply.mode],
     critical: firstPlyFailure.criticalPlies.includes(ply.index),
   }))

@@ -27,7 +27,7 @@ export function PressureField({ plate, label, system, onChange }: PressureFieldP
     <div className={styles.rows}>
       <Field
         size="md"
-        prefix="pG"
+        prefix={`${label} pG`}
         unit={unitOf('strength', system)}
         aria-label={`${label} limiting surface pressure pG`}
         placeholder={required ? 'required' : 'from table'}

@@ -1,0 +1,240 @@
+/* VerdictCard: a status-tinted band over the big governing number and a
+   flush row of key figures. The status colour runs down the left edge. */
+.card {
+  display: flex;
+  flex-direction: column;
+  border: var(--border-width) solid var(--border);
+  border-left: 3px solid var(--verdict);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  min-width: 0;
+}
+
+.pass {
+  --verdict: var(--ok);
+  --verdict-soft: var(--ok-soft);
+  --verdict-text: var(--ok-text);
+}
+
+.review {
+  --verdict: var(--warn);
+  --verdict-soft: var(--warn-soft);
+  --verdict-text: var(--warn-text);
+}
+
+.fail {
+  --verdict: var(--bad);
+  --verdict-soft: var(--bad-soft);
+  --verdict-text: var(--bad-text);
+}
+
+.band {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-12);
+  padding: var(--space-14) var(--space-18);
+  background: var(--verdict-soft);
+}
+
+.verdictText {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.word {
+  font-family: var(--font-mono);
+  font-size: var(--fs-10-5);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--verdict-text);
+}
+
+.sentence {
+  margin: 0;
+  font-size: var(--fs-15);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-snug);
+  color: var(--verdict-text);
+}
+
+.detail {
+  font-size: var(--fs-12);
+  color: var(--verdict-text);
+  opacity: 0.85;
+}
+
+.reference {
+  align-self: flex-start;
+}
+
+.headline {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  padding: var(--space-20) var(--space-18) var(--space-16);
+}
+
+.bigLine {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-8) var(--space-20);
+}
+
+.big {
+  font-family: var(--font-mono);
+  font-size: var(--fs-64);
+  font-weight: var(--weight-medium);
+  line-height: var(--leading-readout);
+  letter-spacing: var(--tracking-readout);
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.bigUnit {
+  margin-left: var(--space-6);
+  font-size: var(--fs-16);
+  letter-spacing: 0;
+  color: var(--text-muted);
+}
+
+.target {
+  font-family: var(--font-mono);
+  font-size: var(--fs-14);
+  color: var(--verdict-text);
+  white-space: nowrap;
+}
+
+.targetLabel {
+  font-size: var(--fs-10-5);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.figures {
+  display: grid;
+  margin: 0;
+  border-top: var(--border-width) solid var(--border-subtle);
+}
+
+.n1 {
+  grid-template-columns: 1fr;
+}
+
+.n2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.n3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.n4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.figure {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  min-width: 0;
+  padding: var(--space-14) var(--space-18);
+  border-left: var(--border-width) solid var(--border-subtle);
+}
+
+.figure:first-child {
+  border-left: 0;
+}
+
+.figureLabel {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--space-6);
+}
+
+.symbol {
+  font-family: var(--font-mono);
+  font-size: var(--fs-11);
+  color: var(--text-secondary);
+}
+
+.figure dt,
+.figure dd {
+  margin: 0;
+}
+
+.figureValue {
+  font-family: var(--font-mono);
+  font-size: var(--fs-22);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-title);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.figureUnit {
+  margin-left: var(--space-4);
+  font-size: var(--fs-12);
+  letter-spacing: 0;
+  color: var(--text-muted);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-10);
+  padding: var(--space-14) var(--space-18);
+  border-top: var(--border-width) solid var(--border-subtle);
+}
+
+@media (max-width: 640px) {
+  .band,
+  .headline,
+  .figure,
+  .actions {
+    padding-left: var(--space-14);
+    padding-right: var(--space-14);
+  }
+
+  .band {
+    flex-wrap: wrap;
+  }
+
+  .verdictText {
+    flex-basis: calc(100% - 40px);
+  }
+
+  .reference {
+    order: 3;
+    margin-left: 40px;
+  }
+
+  .big {
+    font-size: var(--fs-48);
+  }
+
+  /* Three or four figures go two by two. */
+  .n3,
+  .n4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .n3 .figure:nth-child(3),
+  .n4 .figure:nth-child(3) {
+    border-left: 0;
+  }
+
+  .n3 .figure:nth-child(n + 3),
+  .n4 .figure:nth-child(n + 3) {
+    border-top: var(--border-width) solid var(--border-subtle);
+  }
+
+  .figureValue {
+    font-size: var(--fs-17);
+  }
+}

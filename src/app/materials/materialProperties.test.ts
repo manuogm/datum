@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { materialById, SOURCES } from '../../core/materials'
-import { cyclesText, materialDetails, materialSnapshot } from './materialProperties'
+import { cyclesText, materialDetails } from './materialProperties'
 
 function material(id: string) {
   const found = materialById(id)
@@ -52,22 +52,5 @@ describe('cyclesText', () => {
   it('writes cycle counts as powers of ten', () => {
     expect(cyclesText(1e7)).toBe('10⁷')
     expect(cyclesText(5e8)).toBe('5·10⁸')
-  })
-})
-
-describe('materialSnapshot', () => {
-  it('records the material and its key figures for the project history', () => {
-    expect(materialSnapshot(material('ti-6al-4v'))).toEqual({
-      tool: 'mat',
-      title: 'Ti-6Al-4V Grade 5',
-      status: 'pass',
-      figures: [
-        { label: 'Material', value: 'Ti-6Al-4V Grade 5' },
-        { label: 'Rp0.2', value: '880', unit: 'MPa' },
-        { label: 'α', value: '8.6', unit: 'µm/(m·K)' },
-      ],
-      inputs: { materialId: 'ti-6al-4v' },
-      materialIds: ['ti-6al-4v'],
-    })
   })
 })

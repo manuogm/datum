@@ -266,38 +266,10 @@
   font-weight: var(--weight-semibold);
 }
 
-/* Sign-off and footer, pushed to the bottom of the page */
-.signatures {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space-24);
-  margin-top: auto;
-  break-inside: avoid;
-}
-
-.signatures > div {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-16);
-}
-
-.signatureLabel {
-  font-size: var(--fs-10);
-  color: var(--text-muted);
-}
-
-.signatureLine {
-  padding-bottom: var(--space-4);
-  border-bottom: var(--border-width) solid var(--text);
-  font-size: var(--fs-10-5);
-}
-
-.blank {
-  color: var(--text-faint);
-}
-
+/* Footer, pushed to the bottom of the page */
 .footer {
   display: flex;
+  margin-top: auto;
   justify-content: space-between;
   gap: var(--space-16);
   padding-top: var(--space-6);
@@ -337,9 +309,5 @@
 
   .table {
     min-width: calc(var(--sheet-width) - 2 * var(--space-56));
-  }
-
-  .signatures {
-    grid-template-columns: minmax(0, 1fr);
   }
 }

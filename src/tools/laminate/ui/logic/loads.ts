@@ -27,14 +27,19 @@ export function leadingLoad(loads: Required<LaminateLoads>): LoadComponent | nul
   return largest('lineLoad') ?? largest('lineMoment')
 }
 
+/** 'Nx 250 N/mm, Nxy 80 N/mm': the loads applied (leaving out `except`), '' when there are none. */
+export function appliedLoadsText(loads: Required<LaminateLoads>, system: UnitSystem, except: LoadComponent | null = null): string {
+  return LOAD_COMPONENTS.filter((c) => c !== except && loads[c.key] !== 0)
+    .map((c) => `${c.symbol} ${formatQuantity(c.quantity, system, loads[c.key], { withUnit: true })}`)
+    .join(', ')
+}
+
 /**
- * The rest of the first-ply failure load, beside the leading one the readout
- * quotes: every applied load scales by RF together, so 'All loads × RF · Nxy
- * 101.4 N/mm'. Null when only one load is applied (the readout says it all).
+ * The rest of the first-ply failure load, beside the leading one the verdict
+ * quotes (every applied load scales by RF together): 'FPF load with Nxy
+ * 101.4 N/mm'. Null when only one load is applied (the verdict says it all).
  */
 export function failureLoadNote(loads: Required<LaminateLoads>, system: UnitSystem): string | null {
-  const leading = leadingLoad(loads)
-  const others = LOAD_COMPONENTS.filter((c) => c !== leading && loads[c.key] !== 0)
-  if (others.length === 0) return null
-  return `All loads × RF · ${others.map((c) => `${c.symbol} ${formatQuantity(c.quantity, system, loads[c.key], { withUnit: true })}`).join(', ')}`
+  const others = appliedLoadsText(loads, system, leadingLoad(loads))
+  return others === '' ? null : `FPF load with ${others}`
 }
