@@ -1,8 +1,9 @@
 // The numbers of the calculation trail in the viewer's unit system. The
 // engine reports each value with its SI unit; this maps that unit to a
-// display quantity of core/units.
+// display quantity of core/units. Each step also has a headline: the
+// number its row shows before it is opened.
 import { formatDecimal, formatQuantity, unitOf, type Quantity, type UnitSystem } from '../../../../core/units'
-import type { TrailUnit, TrailValue } from '../../calc'
+import type { CalculationStep, TrailUnit, TrailValue } from '../../calc'
 
 const QUANTITY_OF_UNIT: Record<Exclude<TrailUnit, '' | '°'>, Quantity> = {
   N: 'force',
@@ -32,4 +33,23 @@ export function shownValue({ value, unit }: Pick<TrailValue, 'value' | 'unit'>, 
 export function shownText(value: Pick<TrailValue, 'value' | 'unit'>, system: UnitSystem): string {
   const shown = shownValue(value, system)
   return shown.unit === '' ? shown.value : `${shown.value} ${shown.unit}`
+}
+
+export interface StepHeadline extends ShownValue {
+  readonly symbol: string
+}
+
+/**
+ * What a step's row shows: a check its safety factor; R6 the preload range
+ * FMmin – FMmax; another step that only calculates its result, the last
+ * trail value; a step without values a dash.
+ */
+export function stepHeadline(step: CalculationStep, system: UnitSystem): StepHeadline {
+  if (step.check) return { symbol: 'SF', value: formatDecimal(step.check.safetyFactor, 2, true), unit: '' }
+  if (step.id === 'preload-range' && step.values.length === 2) {
+    const [min, max] = step.values.map((v) => shownValue(v, system))
+    return { symbol: 'FM', value: `${min.value} – ${max.value}`, unit: max.unit }
+  }
+  const last = step.values.at(-1)
+  return last ? { symbol: last.symbol, ...shownValue(last, system) } : { symbol: '', value: '—', unit: '' }
 }

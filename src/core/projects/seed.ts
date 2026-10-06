@@ -121,6 +121,7 @@ const BOLT_DESIGN = {
   interfaceFriction: 0.15,
   surfaceRoughness: 'rz-10-to-40',
   loadIntroduction: 'middle',
+  frictionInterfaces: 1,
 }
 
 /** Fields that differ from BOLT_DESIGN. */
@@ -254,15 +255,15 @@ const REAR_UPRIGHT: Project = {
     calculation('BJ-0187', 'bolt', 'caliper-mount-pattern', [
       {
         at: '2026-10-01T09:40:00', by: AL, status: 'fail', title: '8-bolt pattern, LC3',
-        note: 'Helicoil inserts at all four M4 positions. The M4 screws slip in braking.',
-        figures: [['Bolts', '8'], ['u max', '16.46'], ['Governing', 'B8 (J3) in LC3'], ['Load cases', '4']],
+        note: 'Helicoils at the M4 positions. In braking the pattern slips: the friction comes almost entirely from the two M12s.',
+        figures: [['Bolts', '8'], ['u max', '3.28'], ['Governing', 'B8 (J3) in LC3'], ['Load cases', '4']],
         inputs: boltPatternInputs(FW27_TEMP_C, caliperMount([['J3', HELICOIL]], 'J3')),
         materialIds: ['ti-6al-4v', 'al-7075-t6'],
       },
       {
         at: '2026-10-05T11:05:00', by: AL, status: 'fail', title: '8-bolt pattern, LC3',
         note: 'Keenserts (outer thread M6×1 from the catalogue) at B4/B8 for pull-out. Slip in braking still governs: shear pins to follow.',
-        figures: [['Bolts', '8'], ['u max', '16.46'], ['Governing', 'B8 (J4) in LC3'], ['Load cases', '4']],
+        figures: [['Bolts', '8'], ['u max', '3.28'], ['Governing', 'B8 (J4) in LC3'], ['Load cases', '4']],
         inputs: boltPatternInputs(FW27_TEMP_C, caliperMount([
           ['J3', HELICOIL],
           ['J4', { ...CALIPER_SCREW, joint: { kind: 'insert', insert: 'key-locking', materialId: 'al-7075-t6', engagementMm: 8, outerThread: { nominalMm: 6, pitchMm: 1 } } }],
@@ -279,7 +280,7 @@ const REAR_UPRIGHT: Project = {
     approved('D-005', 'Ti-6Al-4V for wishbone clevis', 'Fatigue strength at temperature and α close to the steel pin (8.6 vs 11.1 µm/m·K).', '2026-10-04T17:02:00', { calculationId: 'MD-0012', rev: 'A' }),
     {
       id: 'D-006', title: 'Keensert inserts for M4 into 7075 upright', status: 'proposed', proposedBy: AL,
-      rationale: 'Higher pull-out than Helicoil in thin walls. Slip in braking still fails at the M4 positions.',
+      rationale: 'Higher pull-out than Helicoil and robust to reassembly; needs more wall. Slip in braking still fails for the pattern; shear pins proposed.',
       recordedAt: '2026-10-05T11:05:00', basis: { calculationId: 'BJ-0187', rev: 'B' },
     },
     {
@@ -309,11 +310,11 @@ const OTHER_PROJECTS: Project[] = [
       ]),
       calculation('BJ-0181', 'bolt', 'clamp-screws', [
         { at: '2026-10-04T17:05:00', by: MR, status: 'fail', title: 'M5 8.8 through-bolt',
-          note: 'Busbar clamped on the PA66 boss: the washer crushes the boss. Compression limiter needed; creep to be tested.',
-          figures: [['Bolt', 'M5 8.8'], ['u max', '1.08'], ['Governing', 'R10 Surface pressure under head and nut'], ['MA', '5.8', 'N·m']],
+          note: 'Busbar clamped on the PA66 boss. pG 60 MPa for PA66-GF30 is an assumed creep limit at 85 °C, to be confirmed by test: even so the washer crushes the boss. Compression limiter needed.',
+          figures: [['Bolt', 'M5 8.8'], ['u max', '3.43'], ['Governing', 'R10 Surface pressure under head and nut'], ['MA', '5.8', 'N·m']],
           inputs: boltJointInputs([-30, 85], {
             thread: { nominalMm: 5, pitchMm: 0.8 }, propertyClass: '8.8', washers: true, outerDiameterMm: 14,
-            plates: [{ materialId: 'cu-etp', thicknessMm: 3 }, { materialId: 'pa66-gf30', thicknessMm: 8 }],
+            plates: [{ materialId: 'cu-etp', thicknessMm: 3 }, { materialId: 'pa66-gf30', thicknessMm: 8, limitingPressureMPa: 60 }],
           }, { axialMaxN: 800, transverseN: 150, transverseVariation: 'static' }),
           materialIds: ['cu-etp', 'pa66-gf30'] },
       ]),

@@ -127,14 +127,16 @@ export interface LimitingSurfacePressure {
  * LIMITING_SURFACE_PRESSURE_MPA, else estimated as its tensile strength Rm.
  * UNSURE: the estimate is rough (Table A9 values lie roughly between 0.75·Rm
  * for high-strength aluminium and 1.5·Rm for structural steel), so a check
- * that relies on it is never better than 'warn'. null when none of these is
- * known (composites, polymers).
+ * that relies on it is never better than 'warn'. Only metals are estimated:
+ * a polymer or composite creeps under bearing pressure far below its
+ * tensile strength, so for those pG must be entered (else null).
  */
 export function limitingSurfacePressure(material: JointMaterial): LimitingSurfacePressure | null {
   if (material.limitingSurfacePressureMPa !== undefined) return { valueMPa: material.limitingSurfacePressureMPa, source: 'input' }
   const tabulated = LIMITING_SURFACE_PRESSURE_MPA[material.id]
   if (tabulated !== undefined) return { valueMPa: tabulated, source: 'table' }
-  return material.tensileStrengthMPa === null ? null : { valueMPa: material.tensileStrengthMPa, source: 'estimate' }
+  const metal = material.family !== 'polymer' && material.family !== 'composite'
+  return metal && material.tensileStrengthMPa !== null ? { valueMPa: material.tensileStrengthMPa, source: 'estimate' } : null
 }
 
 /**

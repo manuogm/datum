@@ -4,12 +4,12 @@ import {
   Report, ReportFacts, ReportFigure, ReportSection, ReportSignOff, ReportSummary, ReportSummaryCell, ReportTitleBlock,
   ReportWarnings, reportStyles as styles,
 } from '../../../../app/report'
-import { formatDecimal, formatQuantity, unitOf, type UnitSystem } from '../../../../core/units'
+import { formatQuantity, unitOf, type UnitSystem } from '../../../../core/units'
 import type { BoltedJointAnalysis } from '../../calc'
 import { jointFacts } from '../logic/designFacts'
 import { jointDetail, jointTitle } from '../logic/labels'
 import { jointWarnings } from '../logic/reportWarnings'
-import { PROJECT_STATUS } from '../logic/verdict'
+import { formatUtilisation, PROJECT_STATUS } from '../logic/verdict'
 import { JointDiagram } from '../single/JointDiagram'
 import { SectionDiagram } from '../single/SectionDiagram'
 import type { BoltInputs } from '../state/boltInputs'
@@ -34,14 +34,16 @@ export function JointReport({ analysis, inputs, system }: JointReportProps) {
       <ReportTitleBlock title="Bolted Joint Report" subtitle={`${jointTitle(design)} · ${jointDetail(design)}`} meta={[['Mode', 'Single joint'], ['Units', unitsLine(system)]]} />
 
       <ReportSummary status={status} headline={STATUS_HEADLINE[status]} warnings={warnings.length} warningsSection={4}>
-        <ReportSummaryCell label="GOVERNING" value={governing?.rStep ?? '—'} note={governing ? `${governing.title}, u ${formatDecimal(summary.utilisation, 2, true)}` : undefined} />
+        <ReportSummaryCell label="GOVERNING" value={governing?.rStep ?? '—'} note={governing ? `${governing.title}, u ${formatUtilisation(summary.utilisation)}` : undefined} />
         <ReportFigure label="PRELOAD FM,MIN" value={formatQuantity('force', system, preload.assemblyMinN)} unit={unitOf('force', system)} />
         <ReportFigure label="TORQUE MA" value={formatQuantity('torque', system, preload.tighteningTorqueNm)} unit={unitOf('torque', system)} />
       </ReportSummary>
 
       <div className={styles.columns}>
         <ReportSection heading="1 · Inputs">
-          <ReportFacts facts={jointFacts(inputs, system)} />
+          <div className={report.facts}>
+            <ReportFacts facts={jointFacts(inputs, system)} />
+          </div>
         </ReportSection>
         <ReportSection heading="2 · Section A–A and joint diagram" note="section to scale">
           <div className={report.drawings}>
@@ -55,7 +57,7 @@ export function JointReport({ analysis, inputs, system }: JointReportProps) {
         </ReportSection>
       </div>
 
-      <ReportSection heading="3 · Calculation, VDI 2230-1 R0 … R13">
+      <ReportSection heading="3 · Calculation, VDI 2230-1 R0 … R13" breakable>
         <TrailTable steps={steps} system={system} />
       </ReportSection>
 

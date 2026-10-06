@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { DEFAULT_BOLT_INPUTS, DEFAULT_PATTERN } from '../state/boltInputs'
+import { DEFAULT_BOLT_INPUTS } from '../state/boltInputs'
+import { PATTERN_MISSING_THREAD } from '../testFixtures'
 import { jointFacts } from './designFacts'
 
 describe('jointFacts', () => {
@@ -15,7 +16,7 @@ describe('jointFacts', () => {
   })
 
   it('flags a missing insert outer thread', () => {
-    const keensert = { ...DEFAULT_BOLT_INPUTS, joint: { ...DEFAULT_BOLT_INPUTS.joint, design: DEFAULT_PATTERN.jointTypes[3].design } }
+    const keensert = { ...DEFAULT_BOLT_INPUTS, joint: { ...DEFAULT_BOLT_INPUTS.joint, design: PATTERN_MISSING_THREAD.pattern.jointTypes[3].design } }
     expect(jointFacts(keensert, 'si').find((f) => f.label === 'Insert outer thread')).toMatchObject({ value: 'not given', warn: true })
   })
 })

@@ -6,12 +6,12 @@ import {
   Report, ReportFacts, ReportFigure, ReportSection, ReportSignOff, ReportSummary, ReportSummaryCell, ReportTitleBlock,
   ReportWarnings, reportStyles as styles,
 } from '../../../../app/report'
-import { formatDecimal, formatQuantity, unitOf, type Quantity, type UnitSystem } from '../../../../core/units'
+import { formatQuantity, unitOf, type Quantity, type UnitSystem } from '../../../../core/units'
 import type { Vector3 } from '../../pattern'
 import type { BoltResults } from '../logic/boltResults'
 import { jointDetail, jointTitle } from '../logic/labels'
 import { patternWarnings } from '../logic/reportWarnings'
-import { governingCase, patternStatus, PROJECT_STATUS } from '../logic/verdict'
+import { formatUtilisation, governingCase, patternStatus, PROJECT_STATUS } from '../logic/verdict'
 import { PatternPlan } from '../pattern/PatternPlan'
 import type { BoltInputs } from '../state/boltInputs'
 import { STANDARDS, STATUS_HEADLINE, unitsLine } from './reportShared'
@@ -23,7 +23,6 @@ interface PatternReportProps {
   system: UnitSystem
 }
 
-const ratio = (value: number) => formatDecimal(value, 2, true)
 
 export function PatternReport({ inputs, results, system }: PatternReportProps) {
   const { pattern } = inputs
@@ -46,7 +45,7 @@ export function PatternReport({ inputs, results, system }: PatternReportProps) {
 
       <ReportSummary status={status} headline={STATUS_HEADLINE[status]} warnings={warnings.length} warningsSection={6}>
         <ReportSummaryCell label="GOVERNING" value={`${bolt.bolt.id} (${bolt.bolt.jointTypeId})`} note={`${loadCase.id} ${loadCase.name}${governingStep ? ` · ${governingStep.rStep}` : ''}`} />
-        <ReportFigure label="U MAX" value={ratio(bolt.utilisation)} unit="" />
+        <ReportFigure label="U MAX" value={formatUtilisation(bolt.utilisation)} unit="" />
         <ReportFigure label="BOLTS" value={String(pattern.bolts.length)} unit={`in ${pattern.jointTypes.length} types`} />
       </ReportSummary>
 
@@ -88,7 +87,7 @@ export function PatternReport({ inputs, results, system }: PatternReportProps) {
                 <td className={styles.number}>{vector('torque', c.momentNm)}</td>
                 <td className={styles.number}>{vector('length', c.loadPointMm)}</td>
                 <td className={styles.number}>{a.ok ? a.value.governing.bolt.id : '—'}</td>
-                <td className={styles.number}>{a.ok ? ratio(a.value.governing.utilisation) : '—'}</td>
+                <td className={styles.number}>{a.ok ? formatUtilisation(a.value.governing.utilisation) : '—'}</td>
               </tr>
             ))}
           </tbody>
@@ -116,7 +115,7 @@ export function PatternReport({ inputs, results, system }: PatternReportProps) {
                   <td>{b.bolt.jointTypeId}</td>
                   <td className={styles.number}>{force(b.load.axialN)}</td>
                   <td className={styles.number}>{force(b.load.shearN)}</td>
-                  <td className={styles.number}>{ratio(b.utilisation)}</td>
+                  <td className={styles.number}>{formatUtilisation(b.utilisation)}</td>
                   <td className={styles.source}>{step ? `${step.rStep} ${step.title}` : ''}</td>
                 </tr>
               )
@@ -125,7 +124,7 @@ export function PatternReport({ inputs, results, system }: PatternReportProps) {
         </table>
       </ReportSection>
 
-      <ReportSection heading={`5 · Calculation of ${bolt.bolt.id} in ${loadCase.id}, VDI 2230-1 R0 … R13`}>
+      <ReportSection heading={`5 · Calculation of ${bolt.bolt.id} in ${loadCase.id}, VDI 2230-1 R0 … R13`} breakable>
         <TrailTable steps={bolt.analysis.steps} system={system} />
       </ReportSection>
 

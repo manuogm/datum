@@ -147,8 +147,13 @@
   break-inside: avoid;
 }
 
+.breakable {
+  break-inside: auto;
+}
+
 .heading {
   margin: 0;
+  break-after: avoid;
   font-size: var(--fs-12);
   font-weight: var(--weight-semibold);
 }
@@ -300,4 +305,41 @@
   color: var(--text-faint);
   font-family: var(--font-mono);
   font-size: var(--fs-9);
+}
+
+/* Narrow screens (never print): the report reflows into one column so it
+   reads on a phone; wide tables scroll inside their section. */
+@media screen and (max-width: 820px) {
+  .titleBlock {
+    flex-direction: column;
+  }
+
+  .summary {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .summary > div:nth-child(odd) {
+    border-left: 0;
+  }
+
+  .summary > div:nth-child(n + 3) {
+    border-top: var(--border-width) solid var(--border);
+  }
+
+  .columns {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .section {
+    min-width: 0;
+    overflow-x: auto;
+  }
+
+  .table {
+    min-width: calc(var(--sheet-width) - 2 * var(--space-56));
+  }
+
+  .signatures {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }

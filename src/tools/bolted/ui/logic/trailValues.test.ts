@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest'
-import { shownText, shownValue } from './trailValues'
+import { expectOk } from '../../../../core/testing'
+import { DEFAULT_BOLT_INPUTS } from '../state/boltInputs'
+import { analyseJoint } from './boltResults'
+import { shownText, shownValue, stepHeadline } from './trailValues'
 
 describe('shownValue', () => {
   it('shows each trail unit in the viewer’s system', () => {
@@ -15,5 +18,17 @@ describe('shownValue', () => {
     expect(shownValue({ value: 0.3219, unit: '' }, 'imperial')).toEqual({ value: '0.32', unit: '' })
     expect(shownText({ value: 33.04, unit: '°' }, 'si')).toBe('33.0 °')
     expect(shownText({ value: 1.4512, unit: '' }, 'si')).toBe('1.45')
+  })
+})
+
+describe('stepHeadline', () => {
+  const steps = expectOk(analyseJoint(DEFAULT_BOLT_INPUTS, 'si')).steps
+  const headline = (id: string) => stepHeadline(steps.find((s) => s.id === id)!, 'si')
+
+  it('shows a check\'s safety factor, the preload range and otherwise the result', () => {
+    expect(headline('slip')).toEqual({ symbol: 'SF', value: expect.stringMatching(/^\d\.\d\d$/), unit: '' })
+    expect(headline('preload-range')).toEqual({ symbol: 'FM', value: expect.stringMatching(/^\d+\.\d\d – \d+\.\d\d$/), unit: 'kN' })
+    expect(headline('tightening-torque')).toMatchObject({ symbol: 'MA', unit: 'N·m' })
+    expect(headline('engagement')).toEqual({ symbol: '', value: '—', unit: '' })
   })
 })

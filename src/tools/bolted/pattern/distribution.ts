@@ -12,8 +12,13 @@ import type { BoltLoad, CentroidLoad, PatternLoadCase, PatternProperties } from 
  * - axial loads vary linearly over the pattern, with the neutral axis through
  *   the pattern centroid (no prying, no shift of the neutral axis towards the
  *   compressed edge, which a bolted flange shows once the plate lifts);
- * - in-plane loads: direct shear F/n plus torsion Mz·r/Σr² about the centroid
- *   (elastic method, not the instantaneous-centre method).
+ * - in-plane loads: direct shear plus torsion about the centroid (elastic
+ *   method, not the instantaneous-centre method). With equal weights this is
+ *   F/n + Mz·r/Σr². analysePattern.ts weights each bolt by its slip capacity
+ *   (the friction its residual clamp load can carry), because a friction-grip
+ *   joint slips as a whole: up to slip, the friction redistributes from a
+ *   lightly clamped bolt (e.g. an M4) to the heavily clamped ones (e.g. an
+ *   M12), which share by bolt position alone would ignore.
  */
 
 const N_MM_PER_N_M = 1000
@@ -93,27 +98,55 @@ function axialGradient(properties: PatternProperties, momentNmm: { x: number; y:
 /**
  * Force on each bolt from the load at the centroid:
  * - axial: FA = Fz/n + gx·x + gy·y (see axialGradient);
- * - shear: Q = (Fx, Fy)/n + Mz × r / Σr² = (Fx/n − Mz·y/J, Fy/n + Mz·x/J).
+ * - shear: shares in proportion to `shearWeights` (equal when omitted) about
+ *   the weighted centroid c, with r_i from c:
+ *   Q_i = w_i·F/Σw + w_i·Mz,c × r_i / Σ(w·r²),  Mz,c = Mz + (centroid − c) × F.
+ *   With equal weights: Q = (Fx/n − Mz·y/J, Fy/n + Mz·x/J).
+ *   If no bolt has weight, or the weighted bolts cannot carry the torque
+ *   (all weight on one bolt), the shares fall back to equal weights.
  */
-export function boltLoads(points: readonly Point[], properties: PatternProperties, load: CentroidLoad): Result<readonly BoltLoad[]> {
+export function boltLoads(
+  points: readonly Point[], properties: PatternProperties, load: CentroidLoad, shearWeights?: readonly number[],
+): Result<readonly BoltLoad[]> {
   const n = points.length
   const m = { x: load.momentNm.x * N_MM_PER_N_M, y: load.momentNm.y * N_MM_PER_N_M, z: load.momentNm.z * N_MM_PER_N_M }
   if (m.z !== 0 && properties.polarMm2 <= 0) return fail('A single bolt position cannot carry a torque Mz about the pattern centroid.')
   const gradient = axialGradient(properties, m)
   if (!gradient.ok) return gradient
-  const torsionPerMm2 = properties.polarMm2 > 0 ? m.z / properties.polarMm2 : 0
-  return ok(points.map((p) => {
+  const shears = shearShares(points, properties.centroidMm, load.forceN, m.z, shearWeights)
+  return ok(points.map((p, i) => {
     const x = p.xMm - properties.centroidMm.x
     const y = p.yMm - properties.centroidMm.y
-    const shearXN = load.forceN.x / n - torsionPerMm2 * y
-    const shearYN = load.forceN.y / n + torsionPerMm2 * x
     return {
       xMm: x,
       yMm: y,
       axialN: load.forceN.z / n + gradient.value.x * x + gradient.value.y * y,
-      shearXN,
-      shearYN,
-      shearN: Math.hypot(shearXN, shearYN),
+      shearXN: shears[i].x,
+      shearYN: shears[i].y,
+      shearN: Math.hypot(shears[i].x, shears[i].y),
     }
   }))
+}
+
+/** Weighted elastic shear sharing (see boltLoads); torque in N·mm about the geometric centroid. */
+function shearShares(
+  points: readonly Point[], centroidMm: PatternProperties['centroidMm'], force: { x: number; y: number },
+  torqueNmm: number, weights?: readonly number[],
+): readonly { x: number; y: number }[] {
+  const equal = points.map(() => 1)
+  const shares = (w: readonly number[]) => {
+    const total = w.reduce((sum, wi) => sum + wi, 0)
+    const c = { x: points.reduce((s, p, i) => s + w[i] * p.xMm, 0) / total, y: points.reduce((s, p, i) => s + w[i] * p.yMm, 0) / total }
+    const torque = torqueNmm + (centroidMm.x - c.x) * force.y - (centroidMm.y - c.y) * force.x
+    const polar = points.reduce((s, p, i) => s + w[i] * ((p.xMm - c.x) ** 2 + (p.yMm - c.y) ** 2), 0)
+    if (torque !== 0 && polar <= 0) return null
+    const perMm2 = polar > 0 ? torque / polar : 0
+    return points.map((p, i) => ({
+      x: w[i] * (force.x / total - perMm2 * (p.yMm - c.y)),
+      y: w[i] * (force.y / total + perMm2 * (p.xMm - c.x)),
+    }))
+  }
+  const usable = weights && weights.some((w) => w > 0) ? shares(weights) : null
+  // Equal weights always work here: boltLoads has already rejected a torque on a single bolt position.
+  return usable ?? shares(equal) ?? points.map(() => ({ x: 0, y: 0 }))
 }

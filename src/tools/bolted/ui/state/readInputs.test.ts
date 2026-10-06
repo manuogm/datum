@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { PATTERN_WITH_KEENSERT } from '../testFixtures'
+import { PATTERN_MISSING_THREAD, PATTERN_WITH_KEENSERT } from '../testFixtures'
 import { DEFAULT_BOLT_INPUTS, DEFAULT_PATTERN } from './boltInputs'
 import { boltInputsFrom } from './readInputs'
 
@@ -12,8 +12,19 @@ describe('boltInputsFrom', () => {
   })
 
   it('keeps an outer thread that was not entered as not entered', () => {
-    const j4 = boltInputsFrom(viaJson(DEFAULT_BOLT_INPUTS)).pattern.jointTypes[3].design.joint
+    const j4 = boltInputsFrom(viaJson(PATTERN_MISSING_THREAD)).pattern.jointTypes[3].design.joint
     expect(j4).toMatchObject({ kind: 'insert', insert: 'key-locking', outerThread: null })
+  })
+
+  it('keeps an entered pG and qF, and gives older saves one slip interface', () => {
+    const design = DEFAULT_BOLT_INPUTS.joint.design
+    const entered = {
+      ...DEFAULT_BOLT_INPUTS,
+      joint: { ...DEFAULT_BOLT_INPUTS.joint, design: { ...design, frictionInterfaces: 2, plates: [{ materialId: 'pa66-gf30', thicknessMm: 8, limitingPressureMPa: 60 }] } },
+    }
+    expect(boltInputsFrom(viaJson(entered))).toEqual(entered)
+    const { frictionInterfaces: _omitted, ...older } = design
+    expect(boltInputsFrom({ joint: { design: older } }).joint.design.frictionInterfaces).toBe(1)
   })
 
   it('keeps the default for each malformed field of the joint', () => {

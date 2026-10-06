@@ -18,6 +18,11 @@ export const REVIEW_UTILISATION = 0.85
 
 export type UtilisationTone = 'ok' | 'warn' | 'bad'
 
+/** '0.87', or '∞' when the engine reports no margin at all (a safety factor of 0 or less). */
+export function formatUtilisation(utilisation: number): string {
+  return Number.isFinite(utilisation) ? formatDecimal(utilisation, 2, true) : '∞'
+}
+
 /** Failed and marginal checks keep their own tone; a passing bolt above the review limit shows amber. */
 export function utilisationTone(utilisation: number, status: CheckStatus): UtilisationTone {
   if (status === 'fail') return 'bad'
@@ -66,7 +71,7 @@ export function jointHeadline({ summary, steps }: Pick<BoltedJointAnalysis, 'sum
   const checks = `${summary.checksPassed} of ${summary.checksTotal} checks pass`
   if (!governing) return { title: `${VERDICT_WORD[summary.status]}: VDI 2230 checks`, detail: checks }
   const title = summary.status === 'pass' ? 'Passes every VDI 2230 check' : `${VERDICT_WORD[summary.status]}: ${governing.title}`
-  return { title, detail: `${checks} · ${governing.rStep} governs at u ${formatDecimal(summary.utilisation, 2, true)}` }
+  return { title, detail: `${checks} · ${governing.rStep} governs at u ${formatUtilisation(summary.utilisation)}` }
 }
 
 /** What the results say about a pattern's governing bolt in a load case. */
@@ -75,7 +80,7 @@ export function boltHeadline({ bolt, analysis, utilisation, status }: PatternBol
   const step = analysis.steps.find((s) => s.id === analysis.summary.governing)
   const check = step ? `${step.rStep} ${step.title}` : 'A check'
   const title = `Governing: ${bolt.id} (${bolt.jointTypeId})`
-  if (status === 'fail') return { tone, title, detail: `${check} fails in ${loadCaseId}, u ${formatDecimal(utilisation, 2, true)}` }
+  if (status === 'fail') return { tone, title, detail: `${check} fails in ${loadCaseId}, u ${formatUtilisation(utilisation)}` }
   if (status === 'warn') return { tone, title, detail: `${check} is marginal in ${loadCaseId}` }
   if (tone === 'warn') return { tone, title, detail: `Above the ${formatDecimal(REVIEW_UTILISATION, 2, true)} review limit in ${loadCaseId}` }
   return { tone, title, detail: `Every check passes in ${loadCaseId}` }

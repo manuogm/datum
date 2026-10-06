@@ -6,7 +6,8 @@
 // legend is a round force). The layout returns the frame's SVG coordinates
 // (y down).
 import { niceStep, type Rect, type Segment } from '../../../../app/charts'
-import { boltLoads, loadAtCentroid, patternProperties } from '../../pattern'
+import { ok } from '../../../../core/result'
+import { boltLoads, loadAtCentroid, patternProperties, type BoltPatternAnalysis } from '../../pattern'
 import type { LoadCaseSpec, PatternSpec } from '../state/boltInputs'
 import type { Point } from './jointDiagram'
 
@@ -62,13 +63,14 @@ export interface PlanLayout {
 }
 
 /**
- * The plan of a pattern under a load case. The bolt forces come from the
- * pattern engine's load sharing, which does not need the joint types, so the
- * plan shows them even while a joint type cannot be analysed.
+ * The plan of a pattern under a load case, with the bolt forces of its
+ * analysis (shear shared by slip capacity, as in the results table). While a
+ * joint type cannot be analysed there are no slip capacities, so the plan
+ * shows the shear shared by bolt position alone.
  */
-export function planInputOf(pattern: PatternSpec, loadCase: LoadCaseSpec): PlanInput {
+export function planInputOf(pattern: PatternSpec, loadCase: LoadCaseSpec, analysis: BoltPatternAnalysis | null): PlanInput {
   const properties = patternProperties(pattern.bolts)
-  const loads = boltLoads(pattern.bolts, properties, loadAtCentroid(loadCase, properties.centroidMm))
+  const loads = analysis ? ok(analysis.bolts.map((b) => b.load)) : boltLoads(pattern.bolts, properties, loadAtCentroid(loadCase, properties.centroidMm))
   const nominalMm = (jointTypeId: string) => pattern.jointTypes.find((j) => j.id === jointTypeId)?.design.thread.nominalMm ?? 0
   return {
     bolts: pattern.bolts.map((bolt, i) => ({

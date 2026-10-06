@@ -157,7 +157,7 @@
 .boltRing {
   fill: var(--surface);
   stroke: var(--tone);
-  stroke-width: 2.5px;
+  stroke-width: var(--chart-stroke-ring);
 }
 
 .boltMark {
@@ -171,11 +171,11 @@
 }
 
 .dashed {
-  stroke-dasharray: 2 2;
+  stroke-dasharray: var(--chart-dash-fine);
 }
 
 .selected .boltRing {
-  stroke-width: 4px;
+  stroke-width: var(--chart-stroke-ring-selected);
 }
 
 .boltHit {

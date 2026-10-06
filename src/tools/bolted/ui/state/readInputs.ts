@@ -44,7 +44,9 @@ function asPlate(value: unknown): PlateSpec | null {
   const plate = fields(value)
   const materialId = asMaterialId(plate.materialId)
   const thicknessMm = asNumber(plate.thicknessMm)
-  return materialId !== null && thicknessMm !== null ? { materialId, thicknessMm } : null
+  const pG = asNumber(plate.limitingPressureMPa)
+  if (materialId === null || thicknessMm === null) return null
+  return pG === null ? { materialId, thicknessMm } : { materialId, thicknessMm, limitingPressureMPa: pG }
 }
 
 function asJointKind(value: unknown): JointKindSpec | null {
@@ -80,6 +82,7 @@ function jointDesignFrom(value: unknown, d: JointDesignSpec = DEFAULT_JOINT_DESI
     threadFriction: asNumber(design.threadFriction) ?? d.threadFriction,
     headFriction: asNumber(design.headFriction) ?? d.headFriction,
     interfaceFriction: asNumber(design.interfaceFriction) ?? d.interfaceFriction,
+    frictionInterfaces: asNumber(design.frictionInterfaces) ?? d.frictionInterfaces,
     surfaceRoughness: asRoughness(design.surfaceRoughness) ?? d.surfaceRoughness,
     loadIntroduction: asLoadIntroduction(design.loadIntroduction) ?? d.loadIntroduction,
   }

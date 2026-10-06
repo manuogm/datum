@@ -5,11 +5,11 @@
 import type { KeyboardEvent } from 'react'
 import { cx } from '../../../../app/ui'
 import type { Result } from '../../../../core/result'
-import { formatDecimal, formatQuantity, fromDisplay, toDisplay, unitOf, type UnitSystem } from '../../../../core/units'
+import { formatQuantity, fromDisplay, toDisplay, unitOf, type UnitSystem } from '../../../../core/units'
 import type { BoltPatternAnalysis } from '../../pattern'
 import { jointSymbolKind } from '../logic/labels'
 import { PLAN_FRAME as FRAME, planInputOf, planLayout } from '../logic/patternPlan'
-import { utilisationTone } from '../logic/verdict'
+import { formatUtilisation, utilisationTone } from '../logic/verdict'
 import { Arrow } from '../shared/Arrow'
 import styles from '../shared/diagram.module.css'
 import { JointSymbol } from '../shared/JointSymbol'
@@ -27,7 +27,7 @@ interface PatternPlanProps {
 
 export function PatternPlan({ pattern, loadCase, analysis, system, selectedBolt, onSelectBolt }: PatternPlanProps) {
   // Shear in display units, so the legend is a round force in kN or lbf.
-  const input = planInputOf(pattern, loadCase)
+  const input = planInputOf(pattern, loadCase, analysis.ok ? analysis.value : null)
   const shown = (n: number) => toDisplay('force', system, n)
   const layout = planLayout({ ...input, bolts: input.bolts.map((b) => ({ ...b, shearX: shown(b.shearX), shearY: shown(b.shearY) })) })
   const resultOf = (id: string) => (analysis.ok ? analysis.value.bolts.find((b) => b.bolt.id === id) ?? null : null)
@@ -56,7 +56,7 @@ export function PatternPlan({ pattern, loadCase, analysis, system, selectedBolt,
             {...(onSelectBolt && {
               role: 'button',
               tabIndex: 0,
-              'aria-label': `${bolt.id}, ${spec.jointTypeId}${result ? `, utilisation ${formatDecimal(result.utilisation, 2, true)}` : ''}`,
+              'aria-label': `${bolt.id}, ${spec.jointTypeId}${result ? `, utilisation ${formatUtilisation(result.utilisation)}` : ''}`,
               onClick: () => onSelectBolt(bolt.id),
               onKeyDown: (event: KeyboardEvent) => {
                 if (event.key !== 'Enter' && event.key !== ' ') return
@@ -76,7 +76,7 @@ export function PatternPlan({ pattern, loadCase, analysis, system, selectedBolt,
             </text>
             {result && (
               <text className={styles.toneText} x={bolt.centre.x + bolt.radius + 4} y={bolt.centre.y + bolt.radius + 18}>
-                u {formatDecimal(result.utilisation, 2, true)}
+                u {formatUtilisation(result.utilisation)}
               </text>
             )}
           </g>

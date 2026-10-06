@@ -13,13 +13,28 @@ import type {
  * faces), FA,min = 0 (the load case is applied and removed) and FQ = its
  * transverse share. Returns an explanation instead of a result when the
  * input is not usable; never throws.
+ *
+ * Two passes: the first finds each bolt's slip capacity FKR,min·qF·µT under
+ * its axial share; the second shares the in-plane load in proportion to
+ * those capacities (see distribution.ts) and runs the checks.
  */
 export function analyseBoltPattern(input: BoltPatternInput): Result<BoltPatternAnalysis> {
   const invalid = inputError(input)
   if (invalid) return fail(invalid)
   const properties = patternProperties(input.bolts)
   const centroidLoad = loadAtCentroid(input.loadCase, properties.centroidMm)
-  const loads = boltLoads(input.bolts, properties, centroidLoad)
+  const byPosition = boltLoads(input.bolts, properties, centroidLoad)
+  if (!byPosition.ok) return byPosition
+
+  // Pass 1: any in-plane load selects the transverse embedding values (VDI 2230 Table 5), as in pass 2.
+  const inPlane = byPosition.value.some((load) => load.shearN > 0)
+  const capacities: number[] = []
+  for (const [index, bolt] of input.bolts.entries()) {
+    const first = boltResult(input, bolt, { ...byPosition.value[index], shearN: inPlane ? 1 : 0 })
+    if (!first.ok) return first
+    capacities.push(first.value.slipCapacityN)
+  }
+  const loads = boltLoads(input.bolts, properties, centroidLoad, capacities)
   if (!loads.ok) return loads
 
   const results: PatternBoltResult[] = []
@@ -40,8 +55,9 @@ export function analyseBoltPattern(input: BoltPatternInput): Result<BoltPatternA
 function boltResult(input: BoltPatternInput, bolt: PatternBolt, load: BoltLoad): Result<PatternBoltResult> {
   const jointType = input.jointTypes.find((j) => j.id === bolt.jointTypeId)
   if (!jointType) return fail(`Bolt ${bolt.id} uses joint type ${bolt.jointTypeId}, which is not defined.`)
+  const { design } = jointType
   const analysis = analyseBoltedJoint({
-    ...jointType.design,
+    ...design,
     loads: {
       axialMaxN: Math.max(0, load.axialN),
       transverseN: load.shearN,
@@ -50,8 +66,11 @@ function boltResult(input: BoltPatternInput, bolt: PatternBolt, load: BoltLoad):
     unitSystem: input.unitSystem,
   })
   if (!analysis.ok) return fail(`Joint type ${jointType.id} (${jointType.name}): ${analysis.error}`)
-  const { summary } = analysis.value
-  return ok({ bolt, load, analysis: analysis.value, utilisation: summary.utilisation, status: summary.status })
+  const { summary, preload } = analysis.value
+  return ok({
+    bolt, load, analysis: analysis.value, utilisation: summary.utilisation, status: summary.status,
+    slipCapacityN: Math.max(0, preload.residualClampMinN) * (design.frictionInterfaces ?? 1) * design.interfaceFriction,
+  })
 }
 
 /** The first bolt with the highest utilisation. */

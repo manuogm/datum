@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { DEFAULT_JOINT_DESIGN, DEFAULT_PATTERN } from '../state/boltInputs'
-import { jointOfKind, needsOuterThread, parseThread, threadDesignation, threadOfNominal } from './designEdits'
+import { PATTERN_MISSING_THREAD } from '../testFixtures'
+import { jointOfKind, needsLimitingPressure, needsOuterThread, parseThread, threadDesignation, threadOfNominal, withLimitingPressure } from './designEdits'
 
 describe('threadOfNominal', () => {
   it('takes the coarse pitch', () => {
@@ -42,6 +43,22 @@ describe('parseThread', () => {
 
 describe('needsOuterThread', () => {
   it('flags only a key-locking insert without its outer thread', () => {
-    expect(DEFAULT_PATTERN.jointTypes.map((j) => needsOuterThread(j.design))).toEqual([false, false, false, true])
+    expect(PATTERN_MISSING_THREAD.pattern.jointTypes.map((j) => needsOuterThread(j.design))).toEqual([false, false, false, true])
+  })
+})
+
+describe('needsLimitingPressure', () => {
+  it('asks for pG of polymers and composites only', () => {
+    expect(needsLimitingPressure('pa66-gf30')).toBe(true)
+    expect(needsLimitingPressure('cfrp-t700-m21-qi')).toBe(true)
+    expect(needsLimitingPressure('al-7075-t6')).toBe(false)
+  })
+})
+
+describe('withLimitingPressure', () => {
+  const plate = { materialId: 'pa66-gf30', thicknessMm: 8 }
+  it('sets pG, and drops it when cleared', () => {
+    expect(withLimitingPressure(plate, 60)).toEqual({ ...plate, limitingPressureMPa: 60 })
+    expect(withLimitingPressure({ ...plate, limitingPressureMPa: 60 }, undefined)).toEqual(plate)
   })
 })

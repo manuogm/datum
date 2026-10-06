@@ -121,6 +121,51 @@ describe('equilibrium for an asymmetric pattern with mixed joint types', () => {
   })
 })
 
+describe('in-plane load shared by slip capacity', () => {
+  const m4Insert: JointDesign = {
+    ...common, thread: { nominalMm: 4 }, propertyClass: '12.9', headType: 'socket', outerDiameterMm: 12,
+    joint: { kind: 'insert', insert: 'helical-coil', material: al7075, engagementMm: 6 }, plates: [{ material: ti64, thicknessMm: 5 }],
+  }
+  // Two M12 through-bolts at x = ±60 and two M4 insert screws at y = ±40: symmetric, so both centroids are at the origin.
+  const mixed: BoltPatternInput = {
+    jointTypes: [{ id: 'J1', name: 'M12', design: m12Through }, { id: 'J3', name: 'M4', design: m4Insert }],
+    bolts: [
+      { id: 'A', xMm: -60, yMm: 0, jointTypeId: 'J1' }, { id: 'B', xMm: 60, yMm: 0, jointTypeId: 'J1' },
+      { id: 'C', xMm: 0, yMm: -40, jointTypeId: 'J3' }, { id: 'D', xMm: 0, yMm: 40, jointTypeId: 'J3' },
+    ],
+    loadCase: loadCase({ forceN: { x: 0, y: 4_000, z: 0 } }),
+  }
+
+  it('gives each bolt the same slip margin under a direct shear force', () => {
+    // Q_i = F·C_i/ΣC, so SG_i = FKR_i·µT / Q_i = ΣC/F for every bolt: the joint slips as a whole, not the M4s first.
+    const result = expectOk(analyseBoltPattern(mixed))
+    const capacities = result.bolts.map((b) => b.slipCapacityN)
+    const total = capacities.reduce((a, c) => a + c, 0)
+    expect(capacities[0]).toBeGreaterThan(5 * capacities[2]) // an M12 holds far more than an M4
+    for (const b of result.bolts) {
+      expect(b.load.shearN).toBeCloseTo((4_000 * b.slipCapacityN) / total, 6)
+      expect(b.analysis.steps.find((s) => s.id === 'slip')?.check?.safetyFactor).toBeCloseTo(total / 4_000, 6)
+    }
+  })
+
+  it('still balances force and torque with unequal weights', () => {
+    const lc = loadCase({ forceN: { x: 1_000, y: 4_000, z: 0 }, momentNm: { x: 0, y: 0, z: 300 }, loadPointMm: { x: 10, y: 5, z: 0 } })
+    const properties = patternProperties(mixed.bolts)
+    const load = loadAtCentroid(lc, properties.centroidMm)
+    const shares = expectOk(boltLoads(mixed.bolts, properties, load, [5, 5, 1, 0]))
+    const sum = (f: (l: (typeof shares)[number]) => number) => shares.reduce((acc, l) => acc + f(l), 0)
+    expect(sum((l) => l.shearXN)).toBeCloseTo(1_000, 6)
+    expect(sum((l) => l.shearYN)).toBeCloseTo(4_000, 6)
+    expect(sum((l) => l.xMm * l.shearYN - l.yMm * l.shearXN) / 1000).toBeCloseTo(load.momentNm.z, 6)
+    expect(shares[3].shearN).toBe(0) // no capacity, no share
+  })
+
+  it('falls back to sharing by position when no bolt has any slip capacity', () => {
+    const shares = expectOk(boltLoads(mixed.bolts, patternProperties(mixed.bolts), loadAtCentroid(mixed.loadCase, { x: 0, y: 0 }), [0, 0, 0, 0]))
+    for (const l of shares) expect(l.shearN).toBeCloseTo(1_000, 6)
+  })
+})
+
 describe('patterns that cannot carry the load, and invalid input', () => {
   const pair = [{ id: 'A', xMm: 0, yMm: 0, jointTypeId: 'J1' }, { id: 'B', xMm: 100, yMm: 0, jointTypeId: 'J1' }]
   const pairInput = (lc: PatternLoadCase): BoltPatternInput => ({ jointTypes: [{ id: 'J1', name: 'M12', design: m12Through }], bolts: pair, loadCase: lc })

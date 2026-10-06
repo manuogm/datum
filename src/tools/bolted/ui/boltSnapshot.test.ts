@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { expectError, expectOk } from '../../../core/testing'
 import { boltSnapshot } from './boltSnapshot'
 import { DEFAULT_BOLT_INPUTS } from './state/boltInputs'
-import { PATTERN_WITH_KEENSERT } from './testFixtures'
+import { PATTERN_MISSING_THREAD, PATTERN_WITH_KEENSERT } from './testFixtures'
 
 describe('boltSnapshot', () => {
   it('describes the single joint', () => {
@@ -31,6 +31,6 @@ describe('boltSnapshot', () => {
   })
 
   it("passes on the engine's explanation", () => {
-    expect(expectError(boltSnapshot({ ...DEFAULT_BOLT_INPUTS, mode: 'pattern' }))).toMatch(/outer thread/)
+    expect(expectError(boltSnapshot(PATTERN_MISSING_THREAD))).toMatch(/outer thread/)
   })
 })

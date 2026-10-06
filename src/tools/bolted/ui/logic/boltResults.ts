@@ -53,7 +53,8 @@ export function jointDesign(spec: JointDesignSpec, serviceTempC: TemperatureRang
   for (const plate of spec.plates) {
     const material = materialById(plate.materialId)
     if (!material.ok) return material
-    plates.push({ material: material.value, thicknessMm: plate.thicknessMm })
+    const pG = plate.limitingPressureMPa
+    plates.push({ material: pG === undefined ? material.value : { ...material.value, limitingSurfacePressureMPa: pG }, thicknessMm: plate.thicknessMm })
   }
   const joint = jointType(spec.joint)
   if (!joint.ok) return joint
@@ -69,6 +70,7 @@ export function jointDesign(spec: JointDesignSpec, serviceTempC: TemperatureRang
     threadFriction: spec.threadFriction,
     headFriction: spec.headFriction,
     interfaceFriction: spec.interfaceFriction,
+    frictionInterfaces: spec.frictionInterfaces,
     surfaceRoughness: spec.surfaceRoughness,
     loadIntroduction: { position: spec.loadIntroduction },
     serviceTempC,

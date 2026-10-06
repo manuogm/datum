@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest'
-import { DEFAULT_PATTERN } from '../state/boltInputs'
+import { expectOk } from '../../../../core/testing'
+import { DEFAULT_BOLT_INPUTS, DEFAULT_PATTERN } from '../state/boltInputs'
+import { PATTERN_MISSING_THREAD } from '../testFixtures'
+import { boltResults } from './boltResults'
 import { PLAN_FRAME as FRAME, planInputOf, planLayout, type PlanInput } from './patternPlan'
 
 const SQUARE: PlanInput = {
@@ -61,10 +64,17 @@ describe('planLayout', () => {
 describe('planInputOf', () => {
   it('shares the load case over the bolts even with a joint type left to complete', () => {
     const braking = DEFAULT_PATTERN.loadCases.find((c) => c.id === 'LC3')!
-    const input = planInputOf(DEFAULT_PATTERN, braking)
+    const input = planInputOf(PATTERN_MISSING_THREAD.pattern, braking, null)
     expect(input.bolts).toHaveLength(8)
     expect(input.bolts[0].nominalMm).toBe(12)
     expect(input.bolts.some((b) => b.shearY !== 0)).toBe(true)
     expect(input.inPlaneForce).toEqual(braking.forceN)
+  })
+
+  it('draws the shear the analysis shares out, as in the results table', () => {
+    const { loadCase, analysis } = boltResults(DEFAULT_BOLT_INPUTS, 'si').loadCases.find((c) => c.loadCase.id === 'LC3')!
+    const shared = expectOk(analysis)
+    const input = planInputOf(DEFAULT_PATTERN, loadCase, shared)
+    expect(input.bolts.map((b) => Math.hypot(b.shearX, b.shearY))).toEqual(shared.bolts.map((b) => b.load.shearN))
   })
 })

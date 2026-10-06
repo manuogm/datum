@@ -5,7 +5,7 @@
 import { Callout, cx, Marker, MonoLabel, Readout, ScoreBar } from '../../../../app/ui'
 import { formatDecimal, formatQuantity, unitOf, type UnitSystem } from '../../../../core/units'
 import type { BoltPatternAnalysis, PatternBoltResult } from '../../pattern'
-import { boltHeadline, utilisationTone } from '../logic/verdict'
+import { boltHeadline, formatUtilisation, utilisationTone } from '../logic/verdict'
 import { CalculationTrail } from '../shared/CalculationTrail'
 import type { LoadCaseSpec } from '../state/boltInputs'
 import styles from './pattern.module.css'
@@ -35,7 +35,7 @@ export function PatternResults({ analysis, loadCase, system, selectedBolt, onSel
           {headline.detail}
         </Callout>
         <div className={styles.readouts}>
-          <Readout label="Max utilisation" value={ratio(governing.utilisation)} />
+          <Readout label="Max utilisation" value={formatUtilisation(governing.utilisation)} />
           <Readout label="Min margin 1/u" value={ratio(1 / governing.utilisation)} size="sm" />
         </div>
       </section>
@@ -48,7 +48,7 @@ export function PatternResults({ analysis, loadCase, system, selectedBolt, onSel
               <Marker shape="dot" color={utilisationTone(t.utilisation, t.status)} size={6} />
               <span className={styles.byTypeId}>{t.jointTypeId}</span>
               <span>{t.name}</span>
-              <span className={styles.number}>{ratio(t.utilisation)}</span>
+              <span className={styles.number}>{formatUtilisation(t.utilisation)}</span>
             </div>
           ))}
         </div>
@@ -66,7 +66,7 @@ export function PatternResults({ analysis, loadCase, system, selectedBolt, onSel
         </thead>
         <tbody>
           {analysis.bolts.map((b) => (
-            <tr key={b.bolt.id} className={cx(b.bolt.id === selected.bolt.id && styles.selectedRow)}>
+            <tr key={b.bolt.id} className={cx(b.bolt.id === selected.bolt.id && styles.selectedRow)} onClick={() => onSelectBolt(b.bolt.id)}>
               <td>
                 <button type="button" className={styles.boltLink} onClick={() => onSelectBolt(b.bolt.id)} aria-pressed={b.bolt.id === selected.bolt.id}>
                   {b.bolt.id}
@@ -78,7 +78,7 @@ export function PatternResults({ analysis, loadCase, system, selectedBolt, onSel
               <td>
                 <span className={styles.utilisation}>
                   <ScoreBar value={Math.min(100, (100 * b.utilisation) / BAR_FULL_SCALE)} tone={tone(b)} width="compact" label={`${b.bolt.id} utilisation`} />
-                  {ratio(b.utilisation)}
+                  {formatUtilisation(b.utilisation)}
                 </span>
               </td>
             </tr>

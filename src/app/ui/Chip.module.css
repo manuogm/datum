@@ -48,6 +48,13 @@ button.chip:focus-visible {
   opacity: 0.35;
 }
 
+/* option: one choice of a row; the chosen one is outlined in accent */
+.option.selected {
+  border-color: var(--accent);
+  background: var(--accent-wash);
+  color: var(--text);
+}
+
 /* tag: static label such as a part name */
 .tag {
   padding: var(--space-5) var(--space-10);

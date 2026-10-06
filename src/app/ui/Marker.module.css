@@ -18,3 +18,8 @@
 .diamond {
   transform: rotate(45deg);
 }
+
+.line {
+  width: calc(var(--marker-size) * 2);
+  height: var(--chart-stroke);
+}

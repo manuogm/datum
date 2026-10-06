@@ -2,17 +2,18 @@
 // joint's inputs on the left, section A–A and the joint diagram in the
 // centre, the verdict and the calculation trail on the right.
 import type { Dispatch } from 'react'
-import { Badge, Callout, Column, ColumnHeader, ModeSwitch } from '../../../../app/ui'
+import { Badge, Callout, Column, ColumnHeader, LegendItem, Marker, ModeSwitch } from '../../../../app/ui'
 import { formatDecimal, formatQuantity, unitOf, type UnitSystem } from '../../../../core/units'
 import type { BoltedJointAnalysis } from '../../calc'
 import type { BoltResults } from '../logic/boltResults'
 import { BOLT_MODES, jointTitle, materialName } from '../logic/labels'
 import { DesignInputs } from '../shared/DesignInputs'
-import type { BoltInputs } from '../state/boltInputs'
+import type { BoltInputs, JointDesignSpec } from '../state/boltInputs'
 import type { BoltAction } from '../state/boltReducer'
 import { JointDiagram } from './JointDiagram'
 import { JointResults } from './JointResults'
 import { LoadsFields } from './LoadsFields'
+import { PressureInputs } from './PressureInputs'
 import { SectionDiagram } from './SectionDiagram'
 import styles from './single.module.css'
 
@@ -26,6 +27,7 @@ interface JointViewProps {
 export function JointView({ inputs, results, system, dispatch }: JointViewProps) {
   const { design, loads } = inputs.joint
   const analysis = results.joint.ok ? results.joint.value : null
+  const changeDesign = (changes: Partial<JointDesignSpec>) => dispatch({ type: 'design', target: { scope: 'joint' }, changes })
   return (
     <>
       <Column width="inputs" label="Inputs" header={<ModeSwitch modes={BOLT_MODES} mode={inputs.mode} onChange={(mode) => dispatch({ type: 'change', changes: { mode } })} />}>
@@ -33,7 +35,7 @@ export function JointView({ inputs, results, system, dispatch }: JointViewProps)
           design={design}
           system={system}
           clampLengthMm={analysis?.geometry.clampLengthMm ?? null}
-          onChange={(changes) => dispatch({ type: 'design', target: { scope: 'joint' }, changes })}
+          onChange={changeDesign}
         />
         <LoadsFields
           loads={loads}
@@ -46,7 +48,13 @@ export function JointView({ inputs, results, system, dispatch }: JointViewProps)
 
       <Column
         label="Joint section and joint diagram"
-        header={<ColumnHeader title="Joint section & joint diagram" meta={analysis ? `${jointTitle(design)} · Φn ${formatDecimal(analysis.loadFactor, 3, true)}` : jointTitle(design)} />}
+        header={
+          <ColumnHeader
+            title="Joint section & joint diagram"
+            meta={analysis ? `${jointTitle(design)} · Φn ${formatDecimal(analysis.loadFactor, 3, true)}` : jointTitle(design)}
+            actions={analysis && <DiagramLegend />}
+          />
+        }
       >
         {analysis ? (
           <Drawings analysis={analysis} inputs={inputs} system={system} />
@@ -75,8 +83,26 @@ export function JointView({ inputs, results, system, dispatch }: JointViewProps)
           />
         }
       >
-        {analysis && <JointResults analysis={analysis} system={system} />}
+        {analysis && (
+          <JointResults
+            analysis={analysis}
+            system={system}
+            stepInputs={{ 'surface-pressure': <PressureInputs design={design} system={system} onChange={changeDesign} /> }}
+          />
+        )}
       </Column>
+    </>
+  )
+}
+
+/** The joint diagram's lines, in the header bar like the Fit charts' legends. */
+function DiagramLegend() {
+  return (
+    <>
+      <LegendItem swatch={<Marker shape="line" color="text" />}>Bolt</LegendItem>
+      <LegendItem swatch={<Marker shape="line" color="hole" />}>Clamped parts</LegendItem>
+      <LegendItem swatch={<Marker shape="line" color="accent" />}>FA</LegendItem>
+      <LegendItem swatch={<Marker shape="line" color="ok" />}>FKR</LegendItem>
     </>
   )
 }

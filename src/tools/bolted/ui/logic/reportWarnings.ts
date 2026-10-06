@@ -1,9 +1,9 @@
 // The warnings of the printed report: every check of a joint that fails or
 // is marginal, in the engine's words; for a pattern, per load case, the bolts
 // that fail or are marginal grouped by the check that governs them.
-import { formatDecimal } from '../../../../core/units'
 import type { CalculationStep } from '../../calc'
 import type { LoadCaseResult } from './boltResults'
+import { formatUtilisation } from './verdict'
 
 export function jointWarnings(steps: readonly CalculationStep[]): string[] {
   return steps.filter((s) => s.status === 'fail' || s.status === 'warn').map((s) => `${s.rStep} ${s.title}: ${s.message}`)
@@ -21,6 +21,6 @@ export function patternWarnings(loadCases: readonly LoadCaseResult[]): string[] 
       const group = groups.get(key) ?? { ids: [], utilisation: 0 }
       groups.set(key, { ids: [...group.ids, bolt.bolt.id], utilisation: Math.max(group.utilisation, bolt.utilisation) })
     }
-    return [...groups].map(([verdict, { ids, utilisation }]) => `${name}: ${ids.join(', ')} ${verdict} (u up to ${formatDecimal(utilisation, 2, true)}).`)
+    return [...groups].map(([verdict, { ids, utilisation }]) => `${name}: ${ids.join(', ')} ${verdict} (u up to ${formatUtilisation(utilisation)}).`)
   })
 }

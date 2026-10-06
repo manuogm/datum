@@ -1,6 +1,7 @@
 // Tightening and contact: the method (with its tightening factor αA), the
-// lowest expected friction coefficients, the surface roughness behind
-// embedding, and where the axial load enters the clamped parts.
+// lowest expected friction coefficients and the number of interfaces that
+// carry shear by friction, the surface roughness behind embedding, and where
+// the axial load enters the clamped parts.
 import { InputWell, NumberInput, PanelSection, Select, ValueRow } from '../../../../app/ui'
 import { formatDecimal } from '../../../../core/units'
 import {
@@ -51,6 +52,19 @@ export function TighteningFields({ design, onChange }: TighteningFieldsProps) {
             }
           />
         ))}
+        <ValueRow
+          label="Slip interfaces qF"
+          value={
+            <InputWell>
+              <NumberInput
+                label="Slip interfaces qF"
+                decimals={0}
+                value={design.frictionInterfaces}
+                onChange={(value) => onChange({ frictionInterfaces: Math.max(1, Math.round(value)) })}
+              />
+            </InputWell>
+          }
+        />
       </div>
       <Select
         size="md"

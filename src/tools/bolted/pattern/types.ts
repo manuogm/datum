@@ -85,11 +85,13 @@ export interface BoltLoad {
 export interface PatternBoltResult {
   readonly bolt: PatternBolt
   readonly load: BoltLoad
-  /** VDI 2230 analysis with FA,max = max(0, axialN), FA,min = 0 and FQ = shearN. */
+  /** VDI 2230 analysis with FA,max = max(0, axialN), FA,min = 0 and FQ = shearN (shared by slip capacity). */
   readonly analysis: BoltedJointAnalysis
   /** Highest check utilisation of the bolt (1 = VDI requirement just met); 1/utilisation is its lowest margin. */
   readonly utilisation: number
   readonly status: Exclude<StepStatus, 'info'>
+  /** FKR,min·qF·µT: the transverse force this bolt's clamp load can hold by friction; the in-plane load is shared by it. */
+  readonly slipCapacityN: number
 }
 
 export interface JointTypeSummary {

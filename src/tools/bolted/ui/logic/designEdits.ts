@@ -1,8 +1,10 @@
 // Edits of a joint design that change more than the field touched: a new
 // nominal diameter takes its coarse pitch, a new joint kind keeps the part
 // material, and an insert's outer thread is typed as a thread designation.
-import { pitchesForMm, type InsertType, type ThreadSize } from '../../calc'
-import type { JointDesignSpec, JointKindSpec } from '../state/boltInputs'
+// Also the inputs a design cannot be checked without.
+import { materialById } from '../../../../core/materials'
+import { LIMITING_SURFACE_PRESSURE_MPA, pitchesForMm, type InsertType, type ThreadSize } from '../../calc'
+import type { JointDesignSpec, JointKindSpec, PlateSpec } from '../state/boltInputs'
 
 /** Thread engagement offered for a new tapped joint or insert: 1.5·d, a usual starting point. */
 const STARTING_ENGAGEMENT = 1.5
@@ -40,4 +42,17 @@ export function threadDesignation(thread: Required<ThreadSize>): string {
 /** A key-locking insert cannot be checked until its catalogue outer thread is entered. */
 export function needsOuterThread({ joint }: JointDesignSpec): boolean {
   return joint.kind === 'insert' && joint.insert === 'key-locking' && joint.outerThread === null
+}
+
+/** A polymer or composite part creeps, so its pG is not estimated: unless tabulated it must be entered. */
+export function needsLimitingPressure(materialId: string): boolean {
+  const material = materialById(materialId)
+  if (!material.ok || LIMITING_SURFACE_PRESSURE_MPA[materialId] !== undefined) return false
+  return material.value.family === 'polymer' || material.value.family === 'composite'
+}
+
+/** The plate with pG entered, or without it (back to the table value or estimate) when cleared. */
+export function withLimitingPressure(plate: PlateSpec, limitingPressureMPa: number | undefined): PlateSpec {
+  const base = { materialId: plate.materialId, thicknessMm: plate.thicknessMm }
+  return limitingPressureMPa === undefined ? base : { ...base, limitingPressureMPa }
 }

@@ -93,9 +93,17 @@ export function ReportFigure({ label, value, unit }: { label: string; value: str
   )
 }
 
-export function ReportSection({ heading, note, children }: { heading: string; note?: string; children: ReactNode }) {
+interface ReportSectionProps {
+  heading: string
+  note?: string
+  /** A long table that may continue on the next page; sections otherwise keep together. */
+  breakable?: boolean
+  children: ReactNode
+}
+
+export function ReportSection({ heading, note, breakable = false, children }: ReportSectionProps) {
   return (
-    <section className={styles.section}>
+    <section className={cx(styles.section, breakable && styles.breakable)}>
       <h2 className={styles.heading}>
         {heading} {note && <span className={styles.headingNote}>{note}</span>}
       </h2>

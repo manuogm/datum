@@ -132,6 +132,14 @@
   padding: var(--space-16) var(--space-20);
 }
 
+/* Once the columns wrap, the plan takes its drawn height instead of
+   stretching to the tallest column. */
+@media (max-width: 1200px) {
+  .plan {
+    flex: none;
+  }
+}
+
 @media (max-width: 900px) {
   .plan {
     min-height: var(--chart-height-stacked);
@@ -224,12 +232,21 @@
   cursor: pointer;
 }
 
-.boltLink:focus-visible {
-  outline: var(--border-width) solid var(--accent);
+/* The chosen bolt's row, marked like the chosen material in Materials. */
+.table tbody tr {
+  cursor: pointer;
 }
 
-.selectedRow td {
-  background: var(--surface-raised);
+.table tbody tr:hover td {
+  background: var(--surface-hover);
+}
+
+.table tbody tr.selectedRow td {
+  background: var(--accent-soft);
+}
+
+.table tbody tr.selectedRow td:first-child {
+  box-shadow: inset var(--underline-width) 0 0 var(--accent);
 }
 
 .utilisation {

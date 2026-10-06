@@ -17,10 +17,15 @@ const VDI = 'VDI 2230-1:2015'
 
 const value = (symbol: string, label: string, amount: number, unit: TrailUnit): TrailValue => ({ symbol, label, value: amount, unit })
 
-/** A check whose safety factor is capacity / demand. */
+/**
+ * A check whose safety factor is capacity / demand. With no capacity left
+ * (e.g. FKR,min ≤ 0: no clamp load at all) the safety factor is ≤ 0 and the
+ * utilisation infinite, so such a check always governs.
+ */
 function check(demand: TrailValue, capacity: TrailValue, required: number): StepCheck {
   const safetyFactor = capacity.value / demand.value
-  return { value: demand, limit: capacity, safetyFactor, requiredSafetyFactor: required, utilisation: required / safetyFactor }
+  const utilisation = safetyFactor > 0 ? required / safetyFactor : Number.POSITIVE_INFINITY
+  return { value: demand, limit: capacity, safetyFactor, requiredSafetyFactor: required, utilisation }
 }
 
 interface StepText {
@@ -120,7 +125,9 @@ function preloadChangesStep({ preload: p, input }: JointResults, f: BoltedFormat
     { id: 'preload-changes', rStep: 'R4', title: 'Preload changes', clause: `${VDI} R4, §5.4.2.1 Table 5 (embedding), §5.4.2.3 (temperature)` },
     [
       value('fZ', 'Plastic embedding', p.embeddingUm, 'µm'), value('FZ', 'Preload loss from embedding', p.embeddingLossN, 'N'),
-      value('ΔFVth', 'Preload loss from temperature', p.thermalLossN, 'N'), value('ΔFVth,gain', 'Preload gain from temperature', p.thermalGainN, 'N'),
+      value('ΔFVth,gain', 'Preload gain from temperature', p.thermalGainN, 'N'), value('ΔFVth', 'Preload loss from temperature', p.thermalLossN, 'N'),
+      // Last, as the step's headline: what R5 adds to the required preload.
+      value('FZ + ΔFVth', 'Total preload loss in service', p.embeddingLossN + p.thermalLossN, 'N'),
     ],
     `Embedding of ${f.embedding(p.embeddingUm)} costs FZ = fZ/(δS + δP) = ${f.force(p.embeddingLossN)}.${thermal}`,
   )
@@ -217,12 +224,13 @@ function surfacePressureStep({ bearings }: JointResults, f: BoltedFormat): Calcu
     value('pG', `Limiting pressure of ${b.material.name}`, b.limit?.valueMPa ?? 0, 'MPa'), REQUIRED_SAFETY.surfacePressure)
   const worst = bearings.reduce((a, b) => (sideCheck(b).safetyFactor < sideCheck(a).safetyFactor ? b : a))
   const stepCheck = sideCheck(worst)
-  const estimated = bearings.some((b) => b.limit?.source === 'estimate')
+  const estimatedOn = bearings.filter((b) => b.limit?.source === 'estimate').map((b) => b.material.name)
+  const estimated = estimatedOn.length > 0
   const status = checkStatus(stepCheck.safetyFactor, stepCheck.requiredSafetyFactor)
   return step(text, values,
     `Under the ${worst.side}, pmax = ${f.stress(worst.pressureMPa)} on ${worst.material.name} (pG = ${f.stress(stepCheck.limit.value)}): `
     + `SP = ${f.ratio(stepCheck.safetyFactor)}${stepCheck.safetyFactor < 1 ? ', the part will be crushed: add a washer or use a larger head' : ''}.`
-    + (estimated ? ' pG estimated as Rm: enter the value for the material to confirm.' : ''),
+    + (estimated ? ` pG of ${[...new Set(estimatedOn)].join(' and ')} estimated as Rm: enter the value to confirm.` : ''),
     stepCheck, estimated ? atBestWarn(status) : status)
 }
 

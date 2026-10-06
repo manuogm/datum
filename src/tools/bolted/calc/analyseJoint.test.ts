@@ -284,8 +284,35 @@ describe('behaviour', () => {
     expect(stepOf(a, 'surface-pressure').message).toMatch(/estimated/)
   })
 
+  it('does not estimate pG for a polymer: it creeps far below its tensile strength', () => {
+    const pa66 = expectOk(materialById('pa66-gf30')) // Rm 190 MPa, not in the pG table
+    const a = analyse({ ...exampleA, plates: [{ material: s355, thicknessMm: 12 }, { material: pa66, thicknessMm: 8 }] })
+    const step = stepOf(a, 'surface-pressure')
+    expect(step).toMatchObject({ status: 'warn', check: null })
+    expect(step.message).toMatch(/PA66-GF30: enter it/)
+    expect(analyse({ ...exampleA, plates: [{ material: s355, thicknessMm: 12 }, { material: { ...pa66, limitingSurfacePressureMPa: 40 }, thicknessMm: 8 }] })
+      .bearingPressures[1].limit).toEqual({ valueMPa: 40, source: 'input' })
+  })
+
   it('warns when the utilisation ν is above 90 %', () => {
     expect(stepOf(analyse({ ...exampleA, utilisation: 0.95 }), 'assembly-stress').status).toBe('warn')
+  })
+
+  it('makes a check with no capacity left govern with infinite utilisation', () => {
+    // FA 40 kN opens the joint (FA,sep 25.1 kN): FKR,min < 0, so SG < 0 and slip cannot be resisted at all.
+    const a = analyse({ ...exampleA, loads: { axialMaxN: 40_000, transverseN: 2_000 } })
+    const slip = stepOf(a, 'slip')
+    expect(slip.check?.safetyFactor).toBeLessThan(0)
+    expect(slip.check?.utilisation).toBe(Number.POSITIVE_INFINITY)
+    expect(slip.status).toBe('fail')
+    expect(a.summary.utilisation).toBe(Number.POSITIVE_INFINITY)
+    expect(['slip', 'separation']).toContain(a.summary.governing)
+  })
+
+  it('ends the preload-change step with the total loss R5 adds', () => {
+    const a = analyse(exampleA)
+    // FZ + ΔFVth = 3558.7 + 2161.7 = 5720.4 N
+    expectNear(stepOf(a, 'preload-changes').values.at(-1)?.value ?? 0, 5720.4)
   })
 
   it('writes the messages in imperial units on request', () => {

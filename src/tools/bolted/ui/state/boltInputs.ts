@@ -15,6 +15,12 @@ export type BoltMode = 'joint' | 'pattern'
 export interface PlateSpec {
   readonly materialId: string
   readonly thicknessMm: number
+  /**
+   * pG, the limiting surface pressure of this part (VDI 2230-1 R10), when
+   * entered. Omitted: from VDI 2230 Table A9 or estimated for a metal; a
+   * polymer or composite has no estimate, so it must be entered.
+   */
+  readonly limitingPressureMPa?: number
 }
 
 /** What the bolt screws into (see JointType in the engine). */
@@ -50,6 +56,8 @@ export interface JointDesignSpec {
   readonly threadFriction: number
   readonly headFriction: number
   readonly interfaceFriction: number
+  /** qF: number of interfaces that carry the transverse load by friction. */
+  readonly frictionInterfaces: number
   readonly surfaceRoughness: SurfaceRoughness
   readonly loadIntroduction: LoadIntroductionPosition
 }
@@ -119,6 +127,7 @@ export const DEFAULT_JOINT_DESIGN: JointDesignSpec = {
   threadFriction: 0.12,
   headFriction: 0.12,
   interfaceFriction: 0.15,
+  frictionInterfaces: 1,
   surfaceRoughness: 'rz-10-to-40',
   loadIntroduction: 'middle',
 }
@@ -133,8 +142,10 @@ const PATTERN_DESIGN: JointDesignSpec = {
 
 /**
  * The Bolt Pattern design's caliper mount: eight bolts of four joint types.
- * The Keensert's outer thread is left to the engineer: it comes from the
- * insert catalogue.
+ * The design's J4 is a Keensert, whose outer thread only the insert
+ * catalogue gives; so that the tool opens on a result rather than a
+ * question, the example's J4 is the plain tapped thread a Keensert would
+ * replace. Choosing Keensert in the editor asks for the outer thread.
  */
 export const DEFAULT_PATTERN: PatternSpec = {
   jointTypes: [
@@ -163,7 +174,7 @@ export const DEFAULT_PATTERN: PatternSpec = {
       id: 'J4',
       design: {
         ...PATTERN_DESIGN, thread: { nominalMm: 4, pitchMm: 0.7 }, propertyClass: '12.9',
-        joint: { kind: 'insert', insert: 'key-locking', materialId: 'al-7075-t6', engagementMm: 8, outerThread: null },
+        joint: { kind: 'tapped', materialId: 'al-7075-t6', engagementMm: 8 },
       },
     },
   ],

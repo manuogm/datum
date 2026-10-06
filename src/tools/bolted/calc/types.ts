@@ -263,7 +263,7 @@ export interface StepCheck {
   readonly limit: TrailValue
   readonly safetyFactor: number
   readonly requiredSafetyFactor: number
-  /** requiredSafetyFactor / safetyFactor: 1 is the VDI requirement exactly met. */
+  /** requiredSafetyFactor / safetyFactor: 1 is the VDI requirement exactly met; Infinity when safetyFactor ≤ 0. */
   readonly utilisation: number
 }
 

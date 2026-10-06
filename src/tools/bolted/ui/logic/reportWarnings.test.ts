@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { expectOk } from '../../../../core/testing'
 import { DEFAULT_BOLT_INPUTS } from '../state/boltInputs'
-import { PATTERN_WITH_KEENSERT } from '../testFixtures'
+import { PATTERN_MISSING_THREAD, PATTERN_WITH_KEENSERT } from '../testFixtures'
 import { analyseJoint, boltResults } from './boltResults'
 import { jointWarnings, patternWarnings } from './reportWarnings'
 
@@ -20,7 +20,7 @@ describe('patternWarnings', () => {
   })
 
   it('reports a load case that cannot be analysed', () => {
-    const warnings = patternWarnings(boltResults({ ...DEFAULT_BOLT_INPUTS, mode: 'pattern' }, 'si').loadCases)
+    const warnings = patternWarnings(boltResults(PATTERN_MISSING_THREAD, 'si').loadCases)
     expect(warnings[0]).toMatch(/^LC1 Static: Joint type J4 .*outer thread/)
   })
 })

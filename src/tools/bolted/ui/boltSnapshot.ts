@@ -5,13 +5,12 @@
 // so a project's history compares revisions across them.
 import type { SnapshotFigure, ToolSnapshot } from '../../../core/projects'
 import { fail, ok, type Result } from '../../../core/result'
-import { formatDecimal, formatQuantity } from '../../../core/units'
+import { formatQuantity } from '../../../core/units'
 import { analyseJoint, boltResults, materialIdsOf } from './logic/boltResults'
 import { JOINT_KIND_LABELS, threadLabel } from './logic/labels'
-import { governingCase, patternStatus, PROJECT_STATUS } from './logic/verdict'
+import { formatUtilisation, governingCase, patternStatus, PROJECT_STATUS } from './logic/verdict'
 import type { BoltInputs } from './state/boltInputs'
 
-const ratio = (value: number) => formatDecimal(value, 2, true)
 
 /** Fails, with the engine's explanation, when the inputs cannot be analysed. */
 export function boltSnapshot(inputs: BoltInputs): Result<ToolSnapshot<BoltInputs>> {
@@ -27,7 +26,7 @@ function jointSnapshot(inputs: BoltInputs): Result<ToolSnapshot<BoltInputs>> {
   const governing = steps.find((s) => s.id === summary.governing)
   const figures: SnapshotFigure[] = [
     { label: 'Bolt', value: bolt },
-    { label: 'u max', value: ratio(summary.utilisation) },
+    { label: 'u max', value: formatUtilisation(summary.utilisation) },
     { label: 'Governing', value: governing ? `${governing.rStep} ${governing.title}` : '—' },
     { label: 'MA', value: formatQuantity('torque', 'si', preload.tighteningTorqueNm), unit: 'N·m' },
   ]
@@ -54,7 +53,7 @@ function patternSnapshot(inputs: BoltInputs): Result<ToolSnapshot<BoltInputs>> {
     status: PROJECT_STATUS[patternStatus(analyses)],
     figures: [
       { label: 'Bolts', value: String(pattern.bolts.length) },
-      { label: 'u max', value: ratio(bolt.utilisation) },
+      { label: 'u max', value: formatUtilisation(bolt.utilisation) },
       { label: 'Governing', value: `${bolt.bolt.id} (${bolt.bolt.jointTypeId}) in ${loadCase.id}` },
       { label: 'Load cases', value: String(pattern.loadCases.length) },
     ],

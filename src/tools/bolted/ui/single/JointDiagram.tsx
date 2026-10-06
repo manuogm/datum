@@ -2,7 +2,7 @@
 // service, from logic/jointDiagram: how FA,max splits between the bolt and
 // the clamped parts, and where the parts would separate.
 import { cx } from '../../../../app/ui'
-import { formatQuantity, fromDisplay, toDisplay, unitOf, type UnitSystem } from '../../../../core/units'
+import { formatDecimal, formatQuantity, fromDisplay, toDisplay, unitOf, type UnitSystem } from '../../../../core/units'
 import type { BoltedJointAnalysis } from '../../calc'
 import { JOINT_DIAGRAM_FRAME as FRAME, jointDiagramLayout } from '../logic/jointDiagram'
 import styles from '../shared/diagram.module.css'
@@ -24,6 +24,8 @@ export function JointDiagram({ analysis, axialN, system }: JointDiagramProps) {
   })
   const force = (displayed: number) => formatQuantity('force', system, fromDisplay('force', system, displayed))
   const { bolt, parts, load, residual, preload, separation, forces } = layout
+  // Low on the parts line, below the FKR label and above the separation point.
+  const partsLabel = { x: parts.x1 + 0.85 * (parts.x2 - parts.x1) + 8, y: parts.y1 + 0.85 * (parts.y2 - parts.y1) - 6 }
   const guide = (y: number, toX: number) => <line className={styles.guide} x1={FRAME.left} y1={y} x2={toX} y2={y} />
   return (
     <svg className={styles.svg} viewBox={`0 0 ${FRAME.width} ${FRAME.height}`} role="img" aria-label="Joint diagram: force against elongation">
@@ -68,8 +70,8 @@ export function JointDiagram({ analysis, axialN, system }: JointDiagramProps) {
       <text className={cx(styles.text, styles.strong)} x={FRAME.left + 4} y={preload.y - 5}>
         FV,min {force(forces.preload)}
       </text>
-      <text className={styles.text} x={load.x2 + 6} y={load.y2 - 4}>
-        FS {force(forces.bolt)}
+      <text className={cx(styles.text, styles.end)} x={load.x2 - 8} y={load.y2 - 6}>
+        FS at FV,min {force(forces.bolt)}
       </text>
       <text className={cx(styles.faintText, styles.badText, styles.end)} x={separation.x + 4} y={separation.y + 15}>
         separation at FA {force(forces.separationAxial)}
@@ -77,8 +79,11 @@ export function JointDiagram({ analysis, axialN, system }: JointDiagramProps) {
       <text className={styles.faintText} x={(bolt.x1 + bolt.x2) / 2 - 30} y={(bolt.y1 + bolt.y2) / 2}>
         bolt
       </text>
-      <text className={styles.faintText} x={(parts.x1 + parts.x2) / 2 + 6} y={(parts.y1 + parts.y2) / 2}>
+      <text className={styles.faintText} x={partsLabel.x} y={partsLabel.y}>
         parts
+        <tspan x={partsLabel.x} dy={12}>
+          (n = {formatDecimal(analysis.loadIntroductionFactor, 2, true)})
+        </tspan>
       </text>
     </svg>
   )

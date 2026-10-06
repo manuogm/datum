@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { expectError, expectOk } from '../../../../core/testing'
 import { DEFAULT_BOLT_INPUTS, DEFAULT_PATTERN } from '../state/boltInputs'
-import { PATTERN_WITH_KEENSERT } from '../testFixtures'
+import { PATTERN_MISSING_THREAD, PATTERN_WITH_KEENSERT } from '../testFixtures'
 import { boltResults, jointDesign, materialIdsOf } from './boltResults'
 
 describe('boltResults', () => {
@@ -11,8 +11,12 @@ describe('boltResults', () => {
     expect(joint.geometry.clampLengthMm).toBe(20)
   })
 
+  it('analyses the default pattern', () => {
+    expect(boltResults(DEFAULT_BOLT_INPUTS, 'si').loadCases.every((c) => c.analysis.ok)).toBe(true)
+  })
+
   it('asks for the outer thread of a key-locking insert instead of guessing it', () => {
-    const [first] = boltResults(DEFAULT_BOLT_INPUTS, 'si').loadCases
+    const [first] = boltResults(PATTERN_MISSING_THREAD, 'si').loadCases
     expect(expectError(first.analysis)).toMatch(/^Joint type J4 \(M4 12\.9 \+ Keensert\): .*outer thread.*catalogue/)
   })
 

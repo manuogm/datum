@@ -32,7 +32,7 @@ export function LoadCaseFields({ loadCase, canRemove, serviceTempC, system, onCh
         <VectorFields symbol="M" quantity="torque" vector={loadCase.momentNm} system={system} onChange={(momentNm) => onChange({ momentNm })} />
         <VectorFields symbol="r" quantity="length" vector={loadCase.loadPointMm} system={system} onChange={(loadPointMm) => onChange({ loadPointMm })} />
       </div>
-      <span className={styles.typeDetail}>Rigid plate: the load is shared by bolt position. F and M act at the load point r, in the bolts&apos; axes; its z is the height above the interface.</span>
+      <span className={styles.typeDetail}>Rigid plate: axial load is shared by bolt position, in-plane shear by each boltRigid plate: the load is shared by bolt position. F and Mapos;s friction grip. F and M act at the load point r, in the bolts&apos; axes; its z is the height above the interface.</span>
       <RangeInputRow
         label="Service temp."
         quantity="temperature"
