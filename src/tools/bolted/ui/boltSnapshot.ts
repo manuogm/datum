@@ -6,7 +6,7 @@ import { fail, ok, type Result } from '../../../core/result'
 import { formatQuantity } from '../../../core/units'
 import { analyseJoint, boltResults } from './logic/boltResults'
 import { JOINT_KIND_LABELS, threadLabel } from './logic/labels'
-import { CALCULATION_STATUS, formatUtilisation, governingCase, patternStatus } from './logic/verdict'
+import { CALCULATION_STATUS, formatUtilisation, governingCase, patternStatus, verdictCheck } from './logic/verdict'
 import type { BoltInputs } from './state/boltInputs'
 
 
@@ -19,9 +19,10 @@ function jointSnapshot(inputs: BoltInputs): Result<ToolSnapshot<BoltInputs>> {
   const analysis = analyseJoint(inputs, 'si')
   if (!analysis.ok) return analysis
   const { design } = inputs.joint
-  const { summary, preload, steps } = analysis.value
+  const { summary, preload } = analysis.value
   const bolt = `${threadLabel(design.thread)} ${design.propertyClass}`
-  const governing = steps.find((s) => s.id === summary.governing)
+  // The check behind the status: R10 for a REVIEW on a part without pG, though R8 is more utilised.
+  const governing = verdictCheck(analysis.value)
   const figures: SnapshotFigure[] = [
     { label: 'u max', value: formatUtilisation(summary.utilisation) },
     { label: 'Governing', value: governing ? `${governing.rStep} ${governing.title}` : '—' },
@@ -41,15 +42,16 @@ function patternSnapshot(inputs: BoltInputs): Result<ToolSnapshot<BoltInputs>> {
   const cases = boltResults(inputs, 'si').loadCases
   const governing = governingCase(cases)
   if (!governing.ok) return fail(governing.error)
-  const { loadCase, bolt } = governing.value
+  const { loadCase, bolt, maxUtilisation } = governing.value
+  const check = verdictCheck(bolt.analysis)
   const analyses = cases.flatMap((c) => (c.analysis.ok ? [c.analysis.value] : []))
   return ok({
     tool: 'bolt',
     title: `${pattern.bolts.length}-bolt pattern, ${loadCase.id}`,
     status: CALCULATION_STATUS[patternStatus(analyses)],
     figures: [
-      { label: 'u max', value: formatUtilisation(bolt.utilisation) },
-      { label: 'Governing', value: `${bolt.bolt.id} (${bolt.bolt.jointTypeId}) in ${loadCase.id}` },
+      { label: 'u max', value: formatUtilisation(maxUtilisation) },
+      { label: 'Governing', value: `${bolt.bolt.id} (${bolt.bolt.jointTypeId}) in ${loadCase.id}${check ? `, ${check.rStep}` : ''}` },
       { label: 'Load cases', value: String(pattern.loadCases.length) },
     ],
     inputs,

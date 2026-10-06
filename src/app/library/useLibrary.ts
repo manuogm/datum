@@ -20,7 +20,9 @@ import {
 } from '../../core/library'
 import { ok, type Result } from '../../core/result'
 import { localTimestamp } from '../format/timestamp'
+import { closeTab } from '../shell/openTabs'
 import { forgetCalculations } from '../tools/calculationSteps'
+import { discardDraft } from './drafts'
 import { applyChange, getSnapshot, subscribe } from './libraryStore'
 import { newId } from './newId'
 
@@ -28,6 +30,19 @@ type Done = Result<null>
 
 function done(result: Result<unknown>): Done {
   return result.ok ? ok(null) : result
+}
+
+/**
+ * Once calculations are deleted, nothing of them is left open: their unsaved
+ * drafts are dropped (else the browser keeps warning about edits that cannot
+ * be saved any more), their tabs close and their screens forget their place.
+ */
+function forgetDeleted(ids: readonly string[]): void {
+  for (const id of ids) {
+    discardDraft(id)
+    closeTab(id)
+  }
+  forgetCalculations(ids)
 }
 
 /** Runs a command that creates something under a fresh id; returns that id. */
@@ -47,13 +62,13 @@ export const libraryActions = {
   moveFolder(id: string, parentId: string | null): Done {
     return done(applyChange((library) => moveFolder(library, id, parentId)))
   },
-  /** Deletes the folder with everything in it; the screens of its calculations forget their place. */
+  /** Deletes the folder with everything in it; its calculations' drafts, tabs and screens go with them. */
   deleteFolder(id: string): Done {
     const library = getSnapshot().state
     const doomed = folderAndBelow(library, id)
     const calculations = library.calculations.filter((c) => c.folderId !== null && doomed.has(c.folderId)).map((c) => c.id)
     const result = done(applyChange((current) => deleteFolder(current, id)))
-    if (result.ok) forgetCalculations(calculations)
+    if (result.ok) forgetDeleted(calculations)
     return result
   },
 
@@ -72,10 +87,10 @@ export const libraryActions = {
   moveCalculation(id: string, folderId: string | null): Done {
     return done(applyChange((library) => moveCalculation(library, id, folderId)))
   },
-  /** Deletes the calculation; its screen forgets its place (step, open result depths). */
+  /** Deletes the calculation, with its unsaved draft, its tab and what its screen remembered. */
   deleteCalculation(id: string): Done {
     const result = done(applyChange((library) => deleteCalculation(library, id)))
-    if (result.ok) forgetCalculations([id])
+    if (result.ok) forgetDeleted([id])
     return result
   },
 

@@ -4,8 +4,10 @@
 //
 // The engines only say what is wrong, not where it was entered, so the step
 // is found by elimination: if the joint can be analysed without its loads,
-// the loads are at fault; if it can with the default tightening and
-// friction, the Bolt step is; otherwise the joint and its clamped parts.
+// or with them and the default friction against slip (µT, qF, asked for
+// beside FQ), the Loads step is at fault; if it can with the default
+// tightening and thread and head friction, the Bolt step is; otherwise the
+// joint and its clamped parts.
 import type { StepDef } from '../../../../app/ui'
 import type { Result } from '../../../../core/result'
 import type { UnitSystem } from '../../../../core/units'
@@ -48,14 +50,17 @@ export function boltSteps(mode: BoltMode, fault: StepFault | null): readonly Ste
 const UNLOADED = { axialMaxN: 0, axialMinN: 0, transverseN: 0, transverseVariation: 'static' } as const
 const ROOM: TemperatureRangeC = { minC: 20, maxC: 20 }
 
+/** The friction against slip on the Loads step, at its defaults. */
+const DEFAULT_SLIP: Partial<JointDesignSpec> = {
+  interfaceFriction: DEFAULT_JOINT_DESIGN.interfaceFriction,
+  frictionInterfaces: DEFAULT_JOINT_DESIGN.frictionInterfaces,
+}
+
 /** The Bolt step's More options, at their defaults. */
 const DEFAULT_TIGHTENING: Partial<JointDesignSpec> = {
-  washers: DEFAULT_JOINT_DESIGN.washers,
   tightening: DEFAULT_JOINT_DESIGN.tightening,
   threadFriction: DEFAULT_JOINT_DESIGN.threadFriction,
   headFriction: DEFAULT_JOINT_DESIGN.headFriction,
-  interfaceFriction: DEFAULT_JOINT_DESIGN.interfaceFriction,
-  frictionInterfaces: DEFAULT_JOINT_DESIGN.frictionInterfaces,
 }
 
 /** The single joint's input problem, or null when it can be analysed. */
@@ -63,9 +68,9 @@ export function jointFault(inputs: BoltInputs, analysis: Result<BoltedJointAnaly
   if (analysis.ok) return null
   const { error } = analysis
   const unloaded: BoltInputs = { ...inputs, serviceTempC: ROOM, joint: { ...inputs.joint, loads: UNLOADED } }
-  if (analyseJoint(unloaded, system).ok) return { step: 'loads', error }
-  const tightened: BoltInputs = { ...unloaded, joint: { ...unloaded.joint, design: { ...unloaded.joint.design, ...DEFAULT_TIGHTENING } } }
-  return { step: analyseJoint(tightened, system).ok ? 'bolt' : 'joint', error }
+  const withDesign = (changes: Partial<JointDesignSpec>): BoltInputs => ({ ...unloaded, joint: { ...unloaded.joint, design: { ...unloaded.joint.design, ...changes } } })
+  if (analyseJoint(unloaded, system).ok || analyseJoint(withDesign(DEFAULT_SLIP), system).ok) return { step: 'loads', error }
+  return { step: analyseJoint(withDesign({ ...DEFAULT_SLIP, ...DEFAULT_TIGHTENING }), system).ok ? 'bolt' : 'joint', error }
 }
 
 /**

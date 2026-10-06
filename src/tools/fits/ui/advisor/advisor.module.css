@@ -46,10 +46,6 @@
   max-width: 960px;
 }
 
-.notes {
-  color: var(--warn-text);
-}
-
 .designation {
   display: flex;
   align-items: baseline;

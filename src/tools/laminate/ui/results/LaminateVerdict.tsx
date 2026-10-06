@@ -6,7 +6,7 @@ import type { ReactNode } from 'react'
 import { VerdictCard, type VerdictFigure } from '../../../../app/ui'
 import { formatQuantity, unitOf, type UnitSystem } from '../../../../core/units'
 import type { LaminateAnalysis } from '../../calc'
-import { CRITERION_LABELS, formatFactor } from '../logic/labels'
+import { CRITERION_LABELS, formatFactor, formatReserveFactor } from '../logic/labels'
 import { failureLoadNote, leadingLoad } from '../logic/loads'
 import { constantViews } from '../logic/stiffness'
 import { laminateStatus, plyCountText, plyTones, verdictSentence } from '../logic/verdict'
@@ -20,8 +20,8 @@ interface LaminateVerdictProps {
 
 /** The moduli the verdict quotes, by symbol, with their short names. */
 const MODULI: readonly (readonly [symbol: string, label: string])[] = [
-  ['Ex', 'Modulus'],
-  ['Ey', 'Modulus'],
+  ['Ex', 'Modulus x'],
+  ['Ey', 'Modulus y'],
   ['Gxy', 'Shear modulus'],
 ]
 
@@ -47,7 +47,7 @@ export function LaminateVerdict({ analysis, system, actions }: LaminateVerdictPr
       sentence={verdictSentence(analysis)}
       detail={detail}
       reference={`CLT · ${CRITERION_LABELS[analysis.criterion]}`}
-      headline={{ label: 'Reserve factor', symbol: 'RF min', value: formatFactor(firstPlyFailure.reserveFactor), target: `≥ ${formatFactor(firstPlyFailure.targetReserveFactor)}` }}
+      headline={{ label: 'Reserve factor', symbol: 'RF min', value: formatReserveFactor(firstPlyFailure.reserveFactor), target: `≥ ${formatFactor(firstPlyFailure.targetReserveFactor)}` }}
       figures={[...failureLoad, ...moduli]}
       actions={actions}
     />

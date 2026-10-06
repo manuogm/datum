@@ -5,7 +5,7 @@ import type { ToolSnapshot } from '../../../core/library'
 import { fail, ok, type Result } from '../../../core/result'
 import { formatQuantity } from '../../../core/units'
 import { analyse } from './logic/lamResults'
-import { formatFactor, plyRangeText } from './logic/labels'
+import { formatReserveFactor, plyRangeText } from './logic/labels'
 import { laminateStatus } from './logic/verdict'
 import type { LaminateInputs } from './state/lamInputs'
 
@@ -20,7 +20,7 @@ export function lamSnapshot(inputs: LaminateInputs): Result<ToolSnapshot<Laminat
     title: layup.notation,
     status: laminateStatus(firstPlyFailure),
     figures: [
-      { label: 'RF min', value: formatFactor(firstPlyFailure.reserveFactor) },
+      { label: 'RF min', value: formatReserveFactor(firstPlyFailure.reserveFactor) },
       { label: 'Critical plies', value: firstPlyFailure.criticalPlies.length > 0 ? plyRangeText(firstPlyFailure.criticalPlies) : '—' },
       { label: 'h', value: formatQuantity('length', 'si', layup.thicknessMm), unit: 'mm' },
     ],

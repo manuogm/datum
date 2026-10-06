@@ -3,12 +3,11 @@
 // interference limit, drawn to scale from the advisor's results.
 import { cx } from '../../../../app/ui'
 import { formatQuantity, formatQuantityRange, fromDisplay, toDisplay, type UnitSystem } from '../../../../core/units'
-import type { FitCandidate } from '../../advisor'
+import type { ClearanceRangeUm, FitCandidate } from '../../advisor'
 import { CANDIDATE_CHART_FRAME as F, candidateChartLayout } from '../logic/candidateChart'
 import { scoreTone } from '../logic/candidates'
 import type { TemperatureBand } from '../logic/serviceClearance'
 import bandStyles from '../shared/bands.module.css'
-import type { FitInputs } from '../state/fitInputs'
 import styles from './CandidateChart.module.css'
 
 export interface ChartedCandidate {
@@ -18,7 +17,10 @@ export interface ChartedCandidate {
 
 interface CandidateChartProps {
   charted: readonly ChartedCandidate[]
-  inputs: FitInputs
+  /** The required clearance window, µm. */
+  window: ClearanceRangeUm
+  /** Largest interference accepted at assembly, µm, positive. */
+  maxAssemblyInterferenceUm: number
   system: UnitSystem
   bestDesignation: string
   comparedDesignation: string | null
@@ -26,9 +28,9 @@ interface CandidateChartProps {
   currentDesignation: string
 }
 
-export function CandidateChart({ charted, inputs, system, bestDesignation, comparedDesignation, currentDesignation }: CandidateChartProps) {
+export function CandidateChart(props: CandidateChartProps) {
+  const { charted, window, maxAssemblyInterferenceUm: limit, system, bestDesignation, comparedDesignation, currentDesignation } = props
   const shown = (um: number) => toDisplay('deviation', system, um)
-  const { requiredClearanceUm: window, maxAssemblyInterferenceUm: limit } = inputs
   const layout = candidateChartLayout({
     candidates: charted.map(({ candidate, bands }) => ({
       designation: candidate.fit.designation,

@@ -1,15 +1,17 @@
-// Bolt pattern, Results step, for the load case chosen in the tabs above the
-// verdict (each tab shows its case's highest utilisation, so the worst case
-// stands out). Three depths: the verdict on the case's most utilised bolt;
-// "Show details", the plan with every bolt ringed in its verdict colour, each
-// joint type's most utilised bolt and the per-bolt table; "Show
-// calculation", the trail of the bolt chosen in the plan or the table.
+// Bolt pattern, Results step. The verdict is the whole pattern's, over every
+// load case, as in the report and the library: the governing load case and
+// its deciding bolt. The tabs above it choose the load case the details show
+// (each tab shows its case's utilisation in its verdict colour). Three
+// depths: the verdict; "Show details", the selected case in words, the plan
+// with every bolt ringed in its verdict colour, each joint type's most
+// utilised bolt and the per-bolt table; "Show calculation", the trail of the
+// bolt chosen in the plan or the table.
 import { useState } from 'react'
 import { cx, LegendItem, Marker, MonoLabel, ProblemCallout, ResultsLayout, ScoreBar, VerdictCard } from '../../../../app/ui'
-import { formatDecimal, formatQuantity, unitOf, type UnitSystem } from '../../../../core/units'
+import { formatQuantity, unitOf, type UnitSystem } from '../../../../core/units'
 import type { BoltResults } from '../logic/boltResults'
 import { stepLabel, type StepFault } from '../logic/steps'
-import { formatUtilisation, governingCase, loadCaseVerdict, REVIEW_UTILISATION, utilisationTone } from '../logic/verdict'
+import { decidingBolt, formatUtilisation, loadCaseVerdict, patternVerdict, REVIEW_UTILISATION, utilisationTone, verdictCheck } from '../logic/verdict'
 import { CalculationTrail } from '../shared/CalculationTrail'
 import steps from '../shared/steps.module.css'
 import type { PatternSpec } from '../state/boltInputs'
@@ -17,7 +19,6 @@ import { LoadCaseTabs } from './LoadCaseTabs'
 import styles from './pattern.module.css'
 import { PatternPlan } from './PatternPlan'
 
-const ratio = (value: number) => formatDecimal(value, 2, true)
 /** Bars run to u = 1.5, so a failing bolt still reads as longer than a passing one. */
 const BAR_FULL_SCALE = 1.5
 
@@ -39,17 +40,20 @@ export function PatternResults({ pattern, results, fault, system, onSelectLoadCa
   const { loadCase, analysis } = results.loadCases.find((c) => c.loadCase.id === pattern.loadCaseId) ?? results.loadCases[0]
   const tabs = <LoadCaseTabs loadCases={results.loadCases} selected={loadCase.id} onSelect={onSelectLoadCase} />
 
-  if (!analysis.ok) {
+  const verdict = patternVerdict(results.loadCases)
+  if (!analysis.ok || !verdict.ok) {
+    // The selected case, else the first that cannot be analysed: without it there is no pattern verdict.
+    const failing = analysis.ok ? results.loadCases.find((c) => !c.analysis.ok) : { loadCase, analysis }
     return (
       <ResultsLayout
         verdict={
           <div className={steps.verdict}>
             {tabs}
             <ProblemCallout
-              title={`${loadCase.id} ${loadCase.name} cannot be analysed`}
+              title={failing ? `${failing.loadCase.id} ${failing.loadCase.name} cannot be analysed` : 'There is no load case to analyse'}
               back={fault ? { label: stepLabel('pattern', fault.step), onClick: () => onFix(fault.step) } : undefined}
             >
-              {analysis.error}
+              {failing && !failing.analysis.ok ? failing.analysis.error : verdict.ok ? '' : verdict.error}
             </ProblemCallout>
           </div>
         }
@@ -57,11 +61,13 @@ export function PatternResults({ pattern, results, fault, system, onSelectLoadCa
     )
   }
 
-  const { governing, bolts, byJointType } = analysis.value
-  const verdict = loadCaseVerdict(analysis.value, loadCase)
-  const worst = governingCase(results.loadCases)
-  // The bolt chosen in the plan or table, else the governing bolt of the load case.
-  const selected = bolts.find((b) => b.bolt.id === chosenBolt) ?? governing
+  const { bolts, byJointType } = analysis.value
+  const { governing } = verdict.value
+  const governingCheck = verdictCheck(governing.bolt.analysis)
+  const inCase = loadCaseVerdict(analysis.value, loadCase)
+  const deciding = decidingBolt(analysis.value)
+  // The bolt chosen in the plan or table, else the bolt that decides the load case.
+  const selected = bolts.find((b) => b.bolt.id === chosenBolt) ?? deciding
   const forceUnit = unitOf('force', system)
   return (
     <ResultsLayout
@@ -70,14 +76,14 @@ export function PatternResults({ pattern, results, fault, system, onSelectLoadCa
         <div className={steps.verdict}>
           {tabs}
           <VerdictCard
-            status={verdict.status}
-            sentence={verdict.sentence}
-            detail={verdict.detail}
-            headline={{ label: 'Max utilisation', symbol: 'u', value: formatUtilisation(governing.utilisation), target: '≤ 1.00' }}
+            status={verdict.value.status}
+            sentence={verdict.value.sentence}
+            detail={verdict.value.detail}
+            headline={{ label: 'Max utilisation', symbol: 'u, every load case', value: formatUtilisation(governing.maxUtilisation), target: '≤ 1.00' }}
             figures={[
-              { label: 'Governing bolt', value: `${governing.bolt.id} · ${governing.bolt.jointTypeId}` },
-              { label: 'Min margin', symbol: '1/u', value: ratio(1 / governing.utilisation) },
-              { label: 'Worst load case', value: worst.ok ? `${worst.value.loadCase.id} ${worst.value.loadCase.name}` : '—' },
+              { label: 'Governing load case', value: `${governing.loadCase.id} ${governing.loadCase.name}` },
+              { label: 'Governing bolt', value: `${governing.bolt.bolt.id} · ${governing.bolt.bolt.jointTypeId}` },
+              { label: 'Check', value: governingCheck ? `${governingCheck.rStep} · u ${formatUtilisation(governing.bolt.utilisation)}` : '—' },
             ]}
             reference="VDI 2230-1 · rigid plate"
           />
@@ -86,6 +92,12 @@ export function PatternResults({ pattern, results, fault, system, onSelectLoadCa
       detailsSummary={`Plan · by joint type · ${bolts.length} bolts in ${loadCase.id}`}
       details={
         <div className={styles.details}>
+          <p className={styles.caseVerdict}>
+            <Marker shape="dot" color={utilisationTone(deciding.utilisation, deciding.status)} size={6} />
+            <span>
+              {inCase.sentence} <span className={styles.caseDetail}>{inCase.detail}.</span>
+            </span>
+          </p>
           <div className={styles.planColumn}>
             <div className={styles.plan}>
               <PatternPlan pattern={pattern} loadCase={loadCase} analysis={analysis} system={system} selectedBolt={selected.bolt.id} onSelectBolt={setChosenBolt} />
@@ -121,32 +133,39 @@ export function PatternResults({ pattern, results, fault, system, onSelectLoadCa
                   <th scope="col">FA {forceUnit}</th>
                   <th scope="col">FQ {forceUnit}</th>
                   <th scope="col">u</th>
+                  <th scope="col">Check</th>
                 </tr>
               </thead>
               <tbody>
-                {bolts.map((b) => (
-                  <tr key={b.bolt.id} className={cx(b.bolt.id === selected.bolt.id && styles.selectedRow)} onClick={() => setChosenBolt(b.bolt.id)}>
-                    <td>
-                      <button type="button" className={styles.boltLink} onClick={() => setChosenBolt(b.bolt.id)} aria-pressed={b.bolt.id === selected.bolt.id}>
-                        {b.bolt.id}
-                      </button>
-                    </td>
-                    <td className={styles.byTypeId}>{b.bolt.jointTypeId}</td>
-                    <td>{formatQuantity('force', system, b.load.axialN)}</td>
-                    <td>{formatQuantity('force', system, b.load.shearN)}</td>
-                    <td>
-                      <span className={styles.utilisation}>
-                        <ScoreBar
-                          value={Math.min(100, (100 * b.utilisation) / BAR_FULL_SCALE)}
-                          tone={utilisationTone(b.utilisation, b.status)}
-                          width="compact"
-                          label={`${b.bolt.id} utilisation`}
-                        />
-                        {formatUtilisation(b.utilisation)}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
+                {bolts.map((b) => {
+                  const check = verdictCheck(b.analysis)
+                  return (
+                    <tr key={b.bolt.id} className={cx(b.bolt.id === selected.bolt.id && styles.selectedRow)} onClick={() => setChosenBolt(b.bolt.id)}>
+                      <td>
+                        <button type="button" className={styles.boltLink} onClick={() => setChosenBolt(b.bolt.id)} aria-pressed={b.bolt.id === selected.bolt.id}>
+                          {b.bolt.id}
+                        </button>
+                      </td>
+                      <td className={styles.byTypeId}>{b.bolt.jointTypeId}</td>
+                      <td>{formatQuantity('force', system, b.load.axialN)}</td>
+                      <td>{formatQuantity('force', system, b.load.shearN)}</td>
+                      <td>
+                        <span className={styles.utilisation}>
+                          <ScoreBar
+                            value={Math.min(100, (100 * b.utilisation) / BAR_FULL_SCALE)}
+                            tone={utilisationTone(b.utilisation, b.status)}
+                            width="compact"
+                            label={`${b.bolt.id} utilisation`}
+                          />
+                          {formatUtilisation(b.utilisation)}
+                        </span>
+                      </td>
+                      <td className={styles.checkCell} title={check ? `${check.rStep} ${check.title}` : undefined}>
+                        {check?.rStep ?? '—'}
+                      </td>
+                    </tr>
+                  )
+                })}
               </tbody>
             </table>
             <p className={styles.tableNote}>Choose a bolt in the plan or the table to see its calculation.</p>
@@ -161,7 +180,7 @@ export function PatternResults({ pattern, results, fault, system, onSelectLoadCa
               {selected.bolt.id} · {selected.bolt.jointTypeId} · calculation trail in {loadCase.id}
             </MonoLabel>
           </div>
-          <CalculationTrail key={selected.bolt.id} steps={selected.analysis.steps} system={system} openStep={selected.analysis.summary.governing} />
+          <CalculationTrail key={selected.bolt.id} steps={selected.analysis.steps} system={system} openStep={verdictCheck(selected.analysis)?.id ?? null} />
         </>
       }
     />

@@ -22,4 +22,10 @@ describe('spectrumLayout', () => {
     expect(layout.bars[1]).toEqual({ kind: 'reference', left: 27, width: 34 })
     expect(layout.bars.map((bar) => bar.kind)).toEqual(['cold', 'reference', 'hot'])
   })
+
+  it('draws no window and fits the axis to the bands alone when none is set', () => {
+    const bare = spectrumLayout([{ kind: 'reference', min: 65, max: 195 }], null)
+    expect(bare.window).toBeNull()
+    expect(bare.ticks.at(-1)?.value).toBeGreaterThanOrEqual(195)
+  })
 })

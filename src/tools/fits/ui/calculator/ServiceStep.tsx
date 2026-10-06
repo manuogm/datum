@@ -1,24 +1,28 @@
 // Calculator, step 2: the conditions the fit works in. The housing and shaft
-// materials and the service temperatures move the clearance; the clearance
-// the fit needs in service is prefilled and kept under More options. The fit
-// spectrum beside it shows the clearance at each temperature against that window.
-import { MoreOptions, PanelSection, RangeInputRow, StepPage } from '../../../../app/ui'
-import { serviceClearance } from '../logic/serviceClearance'
+// materials and the service temperatures move the clearance. The clearance
+// the fit needs in service is optional: without it the results show the fit
+// in service without judging it. The fit spectrum beside it shows the
+// clearance at each temperature (against that window, when one is set).
+// A range the wrong way round marks the step and blocks Next.
+import { PanelSection, RangeInputRow, StepPage } from '../../../../app/ui'
+import { serviceClearance, startingWindow } from '../logic/serviceClearance'
+import { ClearanceWindowRow } from '../shared/ClearanceWindowRow'
 import { MaterialPair } from '../shared/MaterialPair'
-import type { FitStepProps } from '../shared/stepProps'
-import { DEFAULT_FIT_INPUTS, type FitInputs } from '../state/fitInputs'
+import sharedStyles from '../shared/shared.module.css'
+import { faultProps, type FitStepProps } from '../shared/stepProps'
+import type { FitInputs } from '../state/fitInputs'
 import { FitSpectrum } from './FitSpectrum'
 
-export function ServiceStep({ inputs, results, system, dispatch, flow }: FitStepProps) {
+export function ServiceStep({ inputs, results, system, dispatch, flow, fault }: FitStepProps) {
   const change = (changes: Partial<FitInputs>) => dispatch({ type: 'change', changes })
   const calculation = results.calculation
   const window = inputs.requiredClearanceUm
-  const windowChanged = window.minUm !== DEFAULT_FIT_INPUTS.requiredClearanceUm.minUm || window.maxUm !== DEFAULT_FIT_INPUTS.requiredClearanceUm.maxUm
   return (
     <StepPage
       {...flow.page}
+      {...faultProps(fault, 'service', 'The fit cannot be checked in service')}
       title="Service"
-      hint="What the housing and the shaft are made of, and the temperatures the fit works at. The clearance it needs in service is under More options."
+      hint="What the housing and the shaft are made of, the temperatures the fit works at and, if it must meet one, the clearance it needs in service."
       nextLabel="See results"
       aside={
         calculation.ok && (
@@ -31,7 +35,7 @@ export function ServiceStep({ inputs, results, system, dispatch, flow }: FitStep
         )
       }
       asideLabel="Fit spectrum"
-      asideMeta="clearance at each temperature · green: required"
+      asideMeta={window === null ? 'clearance at each temperature' : 'clearance at each temperature · green: required'}
     >
       <PanelSection label="Materials">
         <MaterialPair
@@ -43,29 +47,28 @@ export function ServiceStep({ inputs, results, system, dispatch, flow }: FitStep
         />
       </PanelSection>
 
-      <PanelSection label="Temperature">
-        <RangeInputRow
-          label="Service temp."
-          quantity="temperature"
-          system={system}
-          min={inputs.serviceTempC.minC}
-          max={inputs.serviceTempC.maxC}
-          onChange={(minC, maxC) => change({ serviceTempC: { minC, maxC } })}
-        />
-      </PanelSection>
-
-      <MoreOptions count={1} changed={windowChanged ? 1 : 0} memoryKey="fit:service">
-        <PanelSection label="Required in service">
+      <PanelSection label="In service">
+        <div className={sharedStyles.rows}>
           <RangeInputRow
-            label="Clearance in service"
-            quantity="deviation"
+            label="Service temp."
+            quantity="temperature"
             system={system}
-            min={window.minUm}
-            max={window.maxUm}
-            onChange={(minUm, maxUm) => change({ requiredClearanceUm: { minUm, maxUm } })}
+            min={inputs.serviceTempC.minC}
+            max={inputs.serviceTempC.maxC}
+            onChange={(minC, maxC) => change({ serviceTempC: { minC, maxC } })}
           />
-        </PanelSection>
-      </MoreOptions>
+          <ClearanceWindowRow
+            window={window}
+            system={system}
+            start={startingWindow(calculation)}
+            optional
+            onChange={(requiredClearanceUm) => change({ requiredClearanceUm })}
+          />
+          <span className={sharedStyles.footnote}>
+            Required clearance is optional; negative is interference. Without it the fit is shown in service, not judged.
+          </span>
+        </div>
+      </PanelSection>
     </StepPage>
   )
 }

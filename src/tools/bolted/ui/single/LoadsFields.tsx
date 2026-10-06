@@ -1,4 +1,7 @@
-// Working loads on the single joint and the service temperature range.
+// Working loads on the single joint, the friction that holds the transverse
+// load (passed in as `slip`, as it belongs to the design) and the service
+// temperature range.
+import type { ReactNode } from 'react'
 import { PanelSection, RangeInputRow, SegmentedControl, ValueInputRow } from '../../../../app/ui'
 import type { UnitSystem } from '../../../../core/units'
 import type { LoadVariation, TemperatureRangeC } from '../../calc'
@@ -16,9 +19,11 @@ interface LoadsFieldsProps {
   system: UnitSystem
   onLoadsChange: (changes: Partial<JointLoadSpec>) => void
   onTemperatureChange: (serviceTempC: TemperatureRangeC) => void
+  /** µT and qF, under the transverse load they hold. */
+  slip?: ReactNode
 }
 
-export function LoadsFields({ loads, serviceTempC, system, onLoadsChange, onTemperatureChange }: LoadsFieldsProps) {
+export function LoadsFields({ loads, serviceTempC, system, onLoadsChange, onTemperatureChange, slip }: LoadsFieldsProps) {
   return (
     <PanelSection label="Loads per bolt">
       <div className={styles.rows}>
@@ -34,6 +39,7 @@ export function LoadsFields({ loads, serviceTempC, system, onLoadsChange, onTemp
         size="sm"
         fill
       />
+      {slip}
       <RangeInputRow
         label="Service temp."
         quantity="temperature"

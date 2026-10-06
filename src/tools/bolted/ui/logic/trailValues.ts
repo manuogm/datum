@@ -3,7 +3,7 @@
 // display quantity of core/units. Each step also has a headline: the
 // number its row shows before it is opened.
 import { formatDecimal, formatQuantity, unitOf, type Quantity, type UnitSystem } from '../../../../core/units'
-import type { CalculationStep, TrailUnit, TrailValue } from '../../calc'
+import type { CalculationStep, StepCheck, TrailUnit, TrailValue } from '../../calc'
 
 const QUANTITY_OF_UNIT: Record<Exclude<TrailUnit, '' | '°'>, Quantity> = {
   N: 'force',
@@ -52,4 +52,13 @@ export function stepHeadline(step: CalculationStep, system: UnitSystem): StepHea
   }
   const last = step.values.at(-1)
   return last ? { symbol: last.symbol, ...shownValue(last, system) } : { symbol: '', value: '—', unit: '' }
+}
+
+/**
+ * A check's safety factor beside its requirement, 'SF 0.89 / ≥ 1.80', since
+ * the requirements differ (1.0 for R8, 1.2 for R9, 1.8 for R12 under
+ * alternating load).
+ */
+export function safetyFactorText({ safetyFactor, requiredSafetyFactor }: Pick<StepCheck, 'safetyFactor' | 'requiredSafetyFactor'>): string {
+  return `SF ${formatDecimal(safetyFactor, 2, true)} / ≥ ${formatDecimal(requiredSafetyFactor, 2, true)}`
 }

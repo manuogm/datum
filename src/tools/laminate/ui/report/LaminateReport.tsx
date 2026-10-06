@@ -8,7 +8,7 @@ import {
 import { cx } from '../../../../app/ui'
 import { formatQuantity, unitOf, type UnitSystem } from '../../../../core/units'
 import type { LaminateAnalysis } from '../../calc'
-import { CRITERION_LABELS, formatFactor, LAMINATE_STANDARDS, modeText, plyMaterialName, plyRangeText } from '../logic/labels'
+import { CRITERION_LABELS, formatFactor, formatReserveFactor, LAMINATE_STANDARDS, modeText, plyMaterialName, plyRangeText } from '../logic/labels'
 import { leadingLoad } from '../logic/loads'
 import { laminateFacts, laminateWarnings, plyRows, unitsLine } from '../logic/reportContent'
 import { laminateStatus, plyTones } from '../logic/verdict'
@@ -49,7 +49,7 @@ export function LaminateReport({ name, analysis, inputs, system }: LaminateRepor
       />
 
       <ReportSummary status={status} headline={STATUS_HEADLINE[status]} warnings={warnings.length} warningsSection={5}>
-        <ReportFigure label={`RF MIN · TARGET ${formatFactor(firstPlyFailure.targetReserveFactor)}`} value={formatFactor(firstPlyFailure.reserveFactor)} unit="" />
+        <ReportFigure label={`RF MIN · TARGET ${formatFactor(firstPlyFailure.targetReserveFactor)}`} value={formatReserveFactor(firstPlyFailure.reserveFactor)} unit="" />
         <ReportSummaryCell
           label="CRITICAL PLIES"
           value={critical.length > 0 ? plyRangeText(critical) : '—'}

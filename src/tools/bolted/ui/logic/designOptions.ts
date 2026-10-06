@@ -11,12 +11,24 @@ export interface OptionCount {
   readonly changed: number
 }
 
-/** Washers, tightening method, µG, µK, µT and qF: most joints keep a torque wrench at µ 0.12. */
-const TIGHTENING_KEYS = ['washers', 'tightening', 'threadFriction', 'headFriction', 'interfaceFriction', 'frictionInterfaces'] as const
+/** Tightening method, µG and µK: most joints keep a torque wrench at µ 0.12. */
+const TIGHTENING_KEYS = ['tightening', 'threadFriction', 'headFriction'] as const
+
+/** µT and qF, the friction against slip. */
+const SLIP_KEYS = ['interfaceFriction', 'frictionInterfaces'] as const
+
+const changedOf = (design: JointDesignSpec, keys: readonly (keyof JointDesignSpec)[]): OptionCount => ({
+  count: keys.length,
+  changed: keys.filter((key) => design[key] !== DEFAULT_JOINT_DESIGN[key]).length,
+})
 
 export function tighteningOptions(design: JointDesignSpec): OptionCount {
-  const changed = TIGHTENING_KEYS.filter((key) => design[key] !== DEFAULT_JOINT_DESIGN[key]).length
-  return { count: TIGHTENING_KEYS.length, changed }
+  return changedOf(design, TIGHTENING_KEYS)
+}
+
+/** The single joint asks for these beside FQ; a pattern's joint type keeps them under More options. */
+export function slipOptions(design: JointDesignSpec): OptionCount {
+  return changedOf(design, SLIP_KEYS)
 }
 
 /**

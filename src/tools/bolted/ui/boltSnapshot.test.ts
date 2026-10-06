@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { expectError, expectOk } from '../../../core/testing'
 import { boltSnapshot } from './boltSnapshot'
 import { DEFAULT_BOLT_INPUTS } from './state/boltInputs'
-import { PATTERN_MISSING_THREAD, PATTERN_WITH_KEENSERT } from './testFixtures'
+import { JOINT_PEEK_NO_PG, PATTERN_MISSING_THREAD, PATTERN_WITH_KEENSERT } from './testFixtures'
 
 describe('boltSnapshot', () => {
   it('describes the single joint', () => {
@@ -15,11 +15,17 @@ describe('boltSnapshot', () => {
     ])
   })
 
+  it('names the check behind a review, not the most utilised one', () => {
+    const snapshot = expectOk(boltSnapshot(JOINT_PEEK_NO_PG))
+    expect(snapshot.status).toBe('review')
+    expect(snapshot.figures[1]).toEqual({ label: 'Governing', value: 'R10 Surface pressure under head and nut' })
+  })
+
   it('describes the pattern by its governing bolt and load case', () => {
     const snapshot = expectOk(boltSnapshot(PATTERN_WITH_KEENSERT))
     expect(snapshot.title).toBe('8-bolt pattern, LC3')
     expect(snapshot.figures.map((f) => f.label)).toEqual(['u max', 'Governing', 'Load cases'])
-    expect(snapshot.figures[1].value).toBe('B8 (J4) in LC3')
+    expect(snapshot.figures[1].value).toBe('B8 (J4) in LC3, R12')
   })
 
   it('is JSON-safe', () => {

@@ -21,8 +21,12 @@ describe('jointFault', () => {
     expect(faultOf({ ...DEFAULT_BOLT_INPUTS, serviceTempC: { minC: 100, maxC: 20 } })).toMatchObject({ step: 'loads' })
   })
 
-  it('puts a friction problem on the Bolt step', () => {
+  it('puts a thread or head friction problem on the Bolt step', () => {
     expect(faultOf(withDesign({ threadFriction: 0 }))).toEqual({ step: 'bolt', error: expect.stringMatching(/Friction/) })
+  })
+
+  it('puts the friction against slip on the Loads step, beside FQ', () => {
+    expect(faultOf(withDesign({ interfaceFriction: 0 }))).toMatchObject({ step: 'loads' })
   })
 
   it('puts a clamped part or a missing insert thread on the Joint step', () => {

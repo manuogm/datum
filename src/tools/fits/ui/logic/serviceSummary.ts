@@ -1,5 +1,6 @@
 // Words for a fit's in-service result, shared by the results column and the
-// report: "−5.3 … 77.9 µm over −20 … 140 °C; required 0 … 40 µm".
+// report: "−5.3 … 77.9 µm over −20 … 140 °C; required 0 … 40 µm" (or
+// "…; no required window" when none is set).
 import { formatQuantityRange, type UnitSystem } from '../../../../core/units'
 import type { FitCandidate } from '../../advisor'
 import type { FitInputs } from '../state/fitInputs'
@@ -8,9 +9,11 @@ import type { ServiceClearance } from './serviceClearance'
 export function serviceSummary(service: ServiceClearance, inputs: FitInputs, system: UnitSystem): string {
   const { inServiceUm } = service
   const { serviceTempC, requiredClearanceUm } = inputs
+  const required = requiredClearanceUm === null
+    ? 'no required window'
+    : `required ${formatQuantityRange('deviation', system, requiredClearanceUm.minUm, requiredClearanceUm.maxUm)}`
   return `${formatQuantityRange('deviation', system, inServiceUm.minUm, inServiceUm.maxUm)} over `
-    + `${formatQuantityRange('temperature', system, serviceTempC.minC, serviceTempC.maxC)}; `
-    + `required ${formatQuantityRange('deviation', system, requiredClearanceUm.minUm, requiredClearanceUm.maxUm)}`
+    + `${formatQuantityRange('temperature', system, serviceTempC.minC, serviceTempC.maxC)}; ${required}`
 }
 
 /**

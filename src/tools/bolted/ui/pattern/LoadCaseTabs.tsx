@@ -1,9 +1,10 @@
 // One tab per load case. On Results each tab also shows the utilisation of
-// its governing bolt, coloured by verdict (a dash when it cannot be analysed);
+// the bolt that decides its verdict (worst status, then most utilised),
+// coloured by verdict (a dash when it cannot be analysed);
 // on the Load cases step it is a plain switch between the cases.
 import { Chip, cx } from '../../../../app/ui'
 import type { LoadCaseResult } from '../logic/boltResults'
-import { formatUtilisation, utilisationTone } from '../logic/verdict'
+import { decidingBolt, formatUtilisation, utilisationTone } from '../logic/verdict'
 import styles from './pattern.module.css'
 
 const TONE_CLASS = { ok: styles.okText, warn: styles.warnText, bad: styles.badText }
@@ -20,7 +21,7 @@ export function LoadCaseTabs({ loadCases, selected, onSelect, withUtilisation = 
   return (
     <div className={styles.tabs} role="group" aria-label="Load case">
       {loadCases.map(({ loadCase, analysis }) => {
-        const governing = analysis.ok ? analysis.value.governing : null
+        const governing = analysis.ok ? decidingBolt(analysis.value) : null
         return (
           <Chip key={loadCase.id} variant="option" selected={loadCase.id === selected} onClick={() => onSelect(loadCase.id)}>
             {loadCase.id} {loadCase.name}

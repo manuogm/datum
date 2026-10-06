@@ -1,8 +1,12 @@
 import { describe, expect, it } from 'vitest'
 import { expectOk } from '../../../../core/testing'
-import { DEFAULT_FIT_INPUTS } from '../state/fitInputs'
+import { analyseFitDesignation } from '../../calc'
+import { EXAMPLE_FIT_INPUTS, NEW_FIT_INPUTS, type FitInputs } from '../state/fitInputs'
 import { fitResults } from './fitResults'
-import { adviceVerdict, calculatorSentence, candidateStatus, governingEdge } from './verdict'
+import { serviceClearance } from './serviceClearance'
+import {
+  adviceVerdict, advisorVerdict, calculatorSentence, candidateStatus, governingEdge, presentedStatus, unjudgedSentence,
+} from './verdict'
 
 const window = { minUm: 0, maxUm: 40 }
 
@@ -30,7 +34,7 @@ describe('candidateStatus', () => {
 
 describe('adviceVerdict', () => {
   it('leaves out the thermal sentence and keeps the verdict on the best match', () => {
-    const why = expectOk(fitResults(DEFAULT_FIT_INPUTS, 'si').advice).why
+    const why = expectOk(fitResults(EXAMPLE_FIT_INPUTS, 'si').advice).why
     const { sentence, detail } = adviceVerdict(why)
     expect(why.startsWith('The ')).toBe(true)
     expect(why).toContain(sentence)
@@ -52,5 +56,68 @@ describe('calculatorSentence', () => {
     expect(calculatorSentence('review', 'max')).toBe('The clearance in service is partly outside the required window; the maximum clearance governs.')
     expect(calculatorSentence('fail', 'min')).toBe('The clearance in service is outside the required window; the minimum clearance governs.')
     expect(calculatorSentence('pass', 'min')).toMatch(/^The clearance in service stays inside the required window; .*\.$/)
+  })
+})
+
+// Press assembly needing −60 … 0 µm in service, but at most 5 µm interference at assembly:
+// the best match cannot meet both, and its sentence must say so.
+const pressInputs: FitInputs = {
+  ...EXAMPLE_FIT_INPUTS,
+  assembly: 'press',
+  requiredClearanceUm: { minUm: -60, maxUm: 0 },
+  maxAssemblyInterferenceUm: 5,
+}
+
+describe('advisorVerdict', () => {
+  it('names the failing check when the best match does not pass', () => {
+    const advice = expectOk(fitResults(pressInputs, 'si').advice)
+    const best = advice.candidates[0]
+    const failing = best.checks.find((check) => check.status === 'fail')
+    expect(candidateStatus(best)).toBe('fail')
+    const { sentence, detail } = advisorVerdict(best, advice.why)
+    expect(sentence).toBe(`${best.fit.designation} (score ${best.score}) fails a check: ${failing?.message}`)
+    expect(sentence).toMatch(/interference at 20 °C exceeds the 5 µm limit/)
+    // The advisor's own verdict follows.
+    expect(detail).toBe(adviceVerdict(advice.why).sentence + (adviceVerdict(advice.why).detail ? ` ${adviceVerdict(advice.why).detail}` : ''))
+  })
+
+  it("keeps the advisor's verdict when the best match passes every check", () => {
+    const inputs: FitInputs = { ...EXAMPLE_FIT_INPUTS, functions: [], requiredClearanceUm: { minUm: -100, maxUm: 200 } }
+    const advice = expectOk(fitResults(inputs, 'si').advice)
+    expect(candidateStatus(advice.candidates[0])).toBe('pass')
+    expect(advisorVerdict(advice.candidates[0], advice.why)).toEqual(adviceVerdict(advice.why))
+  })
+})
+
+describe('presentedStatus', () => {
+  it("takes the advisor's checks of the best match in advisor mode", () => {
+    const results = fitResults(pressInputs, 'si')
+    const best = expectOk(results.advice).candidates[0]
+    const service = serviceClearance(best.fit, pressInputs, results.housing, results.shaft)
+    // The assembly check fails, whatever the clearance in service.
+    expect(presentedStatus(pressInputs, results, best.fit, service)).toBe('fail')
+  })
+
+  it('takes the clearance in service in calculator mode, pass without a window', () => {
+    const inputs: FitInputs = { ...NEW_FIT_INPUTS, mode: 'calculator' }
+    const results = fitResults(inputs, 'si')
+    const fit = expectOk(results.calculation)
+    expect(presentedStatus(inputs, results, fit, serviceClearance(fit, inputs, results.housing, results.shaft))).toBe('pass')
+  })
+})
+
+describe('unjudgedSentence', () => {
+  const steel = fitResults(NEW_FIT_INPUTS, 'si')
+  const sentence = (designation: string, label: string) => {
+    const fit = expectOk(analyseFitDesignation(designation, 25))
+    return unjudgedSentence(label, fit, serviceClearance(fit, NEW_FIT_INPUTS, steel.housing, steel.shaft), 'si')
+  }
+
+  it('states the fit, its clearance at 20 °C and in service, and that no window is set', () => {
+    expect(sentence('H9/d9', 'Clearance')).toBe('Clearance fit: clearance 65 … 169 µm at 20 °C, 65 … 169 µm in service; no required window is set.')
+  })
+
+  it('writes an interference fit as interference', () => {
+    expect(sentence('H7/s6', 'Interference')).toMatch(/^Interference fit: interference 14 … 48 µm at 20 °C/)
   })
 })

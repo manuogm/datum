@@ -1,13 +1,15 @@
 // Single joint, Results step, in three depths: the verdict with the
 // governing check and the figures to put on the drawing (preload, torque,
 // load factor); "Show details", the joint diagram and one row per check;
-// "Show calculation", the whole trail R0 … R13 with the governing step open.
+// "Show calculation", the whole trail R0 … R13 with the step behind the
+// verdict open.
 import type { ReactNode } from 'react'
 import { LegendItem, Marker, ResultRow, ResultsLayout, VerdictCard } from '../../../../app/ui'
 import { formatDecimal, formatQuantity, unitOf, type UnitSystem } from '../../../../core/units'
-import type { BoltedJointAnalysis, CalculationStep, StepCheck, StepId } from '../../calc'
+import type { BoltedJointAnalysis, StepId } from '../../calc'
 import { STEP_MARKER } from '../logic/labels'
-import { CALCULATION_STATUS, formatUtilisation, jointVerdict } from '../logic/verdict'
+import { safetyFactorText } from '../logic/trailValues'
+import { CALCULATION_STATUS, formatUtilisation, jointVerdict, verdictCheck } from '../logic/verdict'
 import { CalculationTrail } from '../shared/CalculationTrail'
 import { JointDiagram } from './JointDiagram'
 import styles from './single.module.css'
@@ -27,7 +29,8 @@ export function JointResults({ analysis, axialN, system, stepInputs, memoryKey }
   const { summary, preload, steps } = analysis
   const { sentence, detail } = jointVerdict(analysis)
   const governing = steps.find((s) => s.id === summary.governing)
-  const checks = steps.filter((s): s is CalculationStep & { check: StepCheck } => s.check !== null)
+  // Every check, and a step that needs review without a number (R10 when pG is not known).
+  const checks = steps.filter((s) => s.status !== 'info')
   return (
     <ResultsLayout
       memoryKey={memoryKey}
@@ -38,14 +41,14 @@ export function JointResults({ analysis, axialN, system, stepInputs, memoryKey }
           detail={detail}
           headline={{
             label: 'Utilisation',
-            symbol: governing?.check ? `u · ${governing.rStep} SF ${formatDecimal(governing.check.safetyFactor, 2, true)}` : 'u',
+            symbol: governing?.check ? `u · ${governing.rStep} ${safetyFactorText(governing.check)}` : 'u',
             value: formatUtilisation(summary.utilisation),
             target: '≤ 1.00',
           }}
           figures={[
             { label: 'Preload', symbol: 'FM,min', value: formatQuantity('force', system, preload.assemblyMinN), unit: unitOf('force', system) },
             { label: 'Torque', symbol: 'MA', value: formatQuantity('torque', system, preload.tighteningTorqueNm), unit: unitOf('torque', system) },
-            { label: 'Load factor', symbol: 'Φn', value: formatDecimal(analysis.loadFactor, 3, true) },
+            { label: 'Load factor', symbol: 'Φn', value: formatDecimal(analysis.loadFactor, 2, true) },
           ]}
           reference="VDI 2230-1:2015"
         />
@@ -68,7 +71,7 @@ export function JointResults({ analysis, axialN, system, stepInputs, memoryKey }
               <ResultRow
                 key={step.id}
                 label={`${step.rStep} · ${step.title}`}
-                value={`SF ${formatDecimal(step.check.safetyFactor, 2, true)}`}
+                value={step.check ? safetyFactorText(step.check) : 'not checked'}
                 marker={{ color: STEP_MARKER[step.status], shape: 'dot' }}
               />
             ))}
@@ -76,7 +79,7 @@ export function JointResults({ analysis, axialN, system, stepInputs, memoryKey }
         </div>
       }
       calculationSummary="R0 … R13 · values, equations and clauses"
-      calculation={<CalculationTrail steps={steps} system={system} openStep={summary.governing} stepInputs={stepInputs} />}
+      calculation={<CalculationTrail steps={steps} system={system} openStep={verdictCheck(analysis)?.id ?? null} stepInputs={stepInputs} />}
     />
   )
 }

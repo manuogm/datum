@@ -5,7 +5,7 @@
 // ply shown in the plots and the ply list.
 import { cx, MonoLabel, ScoreBar } from '../../../../app/ui'
 import type { LaminateAnalysis } from '../../calc'
-import { angleText, formatFactor, modeText } from '../logic/labels'
+import { angleText, formatFactor, formatReserveFactor, modeText } from '../logic/labels'
 import { plyTally, plyTones } from '../logic/verdict'
 import styles from './results.module.css'
 
@@ -35,7 +35,7 @@ export function PlyFailureList({ analysis, selectedPly, onSelect }: PlyFailureLi
                 type="button"
                 className={cx(styles.plyRow, ply.index === selectedPly && styles.plyRowSelected)}
                 aria-pressed={ply.index === selectedPly}
-                title={`Ply ${ply.index}: RF ${formatFactor(ply.reserveFactor)}, ${modeText(analysis.criterion, ply.mode)}`}
+                title={`Ply ${ply.index}: RF ${formatReserveFactor(ply.reserveFactor)}, ${modeText(analysis.criterion, ply.mode)}`}
                 onClick={() => onSelect(ply.index)}
               >
                 <span className={styles.plyIndex}>{ply.index}</span>

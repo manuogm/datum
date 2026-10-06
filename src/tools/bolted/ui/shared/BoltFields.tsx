@@ -1,5 +1,5 @@
 // The bolt: ISO thread (diameter and pitch), property class and head type.
-// Washers go with the tightening (TighteningFields).
+// Washers go with the clamped parts (PlatesFields).
 import { PanelSection, SegmentedControl, Select } from '../../../../app/ui'
 import { NOMINAL_DIAMETERS_MM, pitchesForMm, PROPERTY_CLASSES, type HeadType } from '../../calc'
 import { threadOfNominal } from '../logic/designEdits'

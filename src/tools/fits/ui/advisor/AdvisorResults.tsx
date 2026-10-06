@@ -1,18 +1,22 @@
-// Advisor, results: the best match as the verdict, with "Apply to calculator"
-// and "Compare runner-up"; on request the details (the candidate chart, the
+// Advisor, results: the best match as the verdict (naming the check it fails,
+// if any), with "Apply to calculator" and "Compare runner-up", and any
+// material warning under it; on request the details (the candidate chart, the
 // checks of the best and the compared fit, every candidate ranked) and the
 // calculation (the advisor's reasoning in full, and its sources).
 import { useState } from 'react'
 import { Badge, Button, MonoLabel, ProblemCallout, Rationale, ResultsLayout, StepPage, VerdictCard } from '../../../../app/ui'
 import { formatQuantityRange, unitOf, type UnitSystem } from '../../../../core/units'
-import type { FitAdvice, FitCandidate } from '../../advisor'
+import type { ClearanceRangeUm, FitAdvice, FitCandidate } from '../../advisor'
 import { formatFit, parseFitDesignation } from '../../calc'
 import { assemblyTemperatures } from '../logic/assemblyTemperatures'
 import { chartedCandidates } from '../logic/candidates'
+import { NO_WINDOW_ERROR } from '../logic/fitResults'
 import { serviceClearance } from '../logic/serviceClearance'
-import { adviceVerdict, candidateStatus } from '../logic/verdict'
+import { advisorVerdict, candidateStatus } from '../logic/verdict'
 import { BandLegend } from '../shared/BandLegend'
 import { FIT_TYPE_LABEL, nominalLabel } from '../shared/labels'
+import { MaterialNotes } from '../shared/MaterialNotes'
+import sharedStyles from '../shared/shared.module.css'
 import type { FitStepProps } from '../shared/stepProps'
 import styles from './advisor.module.css'
 import { CandidateChart } from './CandidateChart'
@@ -24,14 +28,16 @@ const REFERENCE = 'ISO 286-1 · 286-2'
 export function AdvisorResults(props: FitStepProps) {
   const { inputs, results, flow, fault } = props
   const advice = results.advice
-  if (!advice.ok) {
+  // The advisor gives no advice without a window (see fitResults); the check also tells TypeScript.
+  const window = inputs.requiredClearanceUm
+  if (!advice.ok || window === null) {
     const step = fault?.step === 'size' ? { id: 'size', label: 'Size & materials' } : { id: 'requirements', label: 'Requirements' }
     return (
       <StepPage {...flow.page} title="Results" wide>
         <ResultsLayout
           verdict={
             <ProblemCallout title="No advice for these inputs" back={{ label: step.label, onClick: () => flow.goTo(step.id) }}>
-              {advice.error}
+              {advice.ok ? NO_WINDOW_ERROR : advice.error}
             </ProblemCallout>
           }
         />
@@ -45,12 +51,18 @@ export function AdvisorResults(props: FitStepProps) {
       hint={`The ISO fits for ${nominalLabel(inputs.nominalMm, props.system)} in ${results.housing.name} and ${results.shaft.name}, ranked against the requirements.`}
       wide
     >
-      <Recommendation {...props} advice={advice.value} />
+      <Recommendation {...props} advice={advice.value} window={window} />
     </StepPage>
   )
 }
 
-function Recommendation({ advice, inputs, results, system, dispatch, flow }: FitStepProps & { advice: FitAdvice }) {
+interface RecommendationProps extends FitStepProps {
+  advice: FitAdvice
+  /** The required clearance window the candidates were ranked against. */
+  window: ClearanceRangeUm
+}
+
+function Recommendation({ advice, window, inputs, results, system, dispatch, flow }: RecommendationProps) {
   const [comparedDesignation, setComparedDesignation] = useState<string | null>(null)
   const [best, runnerUp] = advice.candidates
   const compared = advice.candidates.find((c) => c !== best && c.fit.designation === comparedDesignation) ?? null
@@ -67,32 +79,35 @@ function Recommendation({ advice, inputs, results, system, dispatch, flow }: Fit
     flow.reachAll('results')
   }
   const toggleCompare = () => setComparedDesignation(compared ? null : (runnerUp?.fit.designation ?? null))
-  const { sentence, detail } = adviceVerdict(advice.why)
+  const { sentence, detail } = advisorVerdict(best, advice.why)
 
   return (
     <ResultsLayout
       memoryKey={flow.memoryKey}
       verdict={
-        <VerdictCard
-          status={candidateStatus(best)}
-          sentence={sentence}
-          detail={detail}
-          reference={REFERENCE}
-          headline={{ label: 'Best match', value: best.fit.designation }}
-          figures={bestFigures(best, system)}
-          actions={
-            <>
-              <Button variant="primary" size="md" onClick={applyBest}>
-                Apply to calculator
-              </Button>
-              {runnerUp && (
-                <Button size="md" aria-pressed={compared !== null} onClick={toggleCompare}>
-                  {compared ? 'Stop comparing' : `Compare runner-up ${runnerUp.fit.designation}`}
+        <div className={sharedStyles.verdict}>
+          <VerdictCard
+            status={candidateStatus(best)}
+            sentence={sentence}
+            detail={detail}
+            reference={REFERENCE}
+            headline={{ label: 'Best match', value: best.fit.designation }}
+            figures={bestFigures(best, system)}
+            actions={
+              <>
+                <Button variant="primary" size="md" onClick={applyBest}>
+                  Apply to calculator
                 </Button>
-              )}
-            </>
-          }
-        />
+                {runnerUp && (
+                  <Button size="md" aria-pressed={compared !== null} onClick={toggleCompare}>
+                    {compared ? 'Stop comparing' : `Compare runner-up ${runnerUp.fit.designation}`}
+                  </Button>
+                )}
+              </>
+            }
+          />
+          <MaterialNotes notes={results.materialNotes} />
+        </div>
       }
       detailsSummary={`${charted.length} fits charted · checks · all ${advice.candidates.length} candidates ranked`}
       details={
@@ -109,7 +124,8 @@ function Recommendation({ advice, inputs, results, system, dispatch, flow }: Fit
           <div className={styles.chartArea}>
             <CandidateChart
               charted={charted}
-              inputs={inputs}
+              window={window}
+              maxAssemblyInterferenceUm={inputs.maxAssemblyInterferenceUm}
               system={system}
               bestDesignation={best.fit.designation}
               comparedDesignation={compared?.fit.designation ?? null}
@@ -129,16 +145,11 @@ function Recommendation({ advice, inputs, results, system, dispatch, flow }: Fit
           />
         </>
       }
-      calculationSummary={`Why ${best.fit.designation} · material notes · ${REFERENCE}`}
+      calculationSummary={`Why ${best.fit.designation} · ${REFERENCE}`}
       calculation={
         <>
           <Rationale>
             <span>{advice.why}</span>
-            {advice.materialNotes.map((note) => (
-              <span key={note} className={styles.notes}>
-                {note}
-              </span>
-            ))}
           </Rationale>
           <div className={styles.sources}>
             <Badge variant="reference" size="sm">

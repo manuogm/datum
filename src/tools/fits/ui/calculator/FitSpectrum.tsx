@@ -1,5 +1,5 @@
 // The fit spectrum: the fit's clearance band at each service temperature on
-// one clearance axis, against the required window, so the effect of
+// one clearance axis, against the required window (if set), so the effect of
 // temperature is seen at a glance. It sits beside the service step and under
 // the zone diagram in the results' details.
 import type { CSSProperties } from 'react'
@@ -26,7 +26,7 @@ export function FitSpectrum({ service, window, system, bare = false }: FitSpectr
   const shown = (um: number) => toDisplay('deviation', system, um)
   const layout = spectrumLayout(
     service.bands.map((band) => ({ kind: band.kind, min: shown(band.minUm), max: shown(band.maxUm) })),
-    { min: shown(window.minUm), max: shown(window.maxUm) },
+    window === null ? null : { min: shown(window.minUm), max: shown(window.maxUm) },
   )
   const lastTick = layout.ticks.length - 1
   return (
@@ -44,7 +44,7 @@ export function FitSpectrum({ service, window, system, bare = false }: FitSpectr
         <span className={styles.clearanceLabel} style={{ left: `${layout.zeroPercent}%` }}>
           CLR
         </span>
-        <div className={styles.window} style={spanStyle(layout.window)} />
+        {layout.window && <div className={styles.window} style={spanStyle(layout.window)} />}
         <div className={styles.zeroLine} style={{ left: `${layout.zeroPercent}%` }} />
         {layout.bars.map((bar, row) => (
           <div

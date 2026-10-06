@@ -1,17 +1,20 @@
 // Calculator, results: the verdict in service first (the clearance edge that
-// governs, against the required window), then on request the details (zone
-// diagram, fit spectrum and every limit and clearance) and the calculation
-// (each value's formula and source).
+// governs, against the required window; without a window, the fit and its
+// clearance in service, not judged) and any material warning under it, then
+// on request the details (zone diagram, fit spectrum and every limit and
+// clearance) and the calculation (each value's formula and source).
 import { cx, PanelSection, ProblemCallout, ResultRow, ResultsLayout, StepPage, VerdictCard } from '../../../../app/ui'
-import { formatQuantity, unitOf, type UnitSystem } from '../../../../core/units'
+import { formatQuantity, formatQuantityRange, unitOf, type UnitSystem } from '../../../../core/units'
 import { REFERENCE_TEMP_C } from '../../advisor'
 import type { FitAnalysis } from '../../calc'
 import { fitQuantities, limitsText, thermalQuantities, type FitQuantity, type FitQuantityKey } from '../logic/fitQuantities'
 import { serviceClearance, type ServiceClearance } from '../logic/serviceClearance'
 import { serviceSummary } from '../logic/serviceSummary'
-import { calculatorSentence, governingEdge } from '../logic/verdict'
+import { calculatorSentence, governingEdge, unjudgedSentence } from '../logic/verdict'
 import { FIT_TYPE_LABEL, nominalLabel } from '../shared/labels'
+import { MaterialNotes } from '../shared/MaterialNotes'
 import { QuantityDetails } from '../shared/QuantityDetails'
+import sharedStyles from '../shared/shared.module.css'
 import type { FitStepProps } from '../shared/stepProps'
 import { ZoneDiagram } from '../shared/ZoneDiagram'
 import type { FitInputs } from '../state/fitInputs'
@@ -20,15 +23,18 @@ import { FitSpectrum } from './FitSpectrum'
 
 const REFERENCE = 'ISO 286-1:2010'
 
-export function CalculatorResults({ inputs, results, system, flow }: FitStepProps) {
+export function CalculatorResults({ inputs, results, system, flow, fault }: FitStepProps) {
   const calculation = results.calculation
-  if (!calculation.ok) {
+  if (!calculation.ok || fault?.step === 'service') {
+    const problem = calculation.ok
+      ? { title: 'Not checked in service', step: 'service', label: 'Service', error: fault?.error }
+      : { title: 'Not defined by ISO 286', step: 'fit', label: 'Size & fit', error: calculation.error }
     return (
       <StepPage {...flow.page} title="Results" wide>
         <ResultsLayout
           verdict={
-            <ProblemCallout title="Not defined by ISO 286" back={{ label: 'Size & fit', onClick: () => flow.goTo('fit') }}>
-              {calculation.error}
+            <ProblemCallout title={problem.title} back={{ label: problem.label, onClick: () => flow.goTo(problem.step) }}>
+              {problem.error}
             </ProblemCallout>
           }
         />
@@ -49,7 +55,12 @@ export function CalculatorResults({ inputs, results, system, flow }: FitStepProp
     >
       <ResultsLayout
         memoryKey={flow.memoryKey}
-        verdict={<CalculatorVerdict fit={fit} service={service} inputs={inputs} system={system} />}
+        verdict={
+          <div className={sharedStyles.verdict}>
+            <CalculatorVerdict fit={fit} service={service} inputs={inputs} system={system} />
+            <MaterialNotes notes={results.materialNotes} />
+          </div>
+        }
         detailsSummary="Tolerance zones · fit spectrum · limits and clearances"
         details={
           <>
@@ -90,12 +101,44 @@ interface CalculatorVerdictProps {
   system: UnitSystem
 }
 
-/** In-service verdict: the governing edge of the clearance against its window limit, then the fit at 20 °C. */
+/**
+ * In-service verdict: the governing edge of the clearance against its window
+ * limit, then the fit at 20 °C. Without a required window: the fit type and
+ * its clearance in service, with no target (status pass).
+ */
 function CalculatorVerdict({ fit, service, inputs, system }: CalculatorVerdictProps) {
   const deviation = (um: number) => formatQuantity('deviation', system, um)
   const deviationUnit = unitOf('deviation', system)
-  const governing = governingEdge(service.inServiceUm, inputs.requiredClearanceUm)
   const at20 = referenceTemp(system)
+  const figures = [
+    { label: `Min clearance, ${at20}`, symbol: 'Cmin', value: deviation(fit.minClearanceUm), unit: deviationUnit },
+    { label: `Max clearance, ${at20}`, symbol: 'Cmax', value: deviation(fit.maxClearanceUm), unit: deviationUnit },
+    { label: 'Fit type', value: FIT_TYPE_LABEL[fit.fitType] },
+    { label: 'Fit', value: `${nominalLabel(fit.nominalMm, system)} ${fit.designation}` },
+  ]
+  const window = inputs.requiredClearanceUm
+  if (window === null) {
+    const { minC, maxC } = inputs.serviceTempC
+    const temperatures = minC === maxC
+      ? formatQuantity('temperature', system, minC, { withUnit: true })
+      : formatQuantityRange('temperature', system, minC, maxC)
+    return (
+      <VerdictCard
+        status={service.status}
+        sentence={unjudgedSentence(FIT_TYPE_LABEL[fit.fitType], fit, service, system)}
+        detail={`Service temperature ${temperatures}. Set a required clearance on the Service step to judge the fit against it.`}
+        reference={REFERENCE}
+        headline={{
+          label: 'Clearance in service',
+          value: formatQuantityRange('deviation', system, service.inServiceUm.minUm, service.inServiceUm.maxUm, false),
+          unit: deviationUnit,
+          target: 'no required window',
+        }}
+        figures={figures}
+      />
+    )
+  }
+  const governing = governingEdge(service.inServiceUm, window)
   return (
     <VerdictCard
       status={service.status}
@@ -108,12 +151,7 @@ function CalculatorVerdict({ fit, service, inputs, system }: CalculatorVerdictPr
         unit: deviationUnit,
         target: `${governing.edge === 'min' ? '≥' : '≤'} ${deviation(governing.limitUm)} ${deviationUnit}`,
       }}
-      figures={[
-        { label: `Min clearance, ${at20}`, symbol: 'Cmin', value: deviation(fit.minClearanceUm), unit: deviationUnit },
-        { label: `Max clearance, ${at20}`, symbol: 'Cmax', value: deviation(fit.maxClearanceUm), unit: deviationUnit },
-        { label: 'Fit type', value: FIT_TYPE_LABEL[fit.fitType] },
-        { label: 'Fit', value: `${nominalLabel(fit.nominalMm, system)} ${fit.designation}` },
-      ]}
+      figures={figures}
     />
   )
 }

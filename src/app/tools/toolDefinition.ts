@@ -5,7 +5,7 @@ import { summaryOf, type CalculationSummary, type ToolSnapshot } from '../../cor
 import type { Result } from '../../core/result'
 
 export interface ToolDefinition<Inputs> {
-  /** The tool's worked example: where a new calculation starts. */
+  /** Where a new calculation starts. */
   defaultInputs: Inputs
   /** Stored inputs → inputs (null: the example); anything malformed keeps its default. */
   inputsFrom: (stored: unknown) => Inputs

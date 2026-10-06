@@ -2,11 +2,13 @@
 // how stored inputs are read back and how a result is summarised.
 import type { ToolDefinition } from '../../../app/tools/toolDefinition'
 import { fitSnapshot } from './fitSnapshot'
-import { DEFAULT_FIT_INPUTS, type FitInputs } from './state/fitInputs'
+import { NEW_FIT_INPUTS, type FitInputs } from './state/fitInputs'
 import { fitInputsFrom } from './state/readInputs'
 
+// A new calculation starts from neutral inputs (NEW_FIT_INPUTS), not from the
+// seeded example's service conditions; the example opens on its own (fitInputsFrom(null)).
 export const FIT_TOOL: ToolDefinition<FitInputs> = {
-  defaultInputs: DEFAULT_FIT_INPUTS,
+  defaultInputs: NEW_FIT_INPUTS,
   inputsFrom: fitInputsFrom,
   snapshot: fitSnapshot,
 }

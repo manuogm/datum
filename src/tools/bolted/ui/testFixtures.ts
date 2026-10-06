@@ -19,3 +19,16 @@ export const PATTERN_WITH_KEENSERT = patternWithKeensert({ nominalMm: 6, pitchMm
 
 /** J4 a Keensert whose outer thread has not been entered: no load case can be analysed. */
 export const PATTERN_MISSING_THREAD = patternWithKeensert(null)
+
+/**
+ * The default joint with its aluminium part in PEEK, whose pG is not known,
+ * with washers and no transverse load: every numeric check passes, and R10
+ * cannot be checked, so the joint needs review though R9 is the most utilised.
+ */
+export const JOINT_PEEK_NO_PG: BoltInputs = {
+  ...DEFAULT_BOLT_INPUTS,
+  joint: {
+    loads: { ...DEFAULT_BOLT_INPUTS.joint.loads, transverseN: 0 },
+    design: { ...DEFAULT_BOLT_INPUTS.joint.design, washers: true, plates: [{ materialId: 'peek', thicknessMm: 12 }, DEFAULT_BOLT_INPUTS.joint.design.plates[1]] },
+  },
+}

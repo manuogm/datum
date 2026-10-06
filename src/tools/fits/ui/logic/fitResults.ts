@@ -7,35 +7,43 @@ import type { UnitSystem } from '../../../../core/units'
 import { adviseFit, type FitAdvice, type FitCandidate } from '../../advisor'
 import { analyseFit, type FitAnalysis } from '../../calc'
 import type { FitInputs } from '../state/fitInputs'
+import { materialNotes } from './materialNotes'
 
 export interface FitResults {
   readonly housing: Material
   readonly shaft: Material
   /** The calculator's hole and shaft classes at the nominal size. */
   readonly calculation: Result<FitAnalysis>
-  /** The advisor's ranked candidates, best first. */
+  /** The advisor's ranked candidates, best first; fails without a required window. */
   readonly advice: Result<FitAdvice>
+  /** The housing or shaft used above its service limit (see materialNotes). */
+  readonly materialNotes: readonly string[]
 }
+
+/** Why the advisor gives no advice without a required window. */
+export const NO_WINDOW_ERROR = 'Enter the clearance the fit needs in service: the advisor ranks every ISO fit against it.'
 
 /** `system` is the unit system of the advisor's texts. */
 export function fitResults(inputs: FitInputs, system: UnitSystem): FitResults {
   const housing = materialOrFirst(inputs.housingMaterialId)
   const shaft = materialOrFirst(inputs.shaftMaterialId)
+  const window = inputs.requiredClearanceUm
   return {
     housing,
     shaft,
     calculation: analyseFit(inputs.hole, inputs.shaft, inputs.nominalMm),
-    advice: adviseFit({
+    advice: window === null ? fail(NO_WINDOW_ERROR) : adviseFit({
       nominalMm: inputs.nominalMm,
       housing,
       shaft,
       functions: inputs.functions,
       assembly: inputs.assembly,
       serviceTempC: inputs.serviceTempC,
-      requiredClearanceUm: inputs.requiredClearanceUm,
+      requiredClearanceUm: window,
       maxAssemblyInterferenceUm: inputs.maxAssemblyInterferenceUm,
       unitSystem: system,
     }),
+    materialNotes: materialNotes(housing, shaft, inputs.serviceTempC, system),
   }
 }
 

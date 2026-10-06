@@ -7,7 +7,7 @@ import { Badge, ResultRow } from '../../../../app/ui'
 import { formatDecimal, type UnitSystem } from '../../../../core/units'
 import type { CalculationStep, StepId } from '../../calc'
 import { STEP_MARKER } from '../logic/labels'
-import { shownValue, stepHeadline } from '../logic/trailValues'
+import { safetyFactorText, shownValue, stepHeadline } from '../logic/trailValues'
 import { formatUtilisation } from '../logic/verdict'
 import styles from './trail.module.css'
 
@@ -43,7 +43,7 @@ function StepRow({ step, system, defaultOpen, inputs }: StepRowProps) {
   return (
     <ResultRow
       label={`${step.rStep} · ${step.title}`}
-      value={step.check ? `SF ${headline.value}` : headline.value}
+      value={step.check ? safetyFactorText(step.check) : headline.value}
       unit={headline.unit}
       marker={{ color: STEP_MARKER[step.status], shape: 'dot' }}
       defaultOpen={defaultOpen}

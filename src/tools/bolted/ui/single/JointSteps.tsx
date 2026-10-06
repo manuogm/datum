@@ -1,5 +1,6 @@
 // Single joint mode as guided steps: Bolt (with the mode choice), Joint (what
-// the bolt screws into and the clamped parts, beside section A–A), Loads,
+// the bolt screws into and the clamped parts with their washers, beside
+// section A–A), Loads (with the friction that holds FQ, which R12 checks),
 // then Results. Advanced inputs wait under More options on their step.
 import type { Dispatch, ReactNode } from 'react'
 import { MoreOptions, ProblemCallout, ResultsLayout, StepPage, type StepFlow } from '../../../../app/ui'
@@ -12,6 +13,7 @@ import { BoltFields } from '../shared/BoltFields'
 import { ContactFields } from '../shared/ContactFields'
 import { JointKindFields } from '../shared/JointKindFields'
 import { PlatesFields } from '../shared/PlatesFields'
+import { SlipRows } from '../shared/SlipFields'
 import styles from '../shared/steps.module.css'
 import { TighteningFields } from '../shared/TighteningFields'
 import type { BoltInputs, JointDesignSpec } from '../state/boltInputs'
@@ -44,7 +46,7 @@ export function JointSteps({ flow, inputs, results, fault, system, dispatch, mod
     case 'bolt': {
       const tightening = tighteningOptions(design)
       return (
-        <StepPage {...flow.page} problem={problem} title="Bolt" hint="The bolt: ISO thread, property class and head. Tightening and friction are under More options.">
+        <StepPage {...flow.page} problem={problem} title="Bolt" hint="The bolt: ISO thread, property class and head. The tightening method and the thread and head friction are under More options.">
           {modeField}
           <BoltFields design={design} onChange={changeDesign} />
           <MoreOptions count={tightening.count} changed={tightening.changed} memoryKey="bolt:tightening">
@@ -60,7 +62,7 @@ export function JointSteps({ flow, inputs, results, fault, system, dispatch, mod
           {...flow.page}
           problem={problem}
           title="Joint"
-          hint="What the bolt screws into, and the parts it clamps from the head down. Contact details are under More options."
+          hint="What the bolt screws into, and the parts it clamps from the head down, with any washers. Contact details are under More options."
           asideLabel="Section A–A"
           asideMeta={`${jointTitle(design)} · to scale`}
           aside={
@@ -81,13 +83,20 @@ export function JointSteps({ flow, inputs, results, fault, system, dispatch, mod
     }
     case 'loads':
       return (
-        <StepPage {...flow.page} problem={problem} title="Loads" hint="The working loads on the bolt, and the temperature range it sees in service." nextLabel="See results">
+        <StepPage
+          {...flow.page}
+          problem={problem}
+          title="Loads"
+          hint="The working loads on the bolt, the friction that holds the transverse load FQ, and the temperature range the joint sees in service."
+          nextLabel="See results"
+        >
           <LoadsFields
             loads={loads}
             serviceTempC={inputs.serviceTempC}
             system={system}
             onLoadsChange={(changes) => dispatch({ type: 'loads', changes })}
             onTemperatureChange={(serviceTempC) => dispatch({ type: 'change', changes: { serviceTempC } })}
+            slip={<SlipRows design={design} onChange={changeDesign} />}
           />
         </StepPage>
       )

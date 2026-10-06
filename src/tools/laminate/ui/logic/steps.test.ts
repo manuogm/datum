@@ -26,8 +26,14 @@ describe('lamSteps', () => {
     expect(lamSteps(null).map((s) => s.label)).toEqual(['Layup', 'Loads', 'Check', 'Results'])
     expect(lamSteps({ step: 'layup', error: 'No ply data' })[0]).toMatchObject({ id: 'layup', invalid: 'No ply data' })
   })
-})
 
+  it('marks Layup while the typed stacking notation does not parse, whatever else is at fault', () => {
+    const steps = lamSteps({ step: 'loads', error: 'Bad load' }, 'Expected a ply angle at character 7')
+    expect(steps[0]).toMatchObject({ id: 'layup', invalid: 'Stacking sequence: Expected a ply angle at character 7' })
+    expect(steps[1]).toMatchObject({ id: 'loads', invalid: 'Bad load' })
+    expect(lamSteps(null, null)[0].invalid).toBeUndefined()
+  })
+})
 
 describe('More options counts', () => {
   it('counts plies of another material than the top ply', () => {

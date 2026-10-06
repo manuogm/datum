@@ -30,7 +30,7 @@ export const EXAMPLE_SUMMARIES: Record<ToolId, CalculationSummary> = {
     title: '[0/±45/90]s',
     status: 'review',
     figures: [
-      { label: 'RF min', value: '1.27' },
+      { label: 'RF min', value: '1.26' },
       { label: 'Critical plies', value: '4–5' },
       { label: 'h', value: '1.000', unit: 'mm' },
     ],

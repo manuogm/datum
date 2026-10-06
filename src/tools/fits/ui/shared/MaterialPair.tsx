@@ -49,7 +49,7 @@ function MaterialSelect({ caption, color, material, system, onChange }: Material
           <span className={styles.caption}>{caption}</span>
         </>
       }
-      meta={`α ${formatQuantity('expansion', system, material.thermalExpansionUmPerMK)}`}
+      meta={`α ${formatQuantity('expansion', system, material.thermalExpansionUmPerMK, { withUnit: true })}`}
     />
   )
 }

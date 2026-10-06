@@ -14,6 +14,7 @@ import { CalculationActions } from '../../../app/tools/CalculationActions'
 import { useCalculationSteps } from '../../../app/tools/calculationSteps'
 import { StepBar } from '../../../app/ui'
 import type { Calculation } from '../../../core/library'
+import { liveNotationDraft, notationError, type NotationDraft } from './logic/notationDraft'
 import { lamSteps, stepFault, type LamStepId } from './logic/steps'
 import { useLaminateTool } from './state/useLaminateTool'
 import { CheckStep } from './steps/CheckStep'
@@ -26,12 +27,18 @@ export function LaminatePage({ calculation }: { calculation: Calculation }) {
   const { inputs, dispatch, analysis, unsaved, save } = useLaminateTool(calculation)
   const { unitSystem: system } = useSettings()
   const fault = stepFault(inputs, analysis)
-  const steps = lamSteps(fault)
+  // The notation typed on Layup, kept here so it outlives the step; dropped once the plies change another way.
+  const [typedNotation, setTypedNotation] = useState<NotationDraft | null>(null)
+  const notationDraft = liveNotationDraft(typedNotation, inputs.plies.map((p) => p.angleDeg))
+  const steps = lamSteps(fault, notationError(notationDraft))
   const flow = useCalculationSteps(calculation, steps)
   // The ply picked in the ply list, the stack or the failure list; forgotten when the stack gets shorter.
   const [chosenPly, setChosenPly] = useState<number | null>(null)
   const selectedPly = chosenPly !== null && chosenPly <= inputs.plies.length ? chosenPly : null
-  const props: LamStepProps = { inputs, analysis, dispatch, system, flow, fault, selectedPly, onSelectPly: setChosenPly }
+  const props: LamStepProps = {
+    inputs, analysis, dispatch, system, flow, fault, selectedPly, onSelectPly: setChosenPly,
+    notationDraft, onNotationDraftChange: setTypedNotation,
+  }
   return (
     <AppLayout current={{ tab: 'calc', id: calculation.id }} actions={<CalculationActions calculationId={calculation.id} unsaved={unsaved} onSave={save} />}>
       <StepBar steps={steps} {...flow.bar} />

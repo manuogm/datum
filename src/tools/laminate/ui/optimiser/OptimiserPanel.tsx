@@ -10,7 +10,7 @@ import { countOf } from '../../../../app/format/count'
 import { Button, Chip, InputWell, MonoLabel, NumberInput, ValueRow } from '../../../../app/ui'
 import { formatQuantity, type UnitSystem } from '../../../../core/units'
 import type { LayupCandidate } from '../../optimise'
-import { formatFactor, plyMaterialName } from '../logic/labels'
+import { formatFactor, formatReserveFactor, plyMaterialName, shownReserveFactor } from '../logic/labels'
 import { appliedRules, DEFAULT_OPTIMISER_SETTINGS, DIRECTION_CHOICES, directionLabel, optimiseRequest, type OptimiserSettings } from '../logic/optimiserRequest'
 import type { LaminateInputs } from '../state/lamInputs'
 import styles from './optimiser.module.css'
@@ -117,7 +117,9 @@ function OptimiserResult({ run, current, system, onUse }: OptimiserResultProps) 
             {others.map((candidate) => (
               <li key={candidate.notation} className={styles.candidate}>
                 <span className={styles.candidateNotation}>{candidate.notation}</span>
-                <span className={candidate.reserveFactor < targetReserveFactor ? styles.candidateRfBelow : styles.candidateRf}>RF {formatFactor(candidate.reserveFactor)}</span>
+                <span className={shownReserveFactor(candidate.reserveFactor) < targetReserveFactor ? styles.candidateRfBelow : styles.candidateRf}>
+                  RF {formatReserveFactor(candidate.reserveFactor)}
+                </span>
                 <Button variant="link" size="sm" disabled={!current} onClick={() => use(candidate.anglesDeg)}>
                   Use
                 </Button>
@@ -154,7 +156,7 @@ function CandidateCard({ candidate, system, disabled, onUse }: CandidateCardProp
     <div className={styles.best}>
       <span className={styles.bestNotation}>{candidate.notation}</span>
       <span className={styles.bestFacts}>
-        {candidate.plyCount} plies · RF {formatFactor(candidate.reserveFactor)} · h {formatQuantity('length', system, candidate.thicknessMm, { withUnit: true })} ·{' '}
+        {candidate.plyCount} plies · RF {formatReserveFactor(candidate.reserveFactor)} · h {formatQuantity('length', system, candidate.thicknessMm, { withUnit: true })} ·{' '}
         {formatQuantity('arealMass', system, candidate.arealMassKgPerM2, { withUnit: true })}
       </span>
       <Button variant="primary" size="sm" disabled={disabled} onClick={() => onUse(candidate.anglesDeg)}>

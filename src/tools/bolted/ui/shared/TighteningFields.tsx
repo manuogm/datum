@@ -1,7 +1,8 @@
-// Tightening (advanced inputs of the bolt): washers, the method with its
-// tightening factor αA, the lowest expected friction coefficients and the
-// number of interfaces that carry shear by friction.
-import { InputWell, NumberInput, PanelSection, Select, Switch, ValueRow } from '../../../../app/ui'
+// Tightening (advanced inputs of the bolt): the method with its tightening
+// factor αA and the lowest expected thread and head friction. The friction
+// against slip (µT, qF) sits with the transverse load (SlipFields), and the
+// washers with the clamped parts (PlatesFields).
+import { InputWell, NumberInput, PanelSection, Select, ValueRow } from '../../../../app/ui'
 import { formatDecimal } from '../../../../core/units'
 import { TIGHTENING_METHODS, type TighteningMethod } from '../../calc'
 import { optionsOf, TIGHTENING_LABELS } from '../logic/labels'
@@ -10,12 +11,11 @@ import styles from './design.module.css'
 
 const METHODS = optionsOf<TighteningMethod>(TIGHTENING_LABELS)
 
-type FrictionKey = 'threadFriction' | 'headFriction' | 'interfaceFriction'
+type FrictionKey = 'threadFriction' | 'headFriction'
 
 const FRICTIONS: readonly { key: FrictionKey; label: string }[] = [
   { key: 'threadFriction', label: 'Thread friction µG' },
   { key: 'headFriction', label: 'Head friction µK' },
-  { key: 'interfaceFriction', label: 'Interface friction µT' },
 ]
 
 interface TighteningFieldsProps {
@@ -26,9 +26,6 @@ interface TighteningFieldsProps {
 export function TighteningFields({ design, onChange }: TighteningFieldsProps) {
   return (
     <PanelSection label="Tightening">
-      <Switch checked={design.washers} onChange={(washers) => onChange({ washers })}>
-        ISO 7089 washers
-      </Switch>
       <Select
         size="md"
         aria-label="Tightening method"
@@ -49,19 +46,6 @@ export function TighteningFields({ design, onChange }: TighteningFieldsProps) {
             }
           />
         ))}
-        <ValueRow
-          label="Slip interfaces qF"
-          value={
-            <InputWell>
-              <NumberInput
-                label="Slip interfaces qF"
-                decimals={0}
-                value={design.frictionInterfaces}
-                onChange={(value) => onChange({ frictionInterfaces: Math.max(1, Math.round(value)) })}
-              />
-            </InputWell>
-          }
-        />
       </div>
     </PanelSection>
   )

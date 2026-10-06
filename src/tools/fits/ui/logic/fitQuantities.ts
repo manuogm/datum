@@ -2,7 +2,7 @@
 // with the numbers filled in, and the standard it comes from. The results
 // column and the PDF report both list these, so they always agree.
 // Formulas mark subscripts with an underscore: 'D_max' reads Dₘₐₓ.
-import { formatQuantity, formatQuantityRange, unitOf, type Quantity, type UnitSystem } from '../../../../core/units'
+import { formatDecimal, formatQuantity, formatQuantityRange, toDisplay, unitOf, type Quantity, type UnitSystem } from '../../../../core/units'
 import { REFERENCE_TEMP_C } from '../../advisor'
 import type { FitAnalysis, ToleranceZone } from '../../calc'
 import type { ServiceClearance } from './serviceClearance'
@@ -33,9 +33,26 @@ const SOURCES = {
   thermal: 'ISO 1, 20 °C reference',
 } as const
 
+/** Decimals of an inch for a limit of size: 0.00001 in, a quarter of a µm. */
+const INCH_LIMIT_DECIMALS = 5
+
+/**
+ * A limit of size in the display unit. In millimetres it keeps the usual 3
+ * decimals (to the µm). In inches it is rounded inward to 5 decimals: an upper limit down and a
+ * lower limit up, so the inch value never admits a part the millimetre limit
+ * rejects (24.993 mm = 0.983976 in is shown 0.98397, not 0.9840).
+ */
+export function limitOfSize(mm: number, system: UnitSystem, side: 'upper' | 'lower'): string {
+  if (system === 'si') return formatQuantity('length', system, mm)
+  const factor = 10 ** INCH_LIMIT_DECIMALS
+  // The small allowance keeps an exact value (e.g. 1 in) from rounding a step inward on floating-point noise.
+  const scaled = toDisplay('length', system, mm) * factor
+  const inward = side === 'upper' ? Math.floor(scaled + 1e-6) : Math.ceil(scaled - 1e-6)
+  return formatDecimal(inward / factor, INCH_LIMIT_DECIMALS, true)
+}
+
 /** Limits, tolerances and clearances of a fit at 20 °C. */
 export function fitQuantities(fit: FitAnalysis, system: UnitSystem): readonly FitQuantity[] {
-  const length = (mm: number) => formatQuantity('length', system, mm)
   const deviation = (um: number) => formatQuantity('deviation', system, um)
   const make = (
     key: FitQuantityKey, label: string, symbol: string, quantity: Quantity, valueSi: number,
@@ -44,27 +61,36 @@ export function fitQuantities(fit: FitAnalysis, system: UnitSystem): readonly Fi
     key, label, symbol, value: formatQuantity(quantity, system, valueSi), unit: unitOf(quantity, system),
     formula, substitution, source, emphasis,
   })
+  // A limit of size, its value written as limitOfSize gives it.
+  const makeLimit = (
+    key: FitQuantityKey, label: string, symbol: string, side: 'upper' | 'lower', valueMm: number,
+    formula: string, substitution: string, source: string,
+  ): FitQuantity => ({ ...make(key, label, symbol, 'length', valueMm, formula, substitution, source), value: limitOfSize(valueMm, system, side) })
   const { hole, shaft } = fit
+  // Lengths in the formulas carry as many decimals as the limits (5 of an inch).
+  const length = (mm: number) => system === 'si'
+    ? formatQuantity('length', system, mm)
+    : formatDecimal(toDisplay('length', system, mm), INCH_LIMIT_DECIMALS, true)
   const D = length(fit.nominalMm)
   // A deviation written as a length, so it can be added to the nominal size.
   const asLength = (um: number) => length(um / 1000)
   return [
-    make('holeMax', 'Hole upper limit', 'D_max', 'length', hole.maxSizeMm, 'D + ES',
+    makeLimit('holeMax', 'Hole upper limit', 'D_max', 'upper', hole.maxSizeMm, 'D + ES',
       plus(D, asLength(hole.upperDeviationUm)), SOURCES.holes),
-    make('holeMin', 'Hole lower limit', 'D_min', 'length', hole.minSizeMm, 'D + EI',
+    makeLimit('holeMin', 'Hole lower limit', 'D_min', 'lower', hole.minSizeMm, 'D + EI',
       plus(D, asLength(hole.lowerDeviationUm)), SOURCES.holes),
     make('holeTolerance', `Hole tolerance IT${hole.grade}`, 'T_H', 'deviation', hole.itUm, 'ES − EI',
       minus(deviation(hole.upperDeviationUm), deviation(hole.lowerDeviationUm)), SOURCES.tolerance),
-    make('shaftMax', 'Shaft upper limit', 'd_max', 'length', shaft.maxSizeMm, 'd + es',
+    makeLimit('shaftMax', 'Shaft upper limit', 'd_max', 'upper', shaft.maxSizeMm, 'd + es',
       plus(D, asLength(shaft.upperDeviationUm)), SOURCES.shafts),
-    make('shaftMin', 'Shaft lower limit', 'd_min', 'length', shaft.minSizeMm, 'd + ei',
+    makeLimit('shaftMin', 'Shaft lower limit', 'd_min', 'lower', shaft.minSizeMm, 'd + ei',
       plus(D, asLength(shaft.lowerDeviationUm)), SOURCES.shafts),
     make('shaftTolerance', `Shaft tolerance IT${shaft.grade}`, 'T_S', 'deviation', shaft.itUm, 'es − ei',
       minus(deviation(shaft.upperDeviationUm), deviation(shaft.lowerDeviationUm)), SOURCES.tolerance),
     make('maxClearance', 'Max clearance', 'C_max', 'deviation', fit.maxClearanceUm, 'D_max − d_min',
-      minus(length(hole.maxSizeMm), length(shaft.minSizeMm)), SOURCES.fits, true),
+      minus(limitOfSize(hole.maxSizeMm, system, 'upper'), limitOfSize(shaft.minSizeMm, system, 'lower')), SOURCES.fits, true),
     make('minClearance', 'Min clearance', 'C_min', 'deviation', fit.minClearanceUm, 'D_min − d_max',
-      minus(length(hole.minSizeMm), length(shaft.maxSizeMm)), SOURCES.fits, true),
+      minus(limitOfSize(hole.minSizeMm, system, 'lower'), limitOfSize(shaft.maxSizeMm, system, 'upper')), SOURCES.fits, true),
     make('meanClearance', 'Mean clearance', 'C_mean', 'deviation', fit.meanClearanceUm, '(C_max + C_min) / 2',
       `(${plus(deviation(fit.maxClearanceUm), deviation(fit.minClearanceUm))}) / 2`, SOURCES.fits),
     make('fitTolerance', 'Fit tolerance', 'T_f', 'deviation', fit.fitToleranceUm, 'T_H + T_S',
@@ -108,7 +134,7 @@ function minus(a: string, b: string): string {
   return b.startsWith('−') ? `${a} − (${b})` : `${a} − ${b}`
 }
 
-/** The tolerance zone's limits as 'lower → upper' in the display unit. */
+/** The tolerance zone's limits as 'lower → upper' in the display unit (see limitOfSize). */
 export function limitsText(zone: ToleranceZone, system: UnitSystem): string {
-  return `${formatQuantity('length', system, zone.minSizeMm)} → ${formatQuantity('length', system, zone.maxSizeMm)}`
+  return `${limitOfSize(zone.minSizeMm, system, 'lower')} → ${limitOfSize(zone.maxSizeMm, system, 'upper')}`
 }

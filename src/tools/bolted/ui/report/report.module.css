@@ -57,3 +57,10 @@
 .factorCol {
   width: 17%;
 }
+
+/* The pattern's plan, full width under the joint types: kept to a size that
+   leaves room for the load cases on the same page. */
+.plan {
+  max-width: 60%;
+  margin: 0 auto;
+}

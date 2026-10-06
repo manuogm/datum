@@ -35,20 +35,40 @@ export interface StepFault {
 
 /**
  * Where the current inputs go wrong, or null when the mode's engine runs.
- * Calculator: ISO 286 does not define the fit at this size (step 1).
- * Advisor: the size is outside ISO 286 (step 2), or else a range of the
- * requirements is the wrong way round or negative (step 3).
+ * Calculator: the size is outside ISO 286, or ISO 286 does not define the
+ * fit at this size (step 1); else a service range is the wrong way round (step 2).
+ * Advisor: the size is outside ISO 286 (step 2), or else the requirements
+ * are missing the window, or a range is the wrong way round or negative (step 3).
  */
 export function stepFault(inputs: FitInputs, results: FitResults): StepFault | null {
+  const sizeCovered = nominalSizeRange(inputs.nominalMm).ok
   if (inputs.mode === 'calculator') {
     const calculation = results.calculation
-    return calculation.ok ? null : { step: 'fit', error: calculation.error, note: 'Choose a fit ISO 286 defines at this size' }
+    if (!calculation.ok) {
+      const note = sizeCovered ? 'Choose a fit ISO 286 defines at this size' : 'Enter a size ISO 286 covers'
+      return { step: 'fit', error: calculation.error, note }
+    }
+    const serviceError = serviceRangeError(inputs)
+    return serviceError === null ? null : { step: 'service', error: serviceError, note: 'Check the ranges above' }
   }
   const advice = results.advice
   if (advice.ok) return null
-  return nominalSizeRange(inputs.nominalMm).ok
-    ? { step: 'requirements', error: advice.error, note: 'Check the ranges above' }
-    : { step: 'size', error: advice.error, note: 'Enter a size ISO 286 covers' }
+  if (!sizeCovered) return { step: 'size', error: advice.error, note: 'Enter a size ISO 286 covers' }
+  const note = inputs.requiredClearanceUm === null ? 'Enter the clearance needed in service' : 'Check the ranges above'
+  return { step: 'requirements', error: advice.error, note }
+}
+
+/**
+ * Why the calculator cannot check the fit in service, or null: the service
+ * temperatures or the required window (when one is set) are the wrong way
+ * round. The same rules, in the same words, as the advisor's.
+ */
+export function serviceRangeError({ serviceTempC, requiredClearanceUm: window }: FitInputs): string | null {
+  if (serviceTempC.minC > serviceTempC.maxC) return 'The service temperature range must go from the lower to the higher temperature.'
+  if (window !== null && window.minUm >= window.maxUm) {
+    return 'The required clearance window must go from a smaller to a larger clearance (negative values are interference).'
+  }
+  return null
 }
 
 /** The steps of the inputs' mode, the faulty one marked. */

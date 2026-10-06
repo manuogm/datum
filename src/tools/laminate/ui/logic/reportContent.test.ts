@@ -15,7 +15,7 @@ describe('laminate report content', () => {
   })
 
   it('warns about the target, the failing plies and couplings', () => {
-    expect(laminateWarnings(analysisOf())).toEqual(['RF 1.27 is below the target of 1.50.'])
+    expect(laminateWarnings(analysisOf())).toEqual(['RF 1.26 is below the target of 1.50.'])
     const unsymmetric = laminateWarnings(analysisOf({ plies: pliesAt([0, 90]), loads: { ...NO_LOADS, nxNPerMm: 1 } }))
     expect(unsymmetric).toHaveLength(1)
     expect(unsymmetric[0]).toMatch(/^Bending–extension coupling \(B ≠ 0\)/)
@@ -39,7 +39,7 @@ describe('laminate report content', () => {
   it('reports each ply at its critical face', () => {
     const rows = plyRows(analysisOf(), 'si')
     expect(rows).toHaveLength(8)
-    expect(rows[3]).toMatchObject({ index: 4, angle: '90°', critical: true, mode: 'matrix tension', reserveFactor: '1.27' })
+    expect(rows[3]).toMatchObject({ index: 4, angle: '90°', critical: true, mode: 'matrix tension', reserveFactor: '1.26' })
     expect(rows[3].stresses).toHaveLength(3)
   })
 

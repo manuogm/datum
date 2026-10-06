@@ -46,11 +46,20 @@ export const stepLabel = (id: LamStepId): string => STEPS.find((step) => step.id
 /** StepPage's `problem` on step `id`: the engine's explanation when the fault is there. */
 export const stepProblem = (fault: StepFault | null, id: LamStepId) => (fault?.step === id ? { title: FAULT_TITLE, detail: fault.error } : null)
 
-/** The four steps, the faulty one marked. */
-export function lamSteps(fault: StepFault | null): readonly StepDef[] {
-  return STEPS.map((step) => (step.id === fault?.step ? { ...step, invalid: fault.error } : step))
+/**
+ * The four steps, the faulty one marked. A stacking notation typed on Layup
+ * that does not parse (see notationDraft) also marks Layup: the plies on
+ * screen are then not the ones typed.
+ */
+export function lamSteps(fault: StepFault | null, notationError: string | null = null): readonly StepDef[] {
+  return STEPS.map((step) => {
+    const problem = step.id === 'layup' && notationError !== null ? `Stacking sequence: ${notationError}` : step.id === fault?.step ? fault.error : null
+    return problem === null ? step : { ...step, invalid: problem }
+  })
 }
 
+/** Beside the disabled Next on Layup while the typed notation does not parse. */
+export const NOTATION_BLOCKS_NEXT = 'Complete the stacking sequence to go on'
 
 /** Layup, "Edit plies one by one": the plies not of the top ply's material (a hybrid stack). */
 export function mixedPlies(plies: readonly PlySpec[]): number {

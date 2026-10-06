@@ -1,14 +1,17 @@
 // Advisor, step 3: the requirements every candidate fit is checked against,
-// the service temperatures and the clearance needed across them. The largest
+// the service temperatures and the clearance needed across them (required:
+// the advisor ranks the fits against it, so Next waits for one). The largest
 // interference accepted at assembly is under More options.
 import { MoreOptions, PanelSection, RangeInputRow, StepPage, ValueInputRow } from '../../../../app/ui'
+import { startingWindow } from '../logic/serviceClearance'
+import { ClearanceWindowRow } from '../shared/ClearanceWindowRow'
 import sharedStyles from '../shared/shared.module.css'
 import { faultProps, type FitStepProps } from '../shared/stepProps'
-import { DEFAULT_FIT_INPUTS, type FitInputs } from '../state/fitInputs'
+import { NEW_FIT_INPUTS, type FitInputs } from '../state/fitInputs'
 
-export function RequirementsStep({ inputs, system, dispatch, flow, fault }: FitStepProps) {
+export function RequirementsStep({ inputs, results, system, dispatch, flow, fault }: FitStepProps) {
   const change = (changes: Partial<FitInputs>) => dispatch({ type: 'change', changes })
-  const interferenceChanged = inputs.maxAssemblyInterferenceUm !== DEFAULT_FIT_INPUTS.maxAssemblyInterferenceUm
+  const interferenceChanged = inputs.maxAssemblyInterferenceUm !== NEW_FIT_INPUTS.maxAssemblyInterferenceUm
   return (
     <StepPage
       {...flow.page}
@@ -27,13 +30,12 @@ export function RequirementsStep({ inputs, system, dispatch, flow, fault }: FitS
             max={inputs.serviceTempC.maxC}
             onChange={(minC, maxC) => change({ serviceTempC: { minC, maxC } })}
           />
-          <RangeInputRow
-            label="Clearance in service"
-            quantity="deviation"
+          <ClearanceWindowRow
+            window={inputs.requiredClearanceUm}
             system={system}
-            min={inputs.requiredClearanceUm.minUm}
-            max={inputs.requiredClearanceUm.maxUm}
-            onChange={(minUm, maxUm) => change({ requiredClearanceUm: { minUm, maxUm } })}
+            start={startingWindow(results.calculation)}
+            optional={false}
+            onChange={(requiredClearanceUm) => change({ requiredClearanceUm })}
           />
         </div>
       </PanelSection>

@@ -9,7 +9,8 @@ import { formatQuantity } from '../../../../core/units'
 import { PLY_MATERIALS } from '../../calc'
 import { NotationField } from '../editor/NotationField'
 import { PlyEditor } from '../editor/PlyEditor'
-import { mixedPlies, stepProblem } from '../logic/steps'
+import { notationError } from '../logic/notationDraft'
+import { mixedPlies, NOTATION_BLOCKS_NEXT, stepProblem } from '../logic/steps'
 import { StackPlot } from '../plots/StackPlot'
 import { DEFAULT_LAMINATE_INPUTS } from '../state/lamInputs'
 import type { LamStepProps } from './stepProps'
@@ -17,19 +18,27 @@ import styles from './steps.module.css'
 
 const MATERIALS = PLY_MATERIALS.map((m) => ({ value: m.id, label: m.name }))
 
-export function LayupStep({ inputs, analysis, dispatch, system, flow, fault, selectedPly, onSelectPly }: LamStepProps) {
+export function LayupStep(props: LamStepProps) {
+  const { inputs, analysis, dispatch, system, flow, fault, selectedPly, onSelectPly, notationDraft, onNotationDraftChange } = props
   const { plies } = inputs
   const anglesDeg = plies.map((p) => p.angleDeg)
   const layup = analysis.ok ? analysis.value.layup : null
   const mixed = mixedPlies(plies)
+  // A notation that does not parse: the plies are not the ones typed, so the steps after cannot go on.
+  const notationBroken = notationError(notationDraft) !== null
   return (
     <StepPage
       {...flow.page}
       problem={stepProblem(fault, 'layup')}
+      nextDisabled={notationBroken}
+      nextNote={notationBroken ? NOTATION_BLOCKS_NEXT : undefined}
       title="Layup"
       hint="The plies from the top down, in stacking notation, and the material they are made of. Editing plies one by one is under More options."
       actions={
-        <Button variant="link" size="sm" onClick={() => dispatch({ type: 'change', changes: DEFAULT_LAMINATE_INPUTS })}>
+        <Button variant="link" size="sm" onClick={() => {
+            onNotationDraftChange(null)
+            dispatch({ type: 'change', changes: DEFAULT_LAMINATE_INPUTS })
+          }}>
           Reset
         </Button>
       }
@@ -42,8 +51,13 @@ export function LayupStep({ inputs, analysis, dispatch, system, flow, fault, sel
       asideMeta={`${layup?.notation ?? ''} · ${countOf(plies.length, 'ply', 'plies')}`}
     >
       <PanelSection label="Stacking sequence">
-        <NotationField anglesDeg={anglesDeg} onChange={(next) => dispatch({ type: 'layup', anglesDeg: next })} />
-        {layup && (
+        <NotationField
+          anglesDeg={anglesDeg}
+          draft={notationDraft}
+          onDraftChange={onNotationDraftChange}
+          onChange={(next) => dispatch({ type: 'layup', anglesDeg: next })}
+        />
+        {layup && !notationBroken && (
           <div className={styles.layupSummary}>
             <Badge tone={layup.symmetric ? 'ok' : 'warn'}>{layup.symmetric ? '✓ Symmetric' : 'Not symmetric'}</Badge>
             <Badge tone={layup.balanced ? 'ok' : 'warn'}>{layup.balanced ? '✓ Balanced' : 'Not balanced'}</Badge>

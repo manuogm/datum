@@ -1,8 +1,9 @@
-// The clamped parts from the head down, and the outer diameter DA of the
-// clamped region around the bolt. A polymer or composite part asks for its
+// The clamped parts from the head down, the ISO 7089 washers under the head
+// (and nut), which R10 suggests against crushing, and the outer diameter DA
+// of the clamped region around the bolt. A polymer or composite part asks for its
 // limiting surface pressure pG right here, as R10 cannot be checked without
 // it; a metal part's pG is an advanced input (ContactFields).
-import { Button, CloseButton, PanelSection, QuantityField, ValueInputRow } from '../../../../app/ui'
+import { Button, CloseButton, PanelSection, QuantityField, Switch, ValueInputRow } from '../../../../app/ui'
 import { formatQuantity, unitOf, type UnitSystem } from '../../../../core/units'
 import { needsLimitingPressure, withLimitingPressure } from '../logic/designEdits'
 import type { JointDesignSpec, PlateSpec } from '../state/boltInputs'
@@ -50,6 +51,9 @@ export function PlatesFields({ design, system, clampLengthMm, onChange }: Plates
           + Add part
         </Button>
       </div>
+      <Switch checked={design.washers} onChange={(washers) => onChange({ washers })}>
+        ISO 7089 washers {design.joint.kind === 'through-bolt' ? 'under head and nut' : 'under the head'}
+      </Switch>
       <ValueInputRow
         label="Outer diameter DA"
         quantity="length"
