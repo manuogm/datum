@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { seedProjects } from '../../../core/projects'
-import { expectOk } from '../calc/testHelpers'
+import { expectOk } from '../../../core/testing'
 import { fitSnapshot } from './fitSnapshot'
 import { fitInputsFrom } from './state/readInputs'
 

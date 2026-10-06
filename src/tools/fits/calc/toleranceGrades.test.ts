@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { rowsWithMeanSize, expectError, expectOk, relativeDifference } from './testHelpers'
+import { expectError, expectOk, relativeDifference } from '../../../core/testing'
+import { rowsWithMeanSize } from './testHelpers'
 import {
   STANDARD_TOLERANCE_TABLE_UM, TOLERANCE_GRADES, nominalSizeRange, standardToleranceUm, type ToleranceGrade,
 } from './toleranceGrades'

@@ -3,7 +3,7 @@
  * screens convert to the viewer's unit system only when showing or reading a
  * value. Imperial shows lengths in inches, small deviations in thou
  * (0.001 in), temperatures in °F and material properties in lb/in³, Msi,
- * ksi and BTU/(h·ft·°F).
+ * ksi and BTU/(h·ft·°F); forces in lbf and torques in lbf·ft.
  */
 
 export const UNIT_SYSTEMS = ['si', 'imperial'] as const
@@ -16,11 +16,16 @@ export type UnitSystem = (typeof UNIT_SYSTEMS)[number]
  * - temperature: °C;
  * - expansion: coefficient of linear thermal expansion α (SI unit µm/(m·K));
  * - density (g/cm³), modulus (GPa), strength (MPa) and conductivity (W/(m·K))
- *   of a material.
+ *   of a material; 'strength' also serves for stresses and surface pressures;
+ * - force (SI unit N, shown in kN) and torque (N·m), e.g. bolt preload and
+ *   tightening torque; torque also serves for moments;
+ * - area (mm²), stiffness (N/mm, shown in kN/mm) and resilience, its inverse
+ *   (mm/N, shown in µm/kN), e.g. a bolt's stress area and elastic resilience.
  */
 export type Quantity =
   | 'length' | 'deviation' | 'temperature' | 'expansion'
-  | 'density' | 'modulus' | 'strength' | 'conductivity'
+  | 'density' | 'modulus' | 'strength' | 'conductivity' | 'force' | 'torque'
+  | 'area' | 'stiffness' | 'resilience'
 
 interface DisplayUnit {
   readonly unit: string
@@ -36,6 +41,14 @@ const UM_PER_THOU = 25.4
 const LB_PER_IN3_PER_G_PER_CM3 = 0.0361273
 const KSI_PER_MPA = 0.1450377 // also Msi per GPa
 const BTU_PER_H_FT_F_PER_W_PER_M_K = 0.5778
+const KN_PER_N = 1e-3
+const LBF_PER_N = 0.2248089
+const LBF_FT_PER_N_M = 0.7375621
+const IN2_PER_MM2 = 1 / MM_PER_INCH ** 2
+const KN_PER_MM_PER_N_PER_MM = 1e-3
+const KLBF_PER_IN_PER_N_PER_MM = (LBF_PER_N * MM_PER_INCH) / 1000
+const UM_PER_KN_PER_MM_PER_N = 1e6
+const UIN_PER_LBF_PER_MM_PER_N = 1e6 / (MM_PER_INCH * LBF_PER_N)
 const identity = (value: number) => value
 
 /** A unit that is a fixed multiple of the SI unit. */
@@ -65,6 +78,11 @@ const DISPLAY_UNITS: Record<Quantity, Record<UnitSystem, DisplayUnit>> = {
   modulus: { si: scaled('GPa', 1, 1), imperial: scaled('Msi', 1, KSI_PER_MPA) },
   strength: { si: scaled('MPa', 0, 1), imperial: scaled('ksi', 1, KSI_PER_MPA) },
   conductivity: { si: scaled('W/(m·K)', 1, 1), imperial: scaled('BTU/(h·ft·°F)', 1, BTU_PER_H_FT_F_PER_W_PER_M_K) },
+  force: { si: scaled('kN', 2, KN_PER_N), imperial: scaled('lbf', 0, LBF_PER_N) },
+  torque: { si: scaled('N·m', 1, 1), imperial: scaled('lbf·ft', 1, LBF_FT_PER_N_M) },
+  area: { si: scaled('mm²', 2, 1), imperial: scaled('in²', 4, IN2_PER_MM2) },
+  stiffness: { si: scaled('kN/mm', 1, KN_PER_MM_PER_N_PER_MM), imperial: scaled('klbf/in', 1, KLBF_PER_IN_PER_N_PER_MM) },
+  resilience: { si: scaled('µm/kN', 3, UM_PER_KN_PER_MM_PER_N), imperial: scaled('µin/lbf', 3, UIN_PER_LBF_PER_MM_PER_N) },
 }
 
 /** Unit symbol shown next to a quantity, e.g. 'µm' or 'thou'. */

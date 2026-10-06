@@ -1,4 +1,5 @@
-// CloseButton: the × in the corner of dialogs and drawers.
+// CloseButton: the × in the corner of dialogs and drawers, or beside a list
+// row it removes.
 import styles from './CloseButton.module.css'
 import { Icon } from './Icon'
 

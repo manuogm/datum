@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { parseZone } from './designation'
 import { analyseFit, analyseFitDesignation } from './fitAnalysis'
 import { PREFERRED_FITS } from './preferredFits'
-import { expectError, expectOk } from './testHelpers'
+import { expectError, expectOk } from '../../../core/testing'
 
 const fit = (designation: string, sizeMm: number) => expectOk(analyseFitDesignation(designation, sizeMm))
 

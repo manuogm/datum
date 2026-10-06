@@ -1,4 +1,4 @@
-// Marker: the status dot, legend swatch and rotated-square project diamond
+// Marker: the status dot, legend swatch (square or line) and rotated-square project diamond
 // that recur across every Direction B screen.
 import type { CSSProperties } from 'react'
 import styles from './Marker.module.css'
@@ -6,7 +6,8 @@ import { cx } from './cx'
 import { markerColor, type MarkerColor } from './tone'
 
 interface MarkerProps {
-  shape?: 'dot' | 'square' | 'diamond'
+  /** line: a short stroke, the legend swatch of a chart line. */
+  shape?: 'dot' | 'square' | 'diamond' | 'line'
   color?: MarkerColor
   /** Edge length in px (the designs use 6, 7, 8 and 10). */
   size?: 6 | 7 | 8 | 10

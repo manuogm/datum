@@ -17,7 +17,7 @@ describe('projectStats', () => {
     const stats = projectStats(upright)
     expect(stats.status).toBe('pass')
     expect(stats.latest?.revision.id).toBe('FT-0412-C')
-    expect(stats.openIssues).toEqual({ review: 2, fail: 0 })
+    expect(stats.openIssues).toEqual({ review: 1, fail: 1 })
     expect(stats.lastActivity).toBe('2026-10-05T14:50:00')
   })
 
@@ -71,6 +71,6 @@ describe('figureChanges', () => {
 describe('materialUsage', () => {
   it('finds current revisions that use a material', () => {
     const uses = materialUsage(projects, 'ti-6al-4v').map((u) => `${u.project.id} ${u.part.name} ${u.calculation.id}`)
-    expect(uses).toEqual(['P-0142 Wishbone clevis MD-0012', 'P-0119 Fitting BJ-0164'])
+    expect(uses).toEqual(['P-0142 Wishbone clevis BJ-0175', 'P-0142 Wishbone clevis MD-0012', 'P-0142 Caliper mount pattern BJ-0187', 'P-0119 Fitting BJ-0164'])
   })
 })

@@ -1,0 +1,21 @@
+/* LoadingState: a section label in the column gutter, faded in after a delay. */
+.loading {
+  padding: var(--space-20);
+  animation: appear var(--duration-fade) linear var(--delay-loading) both;
+}
+
+@keyframes appear {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .loading {
+    animation-duration: 0s;
+  }
+}

@@ -18,7 +18,7 @@
   align-items: center;
   gap: var(--space-16);
   width: 100%;
-  max-width: 794px;
+  max-width: var(--sheet-width);
   padding: var(--space-12) 0;
   background: var(--bg);
 }
@@ -40,15 +40,33 @@
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
-  width: 794px;
+  width: var(--sheet-width);
   max-width: 100%;
-  min-height: 1123px;
-  padding: 48px 56px 40px;
+  min-height: var(--sheet-height);
+  padding: var(--space-48) var(--space-56) var(--space-40);
   background: var(--surface);
   color: var(--text);
   box-shadow: var(--shadow-dialog);
   print-color-adjust: exact;
   -webkit-print-color-adjust: exact;
+}
+
+/* On a phone the sheet keeps A4's look but not its width: see Report.module.css. */
+@media screen and (max-width: 820px) {
+  .sheet {
+    min-height: 0;
+    padding: var(--space-24) var(--space-16);
+  }
+}
+
+@media screen and (max-width: 640px) {
+  .hint {
+    display: none;
+  }
+
+  .toolbar {
+    justify-content: space-between;
+  }
 }
 
 @page {

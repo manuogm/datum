@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { materialById } from '../../../core/materials'
-import { expectError, expectOk } from '../calc/testHelpers'
+import { expectError, expectOk } from '../../../core/testing'
 import { adviseFit, type AdvisorMaterial, type FitAdvice, type FitAdvisorInput } from '.'
 
 const al7075 = expectOk(materialById('al-7075-t6')) // α 23.4 µm/(m·K), service limit 120 °C

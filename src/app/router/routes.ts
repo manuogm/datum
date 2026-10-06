@@ -10,6 +10,7 @@ export type Route =
   | { name: 'fit' }
   | { name: 'fitReport' }
   | { name: 'bolt' }
+  | { name: 'boltReport' }
   | { name: 'lam' }
   | { name: 'mat' }
   | { name: 'notFound'; path: string }
@@ -28,6 +29,7 @@ export function parseHash(hash: string): Route {
   if (extra.length === 0) {
     if (head === 'projects' && id) return { name: 'project', id: decodeURIComponent(id) }
     if (head === 'fit' && id === 'report') return { name: 'fitReport' }
+    if (head === 'bolt' && id === 'report') return { name: 'boltReport' }
     const simple = SIMPLE_ROUTES.find((name) => name === head)
     if (simple && id === undefined) return { name: simple }
   }
@@ -42,6 +44,8 @@ export function routeHref(route: LinkableRoute): string {
       return `#/projects/${encodeURIComponent(route.id)}`
     case 'fitReport':
       return '#/fit/report'
+    case 'boltReport':
+      return '#/bolt/report'
     default:
       return `#/${route.name}`
   }
@@ -56,6 +60,8 @@ export function sectionOf(route: Route): Section | null {
       return 'projects'
     case 'fitReport':
       return 'fit'
+    case 'boltReport':
+      return 'bolt'
     default:
       return route.name
   }

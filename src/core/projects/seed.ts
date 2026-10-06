@@ -100,6 +100,84 @@ function fitInputs(nominalMm: number, fit: string, [housingMaterialId, shaftMate
 }
 
 const FW27_TEMP_C: [number, number] = [TARGETS.serviceTempMinC, TARGETS.serviceTempMaxC]
+
+/**
+ * Inputs of the Bolted Joint tool (its BoltInputs shape) for the bolt
+ * revisions: the joint, or the pattern, of the revision's mode; the tool
+ * fills the other mode with its example. The tool's tests check that each
+ * reopens with these inputs and that its figures are the ones it computes.
+ */
+const BOLT_DESIGN = {
+  thread: { nominalMm: 10, pitchMm: 1.5 },
+  propertyClass: '10.9',
+  headType: 'hex',
+  washers: false,
+  joint: { kind: 'through-bolt' },
+  plates: [{ materialId: 'al-7075-t6', thicknessMm: 12 }],
+  outerDiameterMm: 30,
+  tightening: 'torque-wrench',
+  threadFriction: 0.12,
+  headFriction: 0.12,
+  interfaceFriction: 0.15,
+  surfaceRoughness: 'rz-10-to-40',
+  loadIntroduction: 'middle',
+  frictionInterfaces: 1,
+}
+
+/** Fields that differ from BOLT_DESIGN. */
+type BoltDesignSeed = Record<string, unknown>
+
+const boltDesign = (changes: BoltDesignSeed) => ({ ...BOLT_DESIGN, ...changes })
+const temperature = ([minC, maxC]: [number, number]) => ({ minC, maxC })
+
+function boltJointInputs(serviceTempC: [number, number], design: BoltDesignSeed, loads: { axialMaxN: number; transverseN: number; transverseVariation: 'static' | 'alternating' }) {
+  return { mode: 'joint', serviceTempC: temperature(serviceTempC), joint: { design: boltDesign(design), loads: { axialMinN: 0, ...loads } } }
+}
+
+interface PatternSeed {
+  jointTypes: [id: string, design: BoltDesignSeed][]
+  bolts: [id: string, xMm: number, yMm: number, jointTypeId: string][]
+  loadCases: [id: string, name: string, forceN: [number, number, number], momentNm: [number, number, number], loadPointMm?: [number, number, number]][]
+  shown: string
+}
+
+function boltPatternInputs(serviceTempC: [number, number], pattern: PatternSeed) {
+  const vector = ([x, y, z]: [number, number, number]) => ({ x, y, z })
+  return {
+    mode: 'pattern',
+    serviceTempC: temperature(serviceTempC),
+    pattern: {
+      jointTypes: pattern.jointTypes.map(([id, design]) => ({ id, design: boltDesign(design) })),
+      bolts: pattern.bolts.map(([id, xMm, yMm, jointTypeId]) => ({ id, xMm, yMm, jointTypeId })),
+      loadCases: pattern.loadCases.map(([id, name, forceN, momentNm, loadPointMm = [0, 0, 0]]) => ({
+        id, name, forceN: vector(forceN), momentNm: vector(momentNm), loadPointMm: vector(loadPointMm),
+      })),
+      loadCaseId: pattern.shown,
+    },
+  }
+}
+
+/** The caliper mount of the Bolt Pattern design: socket head screws into the 7075 upright through a Ti bracket. */
+const CALIPER_SCREW: BoltDesignSeed = { headType: 'socket', thread: { nominalMm: 4, pitchMm: 0.7 }, propertyClass: '12.9', plates: [{ materialId: 'ti-6al-4v', thicknessMm: 5 }], outerDiameterMm: 12 }
+const HELICOIL: BoltDesignSeed = { ...CALIPER_SCREW, joint: { kind: 'insert', insert: 'helical-coil', materialId: 'al-7075-t6', engagementMm: 6, outerThread: null } }
+
+function caliperMount(m4: [id: string, design: BoltDesignSeed][], outer: string): PatternSeed {
+  return {
+    jointTypes: [
+      ['J1', { thread: { nominalMm: 12, pitchMm: 1.75 }, plates: [{ materialId: 'ti-6al-4v', thicknessMm: 10 }, { materialId: 'ti-6al-4v', thicknessMm: 10 }] }],
+      ['J2', { ...CALIPER_SCREW, thread: { nominalMm: 6, pitchMm: 1 }, propertyClass: 'A4-80', outerDiameterMm: 16, plates: [{ materialId: 'ti-6al-4v', thicknessMm: 8 }], joint: { kind: 'tapped', materialId: 'ti-6al-4v', engagementMm: 9 } }],
+      ...m4,
+    ],
+    bolts: [['B1', -60, -40, 'J1'], ['B2', 60, -40, 'J1'], ['B3', -60, 40, 'J3'], ['B4', 60, 40, outer], ['B5', 0, -55, 'J2'], ['B6', 0, 55, 'J2'], ['B7', -95, 0, 'J3'], ['B8', 95, 0, outer]],
+    loadCases: [
+      ['LC1', 'Static', [0, 0, 4000], [0, 0, 0]],
+      ['LC2', 'Bump', [0, 0, 12000], [200, 0, 0]],
+      ['LC3', 'Braking', [0, 6000, 14000], [300, 250, 400], [15, 10, 0]],
+      ['LC4', 'Kerb', [4000, 0, 10000], [0, 300, 250]],
+    ],
+    shown: 'LC3',
+  }
+}
 const UPRIGHT_PIN: [string, string] = ['al-7075-t6', 'steel-42crmo4-qt']
 const LOCATE_PIN = { functions: ['locate', 'transmit-torque'], serviceTempC: FW27_TEMP_C }
 
@@ -124,9 +202,14 @@ const REAR_UPRIGHT: Project = {
     ]),
     calculation('BJ-0175', 'bolt', 'wishbone-clevis', [
       {
-        at: '2026-09-24T14:05:00', by: AL, status: 'pass', title: 'M8 clevis bolt, double shear',
-        note: 'Clevis bolt sized for the bump case.',
-        figures: [['Utilisation', '0.62'], ['Slip safety S_G', '2.10']],
+        at: '2026-09-24T14:05:00', by: AL, status: 'pass', title: 'M8 10.9 through-bolt',
+        note: 'Clevis bolt through the Ti ears and the rod end, sized for the bump case.',
+        figures: [['Bolt', 'M8 10.9'], ['u max', '0.86'], ['Governing', 'R8 Working stress'], ['MA', '35.6', 'N·m']],
+        inputs: boltJointInputs(FW27_TEMP_C, {
+          thread: { nominalMm: 8, pitchMm: 1.25 }, washers: true, outerDiameterMm: 20,
+          plates: [{ materialId: 'ti-6al-4v', thicknessMm: 6 }, { materialId: 'steel-42crmo4-qt', thicknessMm: 14 }, { materialId: 'ti-6al-4v', thicknessMm: 6 }],
+        }, { axialMaxN: 3000, transverseN: 600, transverseVariation: 'alternating' }),
+        materialIds: ['ti-6al-4v', 'steel-42crmo4-qt'],
       },
     ]),
     calculation('FT-0412', 'fit', 'bearing-carrier-pin', [
@@ -172,13 +255,20 @@ const REAR_UPRIGHT: Project = {
     calculation('BJ-0187', 'bolt', 'caliper-mount-pattern', [
       {
         at: '2026-10-01T09:40:00', by: AL, status: 'fail', title: '8-bolt pattern, LC3',
-        note: 'Helicoil inserts at all eight positions. B4 overloaded in braking + cornering.',
-        figures: [['B4/B8', 'Helicoil'], ['u max', '1.08']],
+        note: 'Helicoils at the M4 positions. In braking the pattern slips: the friction comes almost entirely from the two M12s.',
+        figures: [['Bolts', '8'], ['u max', '3.28'], ['Governing', 'B8 (J3) in LC3'], ['Load cases', '4']],
+        inputs: boltPatternInputs(FW27_TEMP_C, caliperMount([['J3', HELICOIL]], 'J3')),
+        materialIds: ['ti-6al-4v', 'al-7075-t6'],
       },
       {
-        at: '2026-10-05T11:05:00', by: AL, status: 'review', title: '8-bolt pattern, LC3',
-        note: 'Replaced Helicoils at B4/B8 with Keenserts. B4 still above 85 % in braking + cornering.',
-        figures: [['B4/B8', 'Keensert'], ['u max', '0.91']],
+        at: '2026-10-05T11:05:00', by: AL, status: 'fail', title: '8-bolt pattern, LC3',
+        note: 'Keenserts (outer thread M6×1 from the catalogue) at B4/B8 for pull-out. Slip in braking still governs: shear pins to follow.',
+        figures: [['Bolts', '8'], ['u max', '3.28'], ['Governing', 'B8 (J4) in LC3'], ['Load cases', '4']],
+        inputs: boltPatternInputs(FW27_TEMP_C, caliperMount([
+          ['J3', HELICOIL],
+          ['J4', { ...CALIPER_SCREW, joint: { kind: 'insert', insert: 'key-locking', materialId: 'al-7075-t6', engagementMm: 8, outerThread: { nominalMm: 6, pitchMm: 1 } } }],
+        ], 'J4')),
+        materialIds: ['ti-6al-4v', 'al-7075-t6'],
       },
     ]),
   ],
@@ -190,7 +280,7 @@ const REAR_UPRIGHT: Project = {
     approved('D-005', 'Ti-6Al-4V for wishbone clevis', 'Fatigue strength at temperature and α close to the steel pin (8.6 vs 11.1 µm/m·K).', '2026-10-04T17:02:00', { calculationId: 'MD-0012', rev: 'A' }),
     {
       id: 'D-006', title: 'Keensert inserts for M4 into 7075 upright', status: 'proposed', proposedBy: AL,
-      rationale: 'Higher pull-out than Helicoil in thin walls. B4 still needs a margin review.',
+      rationale: 'Higher pull-out than Helicoil and robust to reassembly; needs more wall. Slip in braking still fails for the pattern; shear pins proposed.',
       recordedAt: '2026-10-05T11:05:00', basis: { calculationId: 'BJ-0187', rev: 'B' },
     },
     {
@@ -219,9 +309,14 @@ const OTHER_PROJECTS: Project[] = [
           materialIds: ['pa66-gf30', 'al-6082-t6'] },
       ]),
       calculation('BJ-0181', 'bolt', 'clamp-screws', [
-        { at: '2026-10-04T17:05:00', by: MR, status: 'review', title: 'M5 into PA66',
-          note: 'Preload loss from creep in the PA66 boss needs a test.', figures: [['Preload loss', '18', '%'], ['u max', '0.78']],
-          materialIds: ['pa66-gf30'] },
+        { at: '2026-10-04T17:05:00', by: MR, status: 'fail', title: 'M5 8.8 through-bolt',
+          note: 'Busbar clamped on the PA66 boss. pG 60 MPa for PA66-GF30 is an assumed creep limit at 85 °C, to be confirmed by test: even so the washer crushes the boss. Compression limiter needed.',
+          figures: [['Bolt', 'M5 8.8'], ['u max', '3.43'], ['Governing', 'R10 Surface pressure under head and nut'], ['MA', '5.8', 'N·m']],
+          inputs: boltJointInputs([-30, 85], {
+            thread: { nominalMm: 5, pitchMm: 0.8 }, propertyClass: '8.8', washers: true, outerDiameterMm: 14,
+            plates: [{ materialId: 'cu-etp', thicknessMm: 3 }, { materialId: 'pa66-gf30', thicknessMm: 8, limitingPressureMPa: 60 }],
+          }, { axialMaxN: 800, transverseN: 150, transverseVariation: 'static' }),
+          materialIds: ['cu-etp', 'pa66-gf30'] },
       ]),
     ],
   }),
@@ -266,8 +361,18 @@ const OTHER_PROJECTS: Project[] = [
     parts: parts('Spar cap', 'Fitting', 'Shear pins'),
     calculations: [
       calculation('BJ-0164', 'bolt', 'fitting', [
-        { at: '2026-09-21T12:00:00', by: MR, status: 'pass', title: '4 × M6 into Ti fitting', note: 'Fitting in Ti-6Al-4V.',
-          figures: [['u max', '0.71'], ['Slip safety S_G', '1.95']], materialIds: ['ti-6al-4v'] },
+        { at: '2026-09-21T12:00:00', by: MR, status: 'pass', title: '4-bolt pattern, LC1', note: 'Four M6 12.9 screws through the 7075 spar cap strap, tapped into the Ti-6Al-4V fitting.',
+          figures: [['Bolts', '4'], ['u max', '0.89'], ['Governing', 'B3 (J1) in LC1'], ['Load cases', '1']],
+          inputs: boltPatternInputs([-40, 70], {
+            jointTypes: [['J1', {
+              thread: { nominalMm: 6, pitchMm: 1 }, propertyClass: '12.9', headType: 'socket', washers: true, outerDiameterMm: 16,
+              plates: [{ materialId: 'al-7075-t6', thicknessMm: 10 }], joint: { kind: 'tapped', materialId: 'ti-6al-4v', engagementMm: 9 },
+            }]],
+            bolts: [['B1', -20, -15, 'J1'], ['B2', 20, -15, 'J1'], ['B3', 20, 15, 'J1'], ['B4', -20, 15, 'J1']],
+            loadCases: [['LC1', 'Pull-up 4 g', [0, 1500, 4000], [20, 0, 0]]],
+            shown: 'LC1',
+          }),
+          materialIds: ['al-7075-t6', 'ti-6al-4v'] },
       ]),
     ],
   }),

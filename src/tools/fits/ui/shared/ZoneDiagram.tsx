@@ -6,7 +6,7 @@ import { useId } from 'react'
 import { cx } from '../../../../app/ui'
 import { formatQuantity, fromDisplay, toDisplay, unitOf, type UnitSystem } from '../../../../core/units'
 import type { FitAnalysis, ToleranceZone } from '../../calc'
-import type { Segment } from '../logic/geometry'
+import type { Segment } from '../../../../app/charts'
 import { REPORT_FRAME, SCREEN_FRAME, zoneDiagramLayout, type DiagramZone, type Dimension } from '../logic/zoneDiagram'
 import styles from './ZoneDiagram.module.css'
 

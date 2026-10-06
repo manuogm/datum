@@ -2,7 +2,7 @@
 // hole and shaft class) and the service conditions used for the in-service
 // check. An undefined combination shows the engine's explanation here.
 import { useState, type Dispatch } from 'react'
-import { Callout, Chip, PanelSection, QuantityField, SegmentedControl, Slider } from '../../../../app/ui'
+import { Callout, Chip, PanelSection, QuantityField, RangeInputRow, SegmentedControl, Slider } from '../../../../app/ui'
 import type { Result } from '../../../../core/result'
 import { formatDecimal, formatQuantity, toDisplay, type UnitSystem } from '../../../../core/units'
 import { formatFit, nominalSizeRange, parseFitDesignation, type FitAnalysis, type FitType } from '../../calc'
@@ -11,7 +11,6 @@ import { preferredFitsOfType } from '../logic/preferredChips'
 import { SLIDER_STEPS, SLIDER_TICKS, sliderPosition, sliderSizeMm, tickPercent } from '../logic/sizeSlider'
 import { FIT_TYPE_LABEL } from '../shared/labels'
 import { MaterialPair } from '../shared/MaterialPair'
-import { RangeRow } from '../shared/RequirementRows'
 import sharedStyles from '../shared/shared.module.css'
 import type { FitInputs } from '../state/fitInputs'
 import type { FitAction } from '../state/fitReducer'
@@ -57,7 +56,7 @@ export function CalculatorInputs({ inputs, results, system, dispatch }: Calculat
           onShaftChange={(shaftMaterialId) => change({ shaftMaterialId })}
         />
         <div className={sharedStyles.rows}>
-          <RangeRow
+          <RangeInputRow
             label="Service temp."
             quantity="temperature"
             system={system}
@@ -65,7 +64,7 @@ export function CalculatorInputs({ inputs, results, system, dispatch }: Calculat
             max={inputs.serviceTempC.maxC}
             onChange={(minC, maxC) => change({ serviceTempC: { minC, maxC } })}
           />
-          <RangeRow
+          <RangeInputRow
             label="Clearance in service"
             quantity="deviation"
             system={system}

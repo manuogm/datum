@@ -1,10 +1,13 @@
-// The requirement rows shared by both modes: a service temperature range, a
-// clearance window, and (advisor only) the assembly interference limit. Each
-// value is typed in the viewer's units and stored in SI.
-import { InputWell, NumberInput, ValueRow } from '../../../../app/ui'
-import { unitOf, type Quantity, type UnitSystem } from '../../../../core/units'
+// Labelled rows with a boxed quantity input on the right: a range
+// ("Service temp.  [−20 … 140 °C]") or a single value ("Max assembly
+// interference  [40 µm]"). Values are typed in the viewer's units and
+// reported in SI.
+import { unitOf, type Quantity, type UnitSystem } from '../../core/units'
+import { InputWell } from './InputWell'
+import { NumberInput } from './NumberInput'
+import { ValueRow } from './ValueRow'
 
-interface RangeRowProps {
+interface RangeInputRowProps {
   label: string
   quantity: Quantity
   system: UnitSystem
@@ -14,7 +17,7 @@ interface RangeRowProps {
 }
 
 /** "Service temp.   [−20 … 140 °C]" */
-export function RangeRow({ label, quantity, system, min, max, onChange }: RangeRowProps) {
+export function RangeInputRow({ label, quantity, system, min, max, onChange }: RangeInputRowProps) {
   return (
     <ValueRow
       label={label}
@@ -29,7 +32,7 @@ export function RangeRow({ label, quantity, system, min, max, onChange }: RangeR
   )
 }
 
-interface SingleRowProps {
+interface ValueInputRowProps {
   label: string
   quantity: Quantity
   system: UnitSystem
@@ -38,7 +41,7 @@ interface SingleRowProps {
 }
 
 /** "Max assembly interference   [40 µm]" */
-export function SingleRow({ label, quantity, system, value, onChange }: SingleRowProps) {
+export function ValueInputRow({ label, quantity, system, value, onChange }: ValueInputRowProps) {
   return (
     <ValueRow
       label={label}

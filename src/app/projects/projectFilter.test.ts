@@ -9,7 +9,7 @@ describe('filterProjects', () => {
   it('splits projects by stage and status', () => {
     expect(ids(filterProjects(rows, 'all', ''))).toHaveLength(8)
     expect(ids(filterProjects(rows, 'released', ''))).toEqual(['P-0128', 'P-0114', 'P-0108'])
-    expect(ids(filterProjects(rows, 'review', ''))).toEqual(['P-0139', 'P-0125'])
+    expect(ids(filterProjects(rows, 'review', ''))).toEqual(['P-0125'])
     expect(ids(filterProjects(rows, 'open', ''))).not.toContain('P-0128')
   })
 

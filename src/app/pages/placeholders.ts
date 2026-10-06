@@ -13,26 +13,10 @@ export interface PlaceholderContent {
 }
 
 /** Routes that still show a placeholder (every other route has its own page). */
-type PlaceholderRoute = Extract<Route, { name: 'bolt' | 'lam' | 'notFound' }>
+type PlaceholderRoute = Extract<Route, { name: 'lam' | 'notFound' }>
 
 export function placeholderFor(route: PlaceholderRoute): PlaceholderContent {
   switch (route.name) {
-    case 'bolt':
-      return {
-        section: 'bolt',
-        eyebrow: 'VDI 2230-1 · NASM 33537',
-        title: 'Bolted Joint',
-        status: 'next',
-        message: 'Single joints and bolt patterns with mixed fasteners and inserts. Next on the bench after the fit calculator.',
-        scope: [
-          'Single joint preload and safety factors',
-          'Bolt patterns with load sharing per bolt',
-          'Inserts: Helicoil and Keensert',
-          'Load cases with governing bolt',
-          'Utilisation heat map in plan view',
-        ],
-        tool: 'bolt',
-      }
     case 'lam':
       return {
         section: 'lam',

@@ -1,0 +1,59 @@
+/* Bolted Joint report: drawings side by side inside a report section. */
+.drawings {
+  display: grid;
+  grid-template-columns: 0.8fr 1fr;
+  gap: var(--space-10);
+  align-items: start;
+}
+
+@media screen and (max-width: 640px) {
+  .drawings {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Inputs beside the drawings, one tight row per fact. */
+.facts dt,
+.facts dd {
+  padding: var(--space-3) 0;
+}
+
+/* The calculation trail: fixed columns wide enough that a step's title and
+   result stay on one line; only a long source wraps. Rows never split across
+   pages, and the header repeats on the next page. */
+.trail {
+  table-layout: fixed;
+}
+
+.trail thead {
+  display: table-header-group;
+}
+
+.trail tr {
+  break-inside: avoid;
+}
+
+.trail td {
+  padding: var(--space-2) 0;
+  vertical-align: top;
+}
+
+.trail .number {
+  padding-right: var(--space-12);
+}
+
+.stepCol {
+  width: 29%;
+}
+
+.resultCol {
+  width: 18%;
+}
+
+.limitCol {
+  width: 10%;
+}
+
+.factorCol {
+  width: 17%;
+}

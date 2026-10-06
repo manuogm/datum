@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { materialById } from '../../../../core/materials'
 import { adviseFit } from '../../advisor'
-import { expectOk } from '../../calc/testHelpers'
+import { expectOk } from '../../../../core/testing'
 import { CHARTED_CANDIDATES, chartedCandidates, scoreTone } from './candidates'
 
 const advice = expectOk(adviseFit({

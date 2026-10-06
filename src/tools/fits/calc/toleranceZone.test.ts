@@ -4,7 +4,7 @@
  */
 import { describe, expect, it } from 'vitest'
 import { parseZone } from './designation'
-import { expectError, expectOk } from './testHelpers'
+import { expectError, expectOk } from '../../../core/testing'
 import { toleranceZone, toleranceZoneFor } from './toleranceZone'
 
 const zone = (designation: string, sizeMm: number) => toleranceZoneFor(expectOk(parseZone(designation)), sizeMm)

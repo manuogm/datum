@@ -12,7 +12,8 @@ import {
   LOWER_DEVIATION_TABLES_UM, UPPER_DEVIATION_TABLES_UM,
 } from './shaftDeviations'
 import { valueForSize, type SizeTable } from './sizeTable'
-import { expectOk, relativeDifference, rowsWithMeanSize } from './testHelpers'
+import { expectOk, relativeDifference } from '../../../core/testing'
+import { rowsWithMeanSize } from './testHelpers'
 import { standardToleranceUm, type ToleranceGrade } from './toleranceGrades'
 
 const IT = (grade: ToleranceGrade, sizeMm: number) => expectOk(standardToleranceUm(grade, sizeMm))

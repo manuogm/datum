@@ -1,12 +1,13 @@
 // Chip: small bordered label. "check" and "filter" chips toggle (pass
-// selected + onClick); "tag" is a static label; "add" is a dashed action.
+// selected + onClick); "option" chips are one choice of a row, like load case
+// tabs; "tag" is a static label; "add" is a dashed action.
 import type { ReactNode } from 'react'
 import styles from './Chip.module.css'
 import { cx } from './cx'
 
 interface ChipProps {
   children: ReactNode
-  variant?: 'check' | 'filter' | 'tag' | 'add'
+  variant?: 'check' | 'filter' | 'option' | 'tag' | 'add'
   selected?: boolean
   onClick?: () => void
   /** Content before the label, e.g. a Marker. */
@@ -17,7 +18,7 @@ interface ChipProps {
 
 export function Chip({ children, variant = 'check', selected = false, onClick, leading, mono = false }: ChipProps) {
   const classes = cx(styles.chip, styles[variant], selected && styles.selected, mono && styles.mono)
-  const toggles = variant === 'check' || variant === 'filter'
+  const toggles = variant === 'check' || variant === 'filter' || variant === 'option'
   const content = (
     <>
       {leading && <span className={styles.leading}>{leading}</span>}

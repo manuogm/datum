@@ -2,8 +2,7 @@
 // scale against the zero line (the nominal size), with the dimension lines
 // for the minimum and maximum clearance. Values come in display units (µm or
 // thou); positions are SVG coordinates of the chosen frame (screen or report).
-import type { Rect, Segment } from './geometry'
-import { niceAxis, scaleLinear } from './scale'
+import { niceAxis, scaleLinear, type Rect, type Segment } from '../../../../app/charts'
 
 export interface ZoneDiagramFrame {
   readonly width: number

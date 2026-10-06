@@ -1,0 +1,271 @@
+/* Bolt pattern mode: joint type cards, load case fields, the bolt list, the
+   plan and the results table. */
+.types {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+
+.type {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-12);
+  padding: var(--space-12) var(--space-14);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface-sunken);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.type:hover {
+  background: var(--surface-hover);
+}
+
+.type:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: var(--focus-ring);
+}
+
+.typeSelected {
+  border-color: var(--accent-border);
+  background: var(--accent-wash);
+}
+
+.typeTitle {
+  font-size: var(--fs-13);
+  font-weight: var(--weight-semibold);
+}
+
+.typeId {
+  margin-right: var(--space-6);
+  color: var(--accent-fg);
+  font-weight: var(--weight-regular);
+}
+
+.typeDetail {
+  font-size: var(--fs-11-5);
+  color: var(--text-faint);
+}
+
+.typeWarn {
+  font-size: var(--fs-11-5);
+  color: var(--warn-text);
+}
+
+.count {
+  font-family: var(--font-mono);
+  font-size: var(--fs-12);
+  color: var(--text-muted);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-8);
+}
+
+.vector {
+  display: grid;
+  grid-template-columns: 14px repeat(3, minmax(0, 1fr)) auto;
+  align-items: center;
+  gap: var(--space-6);
+}
+
+.vectorUnit {
+  font-family: var(--font-mono);
+  font-size: var(--fs-11);
+  color: var(--text-muted);
+}
+
+.vectorSymbol {
+  font-family: var(--font-mono);
+  font-size: var(--fs-12);
+  color: var(--text-muted);
+}
+
+.boltRow {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) minmax(0, 1fr) 64px 28px;
+  align-items: center;
+  gap: var(--space-6);
+}
+
+.boltId {
+  font-family: var(--font-mono);
+  font-size: var(--fs-12);
+  font-weight: var(--weight-semibold);
+}
+
+/* Centre */
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-6);
+}
+
+.tabValue {
+  margin-left: var(--space-6);
+  font-family: var(--font-mono);
+}
+
+.okText {
+  color: var(--ok);
+}
+
+.warnText {
+  color: var(--warn);
+}
+
+.badText {
+  color: var(--bad);
+}
+
+.plan {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  padding: var(--space-16) var(--space-20);
+}
+
+/* Once the columns wrap, the plan takes its drawn height instead of
+   stretching to the tallest column. */
+@media (max-width: 1200px) {
+  .plan {
+    flex: none;
+  }
+}
+
+@media (max-width: 900px) {
+  .plan {
+    min-height: var(--chart-height-stacked);
+  }
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-12);
+  padding: 0 var(--space-20) var(--space-16);
+}
+
+/* Results */
+.summary {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-16);
+  padding: var(--space-18) var(--space-20);
+  border-bottom: var(--border-width) solid var(--border-subtle);
+}
+
+.readouts {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-24);
+}
+
+.byType {
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-8) var(--space-10);
+  font-size: var(--fs-12-5);
+}
+
+.byTypeId {
+  color: var(--accent-fg);
+  font-family: var(--font-mono);
+}
+
+.number {
+  font-family: var(--font-mono);
+  text-align: right;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-12-5);
+}
+
+.table th {
+  padding: var(--space-8) var(--space-6);
+  font-family: var(--font-mono);
+  font-size: var(--fs-10-5);
+  font-weight: var(--weight-regular);
+  letter-spacing: var(--tracking-badge);
+  color: var(--text-faint);
+  text-align: right;
+  text-transform: uppercase;
+}
+
+.table th:first-child,
+.table td:first-child {
+  padding-left: var(--space-20);
+  text-align: left;
+}
+
+.table th:last-child,
+.table td:last-child {
+  padding-right: var(--space-20);
+}
+
+.table td {
+  padding: var(--space-8) var(--space-6);
+  border-top: var(--border-width) solid var(--border-faint);
+  font-family: var(--font-mono);
+  text-align: right;
+  white-space: nowrap;
+}
+
+.boltLink {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text);
+  font: inherit;
+  font-weight: var(--weight-semibold);
+  cursor: pointer;
+}
+
+/* The chosen bolt's row, marked like the chosen material in Materials. */
+.table tbody tr {
+  cursor: pointer;
+}
+
+.table tbody tr:hover td {
+  background: var(--surface-hover);
+}
+
+.table tbody tr.selectedRow td {
+  background: var(--accent-soft);
+}
+
+.table tbody tr.selectedRow td:first-child {
+  box-shadow: inset var(--underline-width) 0 0 var(--accent);
+}
+
+.utilisation {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-8);
+}
+
+.trailHead {
+  padding: var(--space-16) var(--space-20) var(--space-6);
+  border-top: var(--border-width) solid var(--border-subtle);
+}
+
+.problem {
+  padding: var(--space-20);
+}
+
+/* One row of the by-joint-type grid. */
+.entry {
+  display: contents;
+}

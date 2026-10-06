@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { expectError, expectOk } from '../calc/testHelpers'
+import { expectError, expectOk } from '../../../core/testing'
 import { fitSnapshot } from './fitSnapshot'
 import { DEFAULT_FIT_INPUTS } from './state/fitInputs'
 

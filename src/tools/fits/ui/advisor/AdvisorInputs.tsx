@@ -1,14 +1,13 @@
 // Advisor mode, left column: what the fit is for, the geometry and materials,
 // how it is assembled, and the requirements it must meet.
 import type { Dispatch } from 'react'
-import { Chip, PanelSection, QuantityField, SegmentedControl, Select } from '../../../../app/ui'
+import { Chip, PanelSection, QuantityField, RangeInputRow, SegmentedControl, Select, ValueInputRow } from '../../../../app/ui'
 import type { UnitSystem } from '../../../../core/units'
 import {
   APPLICATION_FUNCTIONS, APPLICATIONS, ASSEMBLY_LABELS, ASSEMBLY_METHODS, CUSTOM_APPLICATION, FUNCTION_LABELS, applicationOf,
 } from '../logic/applications'
 import type { FitResults } from '../logic/fitResults'
 import { MaterialPair } from '../shared/MaterialPair'
-import { RangeRow, SingleRow } from '../shared/RequirementRows'
 import type { FitInputs } from '../state/fitInputs'
 import type { FitAction } from '../state/fitReducer'
 import styles from './advisor.module.css'
@@ -75,7 +74,7 @@ export function AdvisorInputs({ inputs, results, system, dispatch }: AdvisorInpu
       </PanelSection>
 
       <PanelSection label="Requirements">
-        <RangeRow
+        <RangeInputRow
           label="Service temp."
           quantity="temperature"
           system={system}
@@ -83,7 +82,7 @@ export function AdvisorInputs({ inputs, results, system, dispatch }: AdvisorInpu
           max={inputs.serviceTempC.maxC}
           onChange={(minC, maxC) => change({ serviceTempC: { minC, maxC } })}
         />
-        <RangeRow
+        <RangeInputRow
           label="Clearance in service"
           quantity="deviation"
           system={system}
@@ -91,7 +90,7 @@ export function AdvisorInputs({ inputs, results, system, dispatch }: AdvisorInpu
           max={inputs.requiredClearanceUm.maxUm}
           onChange={(minUm, maxUm) => change({ requiredClearanceUm: { minUm, maxUm } })}
         />
-        <SingleRow
+        <ValueInputRow
           label="Max assembly interference"
           quantity="deviation"
           system={system}

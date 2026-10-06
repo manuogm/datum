@@ -2,12 +2,11 @@
 // the advisor): inputs on the left, the zone diagram and fit spectrum in the
 // centre, the results on the right.
 import type { Dispatch } from 'react'
-import { Badge, Callout, Column, ColumnHeader } from '../../../../app/ui'
+import { Badge, Callout, Column, ColumnHeader, ModeSwitch } from '../../../../app/ui'
 import { unitOf, type UnitSystem } from '../../../../core/units'
 import type { FitResults } from '../logic/fitResults'
 import { serviceClearance } from '../logic/serviceClearance'
-import { nominalLabel } from '../shared/labels'
-import { ModeSwitch } from '../shared/ModeSwitch'
+import { FIT_MODES, nominalLabel } from '../shared/labels'
 import sharedStyles from '../shared/shared.module.css'
 import { ZoneDiagram } from '../shared/ZoneDiagram'
 import type { FitInputs } from '../state/fitInputs'
@@ -33,7 +32,7 @@ export function CalculatorView({ inputs, results, system, dispatch }: Calculator
   const fitName = `${nominalLabel(inputs.nominalMm, system)} ${shown?.fit.designation ?? ''}`
   return (
     <>
-      <Column width="inputs" label="Inputs" header={<ModeSwitch mode={inputs.mode} onChange={(mode) => dispatch({ type: 'change', changes: { mode } })} />}>
+      <Column width="inputs" label="Inputs" header={<ModeSwitch modes={FIT_MODES} mode={inputs.mode} onChange={(mode) => dispatch({ type: 'change', changes: { mode } })} />}>
         <CalculatorInputs inputs={inputs} results={results} system={system} dispatch={dispatch} />
       </Column>
 

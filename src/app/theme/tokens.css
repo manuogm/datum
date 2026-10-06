@@ -160,6 +160,7 @@
   --space-36: 36px;
   --space-40: 40px;
   --space-44: 44px;
+  --space-48: 48px;
   --space-56: 56px;
 
   /* Radii */
@@ -179,6 +180,13 @@
   --chart-dash-band: 4 2; /* bars at a service temperature */
   --chart-dash-guide: 4 3; /* required window and limits */
   --chart-dash-extension: 3 3; /* extension lines to a dimension */
+  --chart-dash-fine: 2 2; /* a bolt's thread or insert outline in the plan */
+  --chart-stroke-ring: 2.5px; /* status ring around a bolt in the plan */
+  --chart-stroke-ring-selected: 4px; /* the chosen bolt's ring */
+
+  /* Motion */
+  --delay-loading: 300ms; /* a loading note waits this long, so fast loads show nothing */
+  --duration-fade: 150ms;
 
   /* Fixed sizes, as rendered (border included). The prototypes size most
      boxes content-box, so "height: 52px" plus its 1px rule renders 53px. */
@@ -197,6 +205,8 @@
   --column-min-height: 600px; /* a column's height once the row wraps */
   --chart-height-stacked: 520px; /* a chart's height once columns stack */
   --drawer-width: 420px;
+  --sheet-width: 794px; /* A4 at 96 px per inch */
+  --sheet-height: 1123px;
 }
 
 [data-theme='light'] {
