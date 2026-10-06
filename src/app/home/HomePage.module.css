@@ -1,170 +1,63 @@
-/* Home: hero, flush row of tool cards, recent projects. */
+/* Home: the folder heading (breadcrumb, name, actions) over the folder listing. */
 .page {
   display: flex;
-  flex-direction: column;
   flex: 1 0 auto;
+  flex-direction: column;
 }
 
-/* Hero */
-.hero {
+.head {
   display: flex;
   align-items: flex-end;
-  gap: var(--space-40);
-  padding: var(--space-44) var(--space-56) var(--space-32);
+  flex-wrap: wrap;
+  gap: var(--space-20);
+  padding: var(--space-36) var(--space-40) var(--space-24);
   border-bottom: var(--border-width) solid var(--border);
 }
 
-.title {
-  flex: 1;
-  margin: 0;
-  font-size: clamp(var(--fs-48), 6.1vw, var(--fs-88));
-  font-weight: var(--weight-semibold);
-  line-height: var(--leading-display);
-  letter-spacing: var(--tracking-hero);
+.head > :first-child {
+  flex: 1 1 280px;
 }
 
-.titleAccent {
-  color: var(--accent); /* display size: large-text contrast applies */
-}
-
-.intro {
+.actions {
   display: flex;
-  flex-direction: column;
-  gap: var(--space-14);
-  flex: none;
-  width: 380px;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-10);
 }
 
-.lead {
-  margin: 0;
-  font-size: var(--fs-15);
-  line-height: var(--leading-relaxed);
-  color: var(--text-muted);
-  text-wrap: pretty;
+.count {
+  margin-right: var(--space-10);
+  font-family: var(--font-mono);
+  font-size: var(--fs-11);
+  color: var(--text-faint);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-label);
 }
 
-/* Tool row: 1px gaps over the border colour draw the column rules. */
-.tools {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr)) 150px;
-  gap: var(--border-width);
-  flex: none;
-  height: calc(396px + var(--border-width));
-  border-bottom: var(--border-width) solid var(--border);
-  background: var(--border);
+.notice {
+  padding: var(--space-16) var(--space-40) 0;
 }
 
-.more {
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  gap: var(--space-8);
-  padding: var(--space-24) var(--space-20);
-  background:
-    repeating-linear-gradient(135deg, transparent 0 9px, var(--hatch) 9px 10px),
-    var(--bg);
-}
-
-.moreTitle {
-  margin: 0;
-  font-size: var(--fs-15);
-  font-weight: var(--weight-semibold);
-}
-
-.request {
-  font-size: var(--fs-13);
-  font-weight: var(--weight-semibold);
-  color: var(--text);
-  text-decoration: none;
-}
-
-.request:hover {
-  color: var(--accent-fg);
-}
-
-/* Recent projects */
-.recent {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  gap: var(--space-14);
-  min-height: 0;
-  padding: var(--space-22) var(--space-56) var(--space-28);
-}
-
-.recentHead {
-  display: flex;
-  align-items: baseline;
-  gap: var(--space-14);
-}
-
-.allProjects {
-  margin-left: auto;
-  font-size: var(--fs-13);
-  color: var(--text-secondary);
-  text-decoration: none;
-}
-
-.allProjects:hover {
-  color: var(--text);
-}
-
-.projects {
-  display: grid;
-  flex: 1;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--space-16);
-}
-
-/* Narrower screens: wrap the tool row, then stack everything. */
-@media (max-width: 1180px) {
-  .tools {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    height: auto;
+@media (max-width: 1100px) {
+  .head {
+    padding: var(--space-28) var(--space-24) var(--space-20);
   }
 
-  .tools > a {
-    min-height: 340px;
-  }
-
-  .more {
-    grid-column: 1 / -1;
-  }
-}
-
-@media (max-width: 900px) {
-  .hero {
-    flex-direction: column;
-    align-items: stretch;
-    gap: var(--space-24);
-    padding: var(--space-32) var(--space-24) var(--space-24);
-  }
-
-  .intro {
-    width: auto;
-  }
-
-  .recent {
-    padding: var(--space-22) var(--space-24) var(--space-28);
-  }
-
-  .projects {
-    grid-template-columns: minmax(0, 1fr);
+  .notice {
+    padding: var(--space-16) var(--space-24) 0;
   }
 }
 
 @media (max-width: 640px) {
-  .hero,
-  .recent {
-    padding-left: var(--space-16);
-    padding-right: var(--space-16);
+  .head {
+    padding: var(--space-24) var(--space-16) var(--space-16);
   }
 
-  .tools {
-    grid-template-columns: minmax(0, 1fr);
+  .notice {
+    padding: var(--space-16) var(--space-16) 0;
   }
 
-  .tools > a {
-    min-height: 0;
+  .count {
+    width: 100%;
   }
 }

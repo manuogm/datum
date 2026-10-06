@@ -1,5 +1,5 @@
-// EmptyState: the one way screens say "nothing here yet" (no projects match,
-// no decisions recorded, no material selected).
+// EmptyState: the one way screens say "nothing here yet" (an empty folder,
+// no material passes the filters).
 import type { ReactNode } from 'react'
 import styles from './EmptyState.module.css'
 import { cx } from './cx'

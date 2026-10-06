@@ -86,10 +86,17 @@ export function deleteFolder(library: Library, id: string): Result<Library> {
 
 // Calculations
 
-/** A new calculation; its inputs stay null until the tool first opens it. */
+/** A new calculation, stored straight away with its starting inputs (the tool's example). */
 export function createCalculation(
   library: Library,
-  calculation: { id: string; tool: ToolId; name: string; folderId: string | null },
+  calculation: {
+    id: string
+    tool: ToolId
+    name: string
+    folderId: string | null
+    inputs: unknown
+    summary: CalculationSummary | null
+  },
   now: string,
 ): Result<Library> {
   const id = checkNewId(library, calculation.id)
@@ -103,8 +110,8 @@ export function createCalculation(
     folderId: folder.value,
     tool: calculation.tool,
     name: name.value,
-    inputs: null,
-    summary: null,
+    inputs: calculation.inputs,
+    summary: calculation.summary,
     createdAt: now,
     updatedAt: now,
   }
@@ -141,8 +148,8 @@ export function deleteCalculation(library: Library, id: string): Result<Library>
 }
 
 /**
- * Records new inputs and the result they give (an autosave). Returns the
- * same library object when nothing changed, so callers can skip saving.
+ * Saves new inputs and the result they give, over the stored ones. Returns
+ * the same library object when nothing changed, so callers can skip writing.
  */
 export function updateCalculation(
   library: Library,
@@ -158,7 +165,7 @@ export function updateCalculation(
 
 /**
  * Brings a stored summary in line with what the tool now computes for the
- * same inputs (e.g. on first opening). Not an edit: the time is kept. Returns
+ * same inputs (e.g. after an engine fix). Not an edit: the time is kept. Returns
  * the same library object when the summary already matches.
  */
 export function refreshSummary(library: Library, id: string, summary: CalculationSummary | null): Result<Library> {

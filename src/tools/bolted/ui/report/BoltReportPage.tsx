@@ -1,6 +1,8 @@
 // Printable A4 report of a bolted joint calculation, a single joint or a
-// pattern (see app/report for the page frame and printing).
+// pattern (see app/report for the page frame and printing). It shows the
+// inputs on screen, unsaved edits included.
 import { useMemo } from 'react'
+import { latestInputs } from '../../../../app/library/drafts'
 import { ReportPage } from '../../../../app/report'
 import { useSettings } from '../../../../app/settings/settings'
 import type { Calculation } from '../../../../core/library'
@@ -11,7 +13,7 @@ import { PatternReport } from './PatternReport'
 
 export function BoltReportPage({ calculation }: { calculation: Calculation }) {
   const { unitSystem } = useSettings()
-  const inputs = useMemo(() => boltInputsFrom(calculation.inputs), [calculation.inputs])
+  const inputs = useMemo(() => boltInputsFrom(latestInputs(calculation)), [calculation])
   const results = useMemo(() => boltResults(inputs, unitSystem), [inputs, unitSystem])
   const { name } = calculation
   return (

@@ -1,0 +1,153 @@
+/* Shared parts of the Home dialogs: the error line, the question text, the folder picker and the tool cards. */
+.error {
+  margin: 0;
+  font-size: var(--fs-12-5);
+  color: var(--bad-text);
+}
+
+.text {
+  margin: 0;
+  font-size: var(--fs-13-5);
+  line-height: var(--leading-body);
+  color: var(--text-secondary);
+}
+
+/* Move: the folder tree, one button per destination. */
+.tree {
+  display: flex;
+  flex-direction: column;
+  max-height: 320px;
+  margin: 0;
+  padding: var(--space-4);
+  overflow-y: auto;
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface-sunken);
+  list-style: none;
+}
+
+.destination {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+  width: 100%;
+  margin: 0;
+  padding: var(--space-7) var(--space-10);
+  padding-left: calc(var(--space-10) + var(--depth, 0) * var(--space-20));
+  border: var(--border-width) solid transparent;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--text);
+  font: inherit;
+  font-size: var(--fs-13);
+  text-align: left;
+  cursor: pointer;
+}
+
+.destination:hover:not(:disabled) {
+  background: var(--surface-hover);
+}
+
+.destination:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.destination:disabled {
+  color: var(--text-faint);
+  cursor: default;
+}
+
+.chosen,
+.chosen:hover:not(:disabled) {
+  border-color: var(--accent-border);
+  background: var(--accent-soft);
+  color: var(--accent-text);
+}
+
+.destination svg {
+  flex: none;
+  color: var(--text-muted);
+}
+
+.note {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: var(--fs-10-5);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+/* New calculation: three tool cards side by side. */
+.tools {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-12);
+}
+
+.tool {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  min-width: 0;
+  margin: 0;
+  padding: var(--space-14) var(--space-16) var(--space-16);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface-sunken);
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.tool:hover {
+  border-color: var(--border-strong);
+}
+
+.tool:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.picked,
+.picked:hover {
+  border-color: var(--accent);
+  background: var(--accent-wash);
+}
+
+.toolHead {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+  font-size: var(--fs-15);
+  font-weight: var(--weight-semibold);
+}
+
+.toolHead svg {
+  color: var(--accent);
+}
+
+.figure {
+  display: flex;
+  justify-content: center;
+  padding: var(--space-4) 0;
+}
+
+.useWhen {
+  margin: 0;
+  font-size: var(--fs-12-5);
+  line-height: var(--leading-normal);
+  color: var(--text-muted);
+}
+
+@media (max-width: 720px) {
+  .tools {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .figure {
+    display: none;
+  }
+}

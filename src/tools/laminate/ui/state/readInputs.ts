@@ -1,6 +1,6 @@
 // Reading Composite Laminate inputs that come from outside the screen: a
-// shared link or a revision saved in a project. A malformed field keeps its
-// default, so an old link or revision always opens; a ply list with any
+// calculation stored in the library. A malformed field keeps its default,
+// so a calculation saved by an older Datum always opens; a ply list with any
 // unusable ply falls back to the default layup as a whole.
 import { MAX_PLIES, normaliseAngleDeg, PLY_MATERIALS, type FailureCriterion } from '../../calc'
 import { DEFAULT_LAMINATE_INPUTS, type LaminateInputs, type LoadSpec, type PlySpec } from './lamInputs'

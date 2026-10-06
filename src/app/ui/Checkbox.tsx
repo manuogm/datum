@@ -1,5 +1,4 @@
-// Checkbox: labelled accent checkbox (data source filters, "Record as design
-// decision").
+// Checkbox: labelled accent checkbox (data source filters).
 import type { ReactNode } from 'react'
 import styles from './Checkbox.module.css'
 import { cx } from './cx'

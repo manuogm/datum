@@ -1,5 +1,4 @@
-// PageTitle: page heading with a mono eyebrow ("12 PROJECTS · 148
-// CALCULATIONS") and optional content beside the title (a status badge).
+// PageTitle: page heading with a mono eyebrow (a breadcrumb, "MATERIALS") and optional content beside the title (a status badge).
 import type { ReactNode } from 'react'
 import styles from './PageTitle.module.css'
 import { cx } from './cx'

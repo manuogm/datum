@@ -49,8 +49,11 @@ export const libraryActions = {
     return done(applyChange((library) => deleteFolder(library, id)))
   },
 
-  createCalculation(tool: ToolId, name: string, folderId: string | null): Result<string> {
-    return create((id) => (library) => createCalculation(library, { id, tool, name, folderId }, localTimestamp()))
+  /** A new calculation, stored at once with the tool's starting inputs and their summary. */
+  createCalculation(
+    calculation: { tool: ToolId; name: string; folderId: string | null; inputs: unknown; summary: CalculationSummary | null },
+  ): Result<string> {
+    return create((id) => (library) => createCalculation(library, { id, ...calculation }, localTimestamp()))
   },
   renameCalculation(id: string, name: string): Done {
     return done(applyChange((library) => renameCalculation(library, id, name)))
@@ -65,7 +68,7 @@ export const libraryActions = {
     return done(applyChange((library) => deleteCalculation(library, id)))
   },
 
-  /** Autosave from a tool screen: the inputs and the result they give. */
+  /** Save from a tool screen: the inputs on screen and the result they give. */
   saveCalculation(id: string, inputs: unknown, summary: CalculationSummary | null): Done {
     return done(applyChange((library) => updateCalculation(library, id, { inputs, summary }, localTimestamp())))
   },

@@ -1,4 +1,4 @@
-// Switch: on/off option with a label ("Attach PDF report to this revision").
+// Switch: on/off option with a label (e.g. a tool option).
 import type { ReactNode } from 'react'
 import styles from './Switch.module.css'
 import { cx } from './cx'

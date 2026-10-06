@@ -15,7 +15,7 @@
   --surface: #141619; /* header, columns, tool pages */
   --surface-raised: #181a1e; /* highlighted row, timeline card */
   --surface-sunken: #101215; /* inputs, cards, side drawers */
-  --surface-muted: #24272c; /* avatars, neutral badges */
+  --surface-muted: #24272c; /* neutral badges, hovered close buttons */
   --surface-selected: #24272c; /* selected segment */
   --surface-hover: #1f2226; /* hovered / selected list row, bar track */
   --hatch: #15171a; /* diagonal hatch on "coming" tiles */
@@ -97,13 +97,13 @@
   --weight-semibold: 600;
   --weight-bold: 700;
 
-  --fs-9: 9px; /* initials in the smallest avatar */
+  --fs-9: 9px; /* report footer */
   --fs-10: 10px; /* dense table headers */
   --fs-10-5: 10.5px; /* mono uppercase section labels, status badges */
   --fs-11: 11px; /* mono meta, codes */
   --fs-11-5: 11.5px; /* footnotes */
   --fs-12: 12px; /* chips, segmented controls */
-  --fs-12-5: 12.5px; /* list rows, project chip */
+  --fs-12-5: 12.5px; /* list rows */
   --fs-13: 13px; /* body, nav, buttons */
   --fs-13-5: 13.5px; /* card descriptions */
   --fs-14: 14px; /* column titles, inputs */

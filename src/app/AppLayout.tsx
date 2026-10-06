@@ -6,21 +6,19 @@ import styles from './AppLayout.module.css'
 import { routeHref } from './router/routes'
 import { useSettings } from './settings/settings'
 import { DocumentTabs, type CurrentTab } from './shell/DocumentTabs'
-import { cx, PitHeader } from './ui'
+import { PitHeader } from './ui'
 
 interface AppLayoutProps {
   /** The tab marked as shown; 'materials' marks the Materials button instead. */
   current: CurrentTab | 'materials'
   actions?: ReactNode
-  /** surface for tool screens (default); page for the darker Home backdrop. */
-  background?: 'surface' | 'page'
   children: ReactNode
 }
 
-export function AppLayout({ current, actions, background = 'surface', children }: AppLayoutProps) {
+export function AppLayout({ current, actions, children }: AppLayoutProps) {
   const { theme, toggleTheme, unitSystem, setUnitSystem } = useSettings()
   return (
-    <div className={cx(styles.frame, background === 'page' && styles.page)}>
+    <div className={styles.frame}>
       <PitHeader
         homeHref={routeHref({ name: 'home', folderId: null })}
         tabs={<DocumentTabs current={current === 'materials' ? null : current} />}

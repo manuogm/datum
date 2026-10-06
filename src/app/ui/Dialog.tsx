@@ -1,6 +1,6 @@
 // Dialog: a modal window over a dimmed page ("New folder", "Move to …").
-// Traps focus, closes on Escape, the × or a click on the
-// backdrop, and is announced to screen readers by its title.
+// Traps focus, closes on Escape, the × or a click on the backdrop, and is
+// announced to screen readers by its title.
 import { useId, useRef, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import styles from './Dialog.module.css'

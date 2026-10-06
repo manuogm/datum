@@ -1,5 +1,5 @@
 /* Segmented control: inset track with a raised selected segment, or a joined
-   bordered strip (Projects status filter). */
+   bordered strip. */
 .group {
   display: flex;
   flex: none;

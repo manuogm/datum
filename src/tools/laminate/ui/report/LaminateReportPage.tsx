@@ -1,6 +1,7 @@
 // Printable A4 report of a laminate calculation (see app/report for the page
-// frame and printing).
+// frame and printing). It shows the inputs on screen, unsaved edits included.
 import { useMemo } from 'react'
+import { latestInputs } from '../../../../app/library/drafts'
 import { ReportPage } from '../../../../app/report'
 import { useSettings } from '../../../../app/settings/settings'
 import type { Calculation } from '../../../../core/library'
@@ -10,7 +11,7 @@ import { LaminateReport } from './LaminateReport'
 
 export function LaminateReportPage({ calculation }: { calculation: Calculation }) {
   const { unitSystem } = useSettings()
-  const inputs = useMemo(() => lamInputsFrom(calculation.inputs), [calculation.inputs])
+  const inputs = useMemo(() => lamInputsFrom(latestInputs(calculation)), [calculation])
   const analysis = useMemo(() => analyse(inputs), [inputs])
   return (
     <ReportPage calculation={calculation}>

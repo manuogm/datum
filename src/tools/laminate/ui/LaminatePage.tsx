@@ -3,12 +3,12 @@
 // through the thickness in the centre, first-ply failure and the laminate
 // stiffness on the right.
 //
-// The page shows one calculation of the library and saves its inputs as they
-// change. "Report" opens the printable report of the calculation.
+// The page shows one calculation of the library. "Save" stores the inputs on
+// screen; "Report" opens the printable report of the calculation.
 import { useState } from 'react'
 import { AppLayout } from '../../../app/AppLayout'
 import { useSettings } from '../../../app/settings/settings'
-import { ReportButton } from '../../../app/tools/ReportButton'
+import { CalculationActions } from '../../../app/tools/CalculationActions'
 import { Badge, Button, Callout, Column, ColumnHeader, ColumnRow, SegmentedControl } from '../../../app/ui'
 import type { Calculation } from '../../../core/library'
 import { CriterionFields } from './editor/CriterionFields'
@@ -25,7 +25,7 @@ import { DEFAULT_LAMINATE_INPUTS } from './state/lamInputs'
 import { useLaminateTool } from './state/useLaminateTool'
 
 export function LaminatePage({ calculation }: { calculation: Calculation }) {
-  const { inputs, dispatch, analysis } = useLaminateTool(calculation)
+  const { inputs, dispatch, analysis, unsaved, save } = useLaminateTool(calculation)
   const { unitSystem: system } = useSettings()
   const [chosenPly, setChosenPly] = useState<number | null>(null)
   const [component, setComponent] = useState<PlotComponent>('sx')
@@ -33,7 +33,7 @@ export function LaminatePage({ calculation }: { calculation: Calculation }) {
   const selectedPly = chosenPly !== null && chosenPly <= inputs.plies.length ? chosenPly : null
   const criticalPlies = result?.firstPlyFailure.criticalPlies ?? []
   return (
-    <AppLayout current={{ tab: 'calc', id: calculation.id }} actions={<ReportButton calculationId={calculation.id} />}>
+    <AppLayout current={{ tab: 'calc', id: calculation.id }} actions={<CalculationActions calculationId={calculation.id} unsaved={unsaved} onSave={save} />}>
       <ColumnRow>
         <Column
           width="inputs"

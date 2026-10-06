@@ -1,6 +1,6 @@
 // Runs the engines on the current inputs: the ISO 286 analysis of the
 // calculator's fit, the advisor's ranking, and which fit the screen is
-// "about" (the one the report and a saved revision describe).
+// "about" (the one the report and the library summary describe).
 import { MATERIALS, materialById, type Material } from '../../../../core/materials'
 import { fail, ok, type Result } from '../../../../core/result'
 import type { UnitSystem } from '../../../../core/units'
@@ -55,7 +55,7 @@ export function candidateFor(results: FitResults, designation: string): FitCandi
   return results.advice.ok ? results.advice.value.candidates.find((c) => c.fit.designation === designation) : undefined
 }
 
-/** Ids in the URL are checked when read, so the fallback only guards against a renamed material. */
+/** Stored ids are checked when read, so the fallback only guards against a renamed material. */
 function materialOrFirst(id: string): Material {
   const material = materialById(id)
   return material.ok ? material.value : MATERIALS[0]

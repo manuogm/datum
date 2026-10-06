@@ -1,6 +1,7 @@
 // The library data model: folders, nested like a file directory, holding
 // calculations. A calculation is one tool's inputs plus a short summary of
-// its result, kept up to date as the inputs change (there is no "Save").
+// its result, both written when the user saves (there are no revisions: a
+// save overwrites).
 
 /** The calculation tools. Extend as new tools ship. */
 export type ToolId = 'fit' | 'bolt' | 'lam'
@@ -50,15 +51,12 @@ export interface Calculation {
   folderId: string | null
   tool: ToolId
   name: string
-  /**
-   * The tool's inputs, JSON-safe. null until the calculation is first opened:
-   * the tool then starts from its worked example.
-   */
+  /** The tool's inputs, JSON-safe. null stands for the tool's worked example (the seeded examples). */
   inputs: unknown
-  /** null while there is no result: never opened, or inputs the tool cannot analyse. */
+  /** null when the tool cannot analyse the inputs. */
   summary: CalculationSummary | null
   createdAt: string
-  /** When the inputs last changed. */
+  /** When the inputs were last saved. */
   updatedAt: string
 }
 

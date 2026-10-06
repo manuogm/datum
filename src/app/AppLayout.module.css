@@ -7,10 +7,6 @@
   color: var(--text);
 }
 
-.page {
-  background: var(--bg);
-}
-
 .body {
   display: flex;
   flex: 1;

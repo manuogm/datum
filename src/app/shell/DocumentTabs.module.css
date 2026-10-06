@@ -109,3 +109,37 @@
 .close:focus-visible {
   outline: var(--border-width) solid var(--accent);
 }
+
+/* Unsaved changes: a dot in place of the ×, until the tab is hovered or the button focused. */
+.dot {
+  display: none;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--text-secondary);
+}
+
+.unsaved .dot {
+  display: block;
+}
+
+.unsaved .cross {
+  display: none;
+}
+
+.calc:hover .unsaved .dot,
+.unsaved:focus-visible .dot {
+  display: none;
+}
+
+.calc:hover .unsaved .cross,
+.unsaved:focus-visible .cross {
+  display: block;
+}
+
+.question {
+  margin: 0;
+  font-size: var(--fs-13-5);
+  line-height: var(--leading-body);
+  color: var(--text-secondary);
+}

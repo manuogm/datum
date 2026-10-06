@@ -1,6 +1,6 @@
 // Everything the engineer enters in the Composite Laminate tool, in SI units
 // (N/mm, N·mm/mm), with ply materials by their Materials Database id. This
-// record is what a saved revision stores and what the shareable URL carries.
+// record is what a calculation in the library stores.
 import { DEFAULT_TARGET_RESERVE_FACTOR, type FailureCriterion, type LaminateLoads } from '../../calc'
 
 /** One ply, at its material's cured ply thickness. */
@@ -17,7 +17,7 @@ export interface LaminateInputs {
   readonly plies: readonly PlySpec[]
   readonly loads: LoadSpec
   readonly criterion: FailureCriterion
-  /** The reserve factor the laminate must reach: the project's composite minimum. */
+  /** The reserve factor the laminate must reach: 1.5 unless changed. */
   readonly targetReserveFactor: number
 }
 

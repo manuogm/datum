@@ -1,7 +1,7 @@
 // Everything the engineer enters in the Fit Tolerance tool, in SI units.
 // Both modes share these inputs: the advisor's materials and requirements
-// also give the calculator its in-service check. This record is what a saved
-// revision stores and what the shareable URL carries.
+// also give the calculator its in-service check. This record is what a
+// calculation in the library stores.
 import type { ApplicationFunction, AssemblyMethod, ClearanceRangeUm, TemperatureRangeC } from '../../advisor'
 import type { ZoneSpec } from '../../calc'
 

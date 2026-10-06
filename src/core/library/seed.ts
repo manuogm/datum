@@ -1,6 +1,6 @@
 // What a new browser starts with, so Datum is not empty: an "Examples"
 // folder holding each tool's worked example. Their inputs are left null, so
-// each tool opens on its own default example; the summaries are what the
+// each tool opens them on its own default inputs; the summaries are what the
 // tools compute for those defaults (checked by each tool's tests).
 import type { Calculation, CalculationSummary, Library, ToolId } from './model'
 

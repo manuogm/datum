@@ -7,7 +7,7 @@ import { MonoLabel } from './MonoLabel'
 
 interface PanelSectionProps {
   label?: string
-  /** Small note right of the label, e.g. "◆ from project targets". */
+  /** Small note right of the label, e.g. "8 bolts". */
   aside?: ReactNode
   /** Take the remaining height of the column. */
   grow?: boolean

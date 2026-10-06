@@ -1,5 +1,5 @@
 // SearchField: search input with the magnifier icon and an optional keyboard
-// shortcut hint (⌘K), used on Home, Projects and Materials.
+// shortcut hint (⌘K), used on the Materials page.
 import type { InputHTMLAttributes } from 'react'
 import box from './inputBox.module.css'
 import styles from './SearchField.module.css'

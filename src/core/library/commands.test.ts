@@ -53,16 +53,16 @@ describe('folders', () => {
 })
 
 describe('calculations', () => {
-  it('creates a calculation with no inputs yet', () => {
-    const library = expectOk(createCalculation(LIBRARY, { id: 'n', tool: 'lam', name: 'Skin', folderId: 'skins' }, NOW))
-    expect(findCalculation(library, 'n')).toEqual({
-      id: 'n', folderId: 'skins', tool: 'lam', name: 'Skin', inputs: null, summary: null, createdAt: NOW, updatedAt: NOW,
-    })
+  it('stores a new calculation with its starting inputs', () => {
+    const created = { id: 'n', tool: 'lam' as const, name: 'Skin', folderId: 'skins', inputs: { n: 0 }, summary: SUMMARY }
+    const library = expectOk(createCalculation(LIBRARY, created, NOW))
+    expect(findCalculation(library, 'n')).toEqual({ ...created, createdAt: NOW, updatedAt: NOW })
   })
 
   it('refuses a nameless calculation or one in a missing folder', () => {
-    expect(createCalculation(LIBRARY, { id: 'n', tool: 'fit', name: '', folderId: null }, NOW).ok).toBe(false)
-    expect(createCalculation(LIBRARY, { id: 'n', tool: 'fit', name: 'X', folderId: 'gone' }, NOW).ok).toBe(false)
+    const fit = { id: 'n', tool: 'fit' as const, inputs: {}, summary: null }
+    expect(createCalculation(LIBRARY, { ...fit, name: '', folderId: null }, NOW).ok).toBe(false)
+    expect(createCalculation(LIBRARY, { ...fit, name: 'X', folderId: 'gone' }, NOW).ok).toBe(false)
   })
 
   it('renames, moves and deletes a calculation', () => {
@@ -82,7 +82,7 @@ describe('calculations', () => {
     expect(duplicateCalculation(LIBRARY, 'c-pin', 'c-top', NOW).ok).toBe(false)
   })
 
-  it('records new inputs and their summary as an edit', () => {
+  it('saves new inputs and their summary over the stored ones', () => {
     const library = expectOk(updateCalculation(LIBRARY, 'c-top', { inputs: { n: 2 }, summary: SUMMARY }, NOW))
     expect(findCalculation(library, 'c-top')).toMatchObject({ inputs: { n: 2 }, summary: SUMMARY, updatedAt: NOW, createdAt: T0 })
   })

@@ -1,7 +1,7 @@
-// Reading Fit Tolerance inputs that come from outside the screen: a shared
-// link or a revision saved in a project. Each field is checked on its own;
-// a missing or malformed field keeps its default, so an old link or an old
-// revision always opens.
+// Reading Fit Tolerance inputs that come from outside the screen: a
+// calculation stored in the library. Each field is checked on its own; a
+// missing or malformed field keeps its default, so a calculation saved by an
+// older Datum always opens.
 import { materialById } from '../../../../core/materials'
 import type { ApplicationFunction, AssemblyMethod } from '../../advisor'
 import { parseZone, type ZoneKind, type ZoneSpec } from '../../calc'
@@ -47,7 +47,7 @@ export function asMaterialId(value: unknown): string | null {
   return typeof value === 'string' && materialById(value).ok ? value : null
 }
 
-/** Inputs stored in a saved revision (normally a complete FitInputs). */
+/** Inputs stored in the library (normally a complete FitInputs; null for the example). */
 export function fitInputsFrom(value: unknown): FitInputs {
   const saved = isRecord(value) ? value : {}
   const d = DEFAULT_FIT_INPUTS

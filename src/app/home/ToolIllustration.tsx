@@ -60,12 +60,10 @@ const DIAGRAMS: Record<ToolId, ComponentType> = {
   lam: LaminateDiagram,
 }
 
-const WIDTH = 240
-
-export function ToolIllustration({ tool }: { tool: ToolId }) {
+export function ToolIllustration({ tool, width = 240 }: { tool: ToolId; width?: number }) {
   const Diagram = DIAGRAMS[tool]
   return (
-    <svg className={styles.svg} width={WIDTH} height={(WIDTH * 140) / 240} viewBox="0 0 300 170" aria-hidden="true">
+    <svg className={styles.svg} width={width} height={(width * 140) / 240} viewBox="0 0 300 170" aria-hidden="true">
       <Diagram />
     </svg>
   )

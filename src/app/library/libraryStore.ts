@@ -25,7 +25,17 @@ function browserStorage(): KeyValueStore | null {
 }
 
 function load(): LoadedLibrary {
-  return loadLibrary(browserStorage(), () => seedLibrary(localTimestamp()))
+  let seeded = false
+  const storage = browserStorage()
+  const result = loadLibrary(storage, () => {
+    seeded = true
+    return seedLibrary(localTimestamp())
+  })
+  // Keep the seed of a first visit, so the examples keep their dates. (A seed
+  // shown in place of unreadable or newer data is not saved: canSave or the
+  // set-aside copy protect that data.)
+  if (seeded && result.canSave && !result.problem) saveLibrary(storage, result.state)
+  return result
 }
 
 function current(): LoadedLibrary {

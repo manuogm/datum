@@ -39,7 +39,7 @@ export function HomePage({ folderId }: { folderId: string | null }) {
   }
 
   return (
-    <AppLayout current={{ tab: 'home' }} background="page">
+    <AppLayout current={{ tab: 'home' }}>
       <div className={styles.page}>
         <header className={styles.head}>
           <PageTitle eyebrow={<Breadcrumb path={folderPath(library, folderId)} />} title={folder?.name ?? 'Home'} size="md" />

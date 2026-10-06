@@ -1,0 +1,75 @@
+/* Row menu: a quiet square trigger and a small dropdown under it, right-aligned. */
+.root {
+  position: relative;
+  z-index: 1; /* above the row's full-width link */
+}
+
+/* An open menu stays above the rows after it. */
+.rootOpen {
+  z-index: 2;
+}
+
+.trigger {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  margin: 0;
+  padding: 0;
+  border: var(--border-width) solid transparent;
+  border-radius: var(--radius-md);
+  background: none;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.trigger:hover,
+.open {
+  border-color: var(--border-strong);
+  color: var(--text);
+}
+
+.trigger:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: var(--focus-ring);
+}
+
+.menu {
+  position: absolute;
+  top: calc(100% + var(--space-4));
+  right: 0;
+  z-index: var(--z-overlay);
+  display: flex;
+  flex-direction: column;
+  min-width: 160px;
+  padding: var(--space-4);
+  border: var(--border-width) solid var(--border-strong);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  box-shadow: var(--shadow-dialog);
+}
+
+.item {
+  margin: 0;
+  padding: var(--space-8) var(--space-10);
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--text);
+  font: inherit;
+  font-size: var(--fs-13);
+  text-align: left;
+  cursor: pointer;
+}
+
+.item:hover,
+.item:focus-visible {
+  outline: none;
+  background: var(--surface-hover);
+}
+
+.danger {
+  color: var(--bad-text);
+}

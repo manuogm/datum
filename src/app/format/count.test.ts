@@ -5,7 +5,7 @@ describe('countOf', () => {
   it('uses the singular only for exactly one', () => {
     expect(countOf(1, 'calc')).toBe('1 calc')
     expect(countOf(2, 'calc')).toBe('2 calcs')
-    expect(countOf(0, 'decision')).toBe('0 decisions')
+    expect(countOf(0, 'folder')).toBe('0 folders')
   })
 
   it('takes an irregular plural', () => {

@@ -11,12 +11,9 @@ import type { Route } from './app/router/routes'
 import { useRoute } from './app/router/useRoute'
 import { SettingsProvider } from './app/settings/SettingsProvider'
 import { openTab } from './app/shell/openTabs'
+import { loadBolt, loadFit, loadLaminate } from './app/tools/toolModules'
 import { LoadingState } from './app/ui'
 
-// One loader per chunk: a module's screens share it, so it loads once.
-const loadFit = () => import('./tools/fits/ui')
-const loadBolt = () => import('./tools/bolted/ui')
-const loadLaminate = () => import('./tools/laminate/ui')
 const loadMaterials = () => import('./app/materials/MaterialsPage')
 
 type CalculationScreen = ComponentType<{ calculation: Calculation }>
