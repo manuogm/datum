@@ -318,6 +318,80 @@ export const MATERIALS: readonly Material[] = [
     maxServiceTempC: 150,
     sources: { default: 'supplier' },
   },
+
+  // ── Composite plies (lamina properties for the Composite Laminate tool; the
+  //    material-level E, ν, Rm and α are those along the fibres: E1, ν12, Xt, α1) ──
+  {
+    id: 'cfrp-t700-m21-ud', name: 'CFRP T700/M21 UD', family: 'composite', spec: 'Hexcel HexPly M21', condition: 'Unidirectional prepreg ply, cured',
+    // UNSURE: all values recalled as typical of T700GC/M21 from producer data and published test campaigns,
+    // not transcribed from the HexPly M21 datasheet (which quotes several fibre areal weights and ply
+    // thicknesses). 0.125 mm is the ply thickness of the Composite Laminate design. α2 ≈ 30 µm/(m·K) is not modelled.
+    densityGPerCm3: 1.58, youngsModulusGPa: 135, poissonsRatio: 0.32,
+    yieldStrengthMPa: null, tensileStrengthMPa: 2400, elongationPercent: null,
+    thermalExpansionUmPerMK: 0.2, thermalConductivityWPerMK: null,
+    fatigue: null,
+    maxServiceTempC: 120,
+    lamina: {
+      form: 'ud', e1GPa: 135, e2GPa: 8.8, g12GPa: 4.6, nu12: 0.32,
+      xtMPa: 2400, xcMPa: 1300, ytMPa: 60, ycMPa: 250, sMPa: 95, plyThicknessMm: 0.125,
+    },
+    sources: { default: 'supplier' },
+  },
+  {
+    id: 'cfrp-im7-8552-ud', name: 'CFRP IM7/8552 UD', family: 'composite', spec: 'Hexcel HexPly 8552', condition: 'Unidirectional prepreg ply, cured',
+    // Ply values: Camanho et al. (2007) Table 1. Density and α1: typical producer values (UNSURE).
+    densityGPerCm3: 1.57, youngsModulusGPa: 171.42, poissonsRatio: 0.32,
+    yieldStrengthMPa: null, tensileStrengthMPa: 2326.2, elongationPercent: null,
+    thermalExpansionUmPerMK: 0, thermalConductivityWPerMK: null,
+    fatigue: null,
+    maxServiceTempC: 120,
+    lamina: {
+      form: 'ud', e1GPa: 171.42, e2GPa: 9.08, g12GPa: 5.29, nu12: 0.32,
+      xtMPa: 2326.2, xcMPa: 1200.1, ytMPa: 62.3, ycMPa: 199.8, sMPa: 92.3, plyThicknessMm: 0.125,
+    },
+    sources: { default: 'camanho2007', overrides: { densityGPerCm3: 'supplier', thermalExpansionUmPerMK: 'supplier' } },
+  },
+  {
+    id: 'cfrp-t300-5208-ud', name: 'CFRP T300/5208 UD', family: 'composite', spec: 'Tsai & Hahn (1980)', condition: 'Unidirectional ply, textbook reference material',
+    // The classic textbook ply (Tsai & Hahn 1980): used for the worked examples of the laminate engine.
+    densityGPerCm3: 1.6, youngsModulusGPa: 181, poissonsRatio: 0.28,
+    yieldStrengthMPa: null, tensileStrengthMPa: 1500, elongationPercent: null,
+    thermalExpansionUmPerMK: 0.02, thermalConductivityWPerMK: null,
+    fatigue: null,
+    maxServiceTempC: 150,
+    lamina: {
+      form: 'ud', e1GPa: 181, e2GPa: 10.3, g12GPa: 7.17, nu12: 0.28,
+      xtMPa: 1500, xcMPa: 1500, ytMPa: 40, ycMPa: 246, sMPa: 68, plyThicknessMm: 0.125,
+    },
+    sources: { default: 'tsaiHahn' },
+  },
+  {
+    id: 'gfrp-e-glass-epoxy-ud', name: 'GFRP E-glass/epoxy UD', family: 'composite', spec: 'Tsai & Hahn (1980)', condition: 'Unidirectional ply (Scotchply 1002)',
+    densityGPerCm3: 1.8, youngsModulusGPa: 38.6, poissonsRatio: 0.26,
+    yieldStrengthMPa: null, tensileStrengthMPa: 1062, elongationPercent: null,
+    thermalExpansionUmPerMK: 8.6, thermalConductivityWPerMK: null,
+    fatigue: null,
+    maxServiceTempC: 100,
+    lamina: {
+      form: 'ud', e1GPa: 38.6, e2GPa: 8.27, g12GPa: 4.14, nu12: 0.26,
+      xtMPa: 1062, xcMPa: 610, ytMPa: 31, ycMPa: 118, sMPa: 72, plyThicknessMm: 0.125,
+    },
+    sources: { default: 'tsaiHahn' },
+  },
+  {
+    id: 'cfrp-t300-fabric', name: 'CFRP T300 3K plain weave', family: 'composite', spec: 'Generic', condition: 'Woven fabric / epoxy ply, cured (1 = warp, 2 = weft)',
+    // UNSURE: generic typical values for a 200 g/m² 3K plain-weave carbon/epoxy ply, not from one datasheet.
+    densityGPerCm3: 1.55, youngsModulusGPa: 60, poissonsRatio: 0.05,
+    yieldStrengthMPa: null, tensileStrengthMPa: 600, elongationPercent: null,
+    thermalExpansionUmPerMK: 2.5, thermalConductivityWPerMK: null,
+    fatigue: null,
+    maxServiceTempC: 120,
+    lamina: {
+      form: 'fabric', e1GPa: 60, e2GPa: 60, g12GPa: 5, nu12: 0.05,
+      xtMPa: 600, xcMPa: 570, ytMPa: 600, ycMPa: 570, sMPa: 90, plyThicknessMm: 0.22,
+    },
+    sources: { default: 'supplier' },
+  },
   {
     id: 'gfrp-e-glass-qi', name: 'GFRP E-glass QI', family: 'composite', spec: 'ISO 1268', condition: 'Quasi-isotropic laminate',
     // UNSURE: as shown on the Materials screen mock-up; typical of E-glass/epoxy.

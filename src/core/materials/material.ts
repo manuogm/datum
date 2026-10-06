@@ -22,6 +22,32 @@ export interface FatigueStrength {
 }
 
 /**
+ * Properties of one unidirectional or fabric ply, in its material axes (1 =
+ * fibre direction, or warp for a fabric; 2 = transverse, or weft), for
+ * classical laminate theory. Strengths are positive magnitudes: Xc and Yc are
+ * compressive strengths written without a sign.
+ */
+export interface LaminaProperties {
+  /** 'ud': unidirectional tape; 'fabric': woven, with 1 = warp and 2 = weft. */
+  readonly form: 'ud' | 'fabric'
+  readonly e1GPa: number
+  readonly e2GPa: number
+  readonly g12GPa: number
+  /** Major Poisson's ratio ν12 (strain in 2 from stress in 1). */
+  readonly nu12: number
+  /** Tensile and compressive strength along 1. */
+  readonly xtMPa: number
+  readonly xcMPa: number
+  /** Tensile and compressive strength along 2. */
+  readonly ytMPa: number
+  readonly ycMPa: number
+  /** In-plane shear strength S12. */
+  readonly sMPa: number
+  /** Cured ply thickness. */
+  readonly plyThicknessMm: number
+}
+
+/**
  * Properties of one material at room temperature (20 °C unless the source says otherwise).
  *
  * `null` means "not given": either the property does not apply (composites and
@@ -65,6 +91,8 @@ export interface Material {
    * judgement for screening (SOURCES.judgement), not a value from a standard.
    */
   readonly maxServiceTempC: number
+  /** Ply properties for laminate analysis (composite plies only). */
+  readonly lamina?: LaminaProperties
   /** Source of each MaterialProperty: `default`, unless `overrides` names another one for that property. */
   readonly sources: {
     readonly default: SourceId
@@ -76,4 +104,4 @@ export interface Material {
 export type MaterialProperty =
   | 'densityGPerCm3' | 'youngsModulusGPa' | 'poissonsRatio' | 'yieldStrengthMPa'
   | 'tensileStrengthMPa' | 'elongationPercent' | 'thermalExpansionUmPerMK'
-  | 'thermalConductivityWPerMK' | 'fatigue'
+  | 'thermalConductivityWPerMK' | 'fatigue' | 'lamina'
