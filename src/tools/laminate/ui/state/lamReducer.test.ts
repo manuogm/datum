@@ -11,6 +11,8 @@ describe('lamReducer', () => {
     expect(lamReducer(mixed, { type: 'layup', anglesDeg: [45, -45] }).plies).toEqual([...pliesAt([45], 'cfrp-im7-8552-ud'), ...pliesAt([-45])])
     expect(lamReducer(mixed, { type: 'layup', anglesDeg: [0, 45, 135] }).plies).toEqual(pliesAt([0, 45, -45], 'cfrp-im7-8552-ud'))
     expect(lamReducer(mixed, { type: 'layup', anglesDeg: [] })).toBe(mixed)
+    // An optimiser result is of one material: a hybrid stack takes it throughout.
+    expect(lamReducer(mixed, { type: 'layup', anglesDeg: [0, 0], materialId: 'cfrp-t700-m21-ud' }).plies).toEqual(pliesAt([0, 0], 'cfrp-t700-m21-ud'))
   })
 
   it('edits, adds, removes and moves plies', () => {

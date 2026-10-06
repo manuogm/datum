@@ -7,14 +7,14 @@ import { abdMatrices, constantViews, COUPLING_FLAGS } from '../logic/stiffness'
 import report from './report.module.css'
 
 interface StiffnessTablesProps {
-  analysis: Pick<LaminateAnalysis, 'stiffness' | 'coupling' | 'constants'>
+  analysis: Pick<LaminateAnalysis, 'stiffness' | 'coupling' | 'constants' | 'layup'>
   system: UnitSystem
 }
 
 export function StiffnessTables({ analysis, system }: StiffnessTablesProps) {
   return (
     <div className={report.stiffness}>
-      {abdMatrices(analysis.stiffness, system).map((matrix) => (
+      {abdMatrices(analysis.stiffness, analysis.layup.thicknessMm, system).map((matrix) => (
         <table key={matrix.symbol} className={styles.table}>
           <thead>
             <tr>

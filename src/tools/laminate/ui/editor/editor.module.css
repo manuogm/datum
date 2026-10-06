@@ -109,11 +109,17 @@
   color: var(--text-muted);
 }
 
-.critical {
-  color: var(--bad);
-  font-weight: var(--weight-semibold);
+.warn {
+  color: var(--warn-text);
 }
 
+.bad {
+  color: var(--bad-text);
+}
+
+.critical {
+  font-weight: var(--weight-bold);
+}
 
 .summary {
   display: flex;
@@ -132,4 +138,11 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: var(--space-10);
+}
+
+.loadsHead {
+  margin-bottom: calc(-1 * var(--space-4));
+  font-family: var(--font-mono);
+  font-size: var(--fs-10-5);
+  color: var(--text-faint);
 }

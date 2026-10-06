@@ -1,7 +1,7 @@
 // The laminate's layup: its stacking notation, the ply list it expands to,
 // and what the stack is (symmetric, balanced, its thickness and areal mass).
 import { countOf } from '../../../../app/format/count'
-import { Badge, Button, PanelSection } from '../../../../app/ui'
+import { Badge, Button, PanelSection, type Status } from '../../../../app/ui'
 import { formatQuantity, type UnitSystem } from '../../../../core/units'
 import type { LayupSummary } from '../../calc'
 import type { PlySpec } from '../state/lamInputs'
@@ -14,6 +14,7 @@ interface LayupEditorProps {
   plies: readonly PlySpec[]
   /** From the analysis, when it ran. */
   layup: LayupSummary | null
+  tones: readonly Status[]
   criticalPlies: readonly number[]
   selectedPly: number | null
   onSelectPly: (index: number) => void
@@ -21,7 +22,7 @@ interface LayupEditorProps {
   dispatch: (action: LamAction) => void
 }
 
-export function LayupEditor({ plies, layup, criticalPlies, selectedPly, onSelectPly, system, dispatch }: LayupEditorProps) {
+export function LayupEditor({ plies, layup, tones, criticalPlies, selectedPly, onSelectPly, system, dispatch }: LayupEditorProps) {
   return (
     <PanelSection label="Ply stack · top to bottom" aside={countOf(plies.length, 'ply', 'plies')}>
       <NotationField anglesDeg={plies.map((p) => p.angleDeg)} onChange={(anglesDeg) => dispatch({ type: 'layup', anglesDeg })} />
@@ -34,6 +35,7 @@ export function LayupEditor({ plies, layup, criticalPlies, selectedPly, onSelect
       </div>
       <PlyList
         plies={plies}
+        tones={tones}
         criticalPlies={criticalPlies}
         selectedPly={selectedPly}
         onSelect={onSelectPly}

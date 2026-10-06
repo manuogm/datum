@@ -7,7 +7,7 @@ import { materialUsage } from '../../core/projects'
 import type { UnitSystem } from '../../core/units'
 import { useProjects } from '../projects/useProjects'
 import { reopenRevisionHref } from '../projects/reopenLink'
-import { Badge, Button, cx, Marker, markerColor, PanelSection, type Tone } from '../ui'
+import { Badge, Button, cx, EmptyState, Marker, markerColor, PanelSection, type Tone } from '../ui'
 import { mainSourceKind } from './materialFilter'
 import styles from './MaterialDetail.module.css'
 import { materialDetails, type PropertyRow } from './materialProperties'
@@ -70,7 +70,7 @@ export function MaterialDetail({ material, unitSystem, onSaveToProject }: Materi
       </PanelSection>
       <PanelSection label="Used in" grow>
         {usage.length === 0 ? (
-          <p className={styles.unused}>Not used in any project yet.</p>
+          <EmptyState inset="none">Not used in any project yet.</EmptyState>
         ) : (
           <ul className={styles.usage}>
             {usage.map(({ project, part, calculation, revision }) => (

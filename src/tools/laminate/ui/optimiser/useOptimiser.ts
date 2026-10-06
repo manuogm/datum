@@ -8,7 +8,7 @@ import type { LayupOptimisation, OptimiseInput } from '../../optimise'
 export type OptimiserRun =
   | { readonly status: 'idle' }
   | { readonly status: 'running'; readonly request: string; readonly seconds: number }
-  | { readonly status: 'done'; readonly request: string; readonly seconds: number; readonly result: Result<LayupOptimisation> }
+  | { readonly status: 'done'; readonly request: string; readonly input: OptimiseInput; readonly seconds: number; readonly result: Result<LayupOptimisation> }
 
 const TICK_MS = 100
 
@@ -34,11 +34,11 @@ export function useOptimiser() {
     const next = new Worker(new URL('./optimise.worker.ts', import.meta.url), { type: 'module' })
     next.onmessage = (event: MessageEvent<Result<LayupOptimisation>>) => {
       stop()
-      setRun({ status: 'done', request, seconds: seconds(), result: event.data })
+      setRun({ status: 'done', request, input, seconds: seconds(), result: event.data })
     }
     next.onerror = () => {
       stop()
-      setRun({ status: 'done', request, seconds: seconds(), result: fail('The optimiser stopped unexpectedly.') })
+      setRun({ status: 'done', request, input, seconds: seconds(), result: fail('The optimiser stopped unexpectedly.') })
     }
     next.postMessage(input)
     worker.current = next

@@ -8,8 +8,10 @@ export const STACK_FRAME = { width: 420, height: 480 } as const
 
 /** Half the side of a ply square before projection. */
 export const PLY_HALF_SIDE = 64
-/** Ply plane → screen: x runs down to the right, y up to the right (seen from above). */
-export const PLY_PROJECTION = 'matrix(0.866,0.35,-0.866,0.35,0,0)'
+/** Where the ply plane's x axis lands on screen: down to the right (y runs up to the right). */
+export const PROJECTED_X = { dx: 0.866, dy: 0.35 } as const
+/** Ply plane → screen, seen from above. */
+export const PLY_PROJECTION = `matrix(${PROJECTED_X.dx},${PROJECTED_X.dy},${-PROJECTED_X.dx},${PROJECTED_X.dy},0,0)`
 
 const CENTRE_X = 170
 const FIRST_Y = 64
@@ -18,7 +20,26 @@ const MAX_SPACING = 48
 /** Closest two ply labels may sit. */
 const LABEL_SPACING = 14
 export const LEADER = { x1: 282, x2: 318, labelX: 324 } as const
-export const X_ARROW = { x1: 40, y1: 452, x2: 74, y2: 472, head: '80,475 70,474 74,467', labelX: 84, labelY: 476 } as const
+/** The x · 0° arrow: drawn along the projected ply x axis, so it points the way the 0° fibres run. */
+export const X_ARROW = xArrow({ x: 40, y: 452 }, 38)
+
+function xArrow(start: { x: number; y: number }, length: number) {
+  const norm = Math.hypot(PROJECTED_X.dx, PROJECTED_X.dy)
+  const [ux, uy] = [PROJECTED_X.dx / norm, PROJECTED_X.dy / norm]
+  const end = { x: start.x + length * ux, y: start.y + length * uy }
+  const HEAD = 6
+  const HALF_WIDTH = 3.5
+  const point = (x: number, y: number) => `${x.toFixed(1)},${y.toFixed(1)}`
+  return {
+    x1: start.x,
+    y1: start.y,
+    x2: end.x,
+    y2: end.y,
+    head: [point(end.x + HEAD * ux, end.y + HEAD * uy), point(end.x - HALF_WIDTH * uy, end.y + HALF_WIDTH * ux), point(end.x + HALF_WIDTH * uy, end.y - HALF_WIDTH * ux)].join(' '),
+    labelX: end.x + HEAD + 6,
+    labelY: end.y + 8,
+  } as const
+}
 
 export interface StackPly {
   /** 1 = top ply. */

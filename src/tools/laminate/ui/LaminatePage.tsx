@@ -17,6 +17,7 @@ import { LayupEditor } from './editor/LayupEditor'
 import { LoadsFields } from './editor/LoadsFields'
 import { lamSnapshot } from './lamSnapshot'
 import { CRITERION_LABELS } from './logic/labels'
+import { plyTones } from './logic/verdict'
 import { PLOT_COMPONENTS, type PlotComponent } from './logic/thicknessPlot'
 import { OptimiserPanel } from './optimiser/OptimiserPanel'
 import { LaminateDrawings } from './plots/LaminateDrawings'
@@ -62,6 +63,7 @@ export function LaminatePage() {
           <LayupEditor
             plies={inputs.plies}
             layup={result?.layup ?? null}
+            tones={result ? plyTones(result) : []}
             criticalPlies={criticalPlies}
             selectedPly={selectedPly}
             onSelectPly={setChosenPly}
@@ -70,7 +72,7 @@ export function LaminatePage() {
           />
           <LoadsFields loads={inputs.loads} system={system} onChange={(changes) => dispatch({ type: 'loads', changes })} />
           <CriterionFields criterion={inputs.criterion} targetReserveFactor={inputs.targetReserveFactor} onChange={(changes) => dispatch({ type: 'change', changes })} />
-          <OptimiserPanel inputs={inputs} system={system} onUse={(anglesDeg) => dispatch({ type: 'layup', anglesDeg })} />
+          <OptimiserPanel inputs={inputs} system={system} onUse={(anglesDeg, materialId) => dispatch({ type: 'layup', anglesDeg, materialId })} />
         </Column>
 
         <Column

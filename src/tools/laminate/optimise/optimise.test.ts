@@ -67,6 +67,14 @@ describe('optimiseLayup, in-plane loads (the design screen case: Nx 250, Nxy 80 
     expect(tooFew.candidates[0].notation).toBe('[45/0/−45/90]s')
   })
 
+  it('reports the ply limit it searched to, also when the rules stop the laminate growing before it', () => {
+    // Only 0° plies: at most 4 in a row, and the mid-plane run counts twice, so 4 plies is the largest legal laminate.
+    const zeroOnly = expectOk(optimiseLayup({ ...designCase, anglesDeg: [0], maxPlies: 24 }))
+    expect(zeroOnly.best).toBeNull()
+    expect(zeroOnly.search).toMatchObject({ plyCounts: [2, 4], maxPlies: 24 })
+    expect(result.search.maxPlies).toBe(48)
+  })
+
   it('gives the same answer every time', () => {
     expect(expectOk(optimiseLayup(designCase))).toEqual(result)
   })

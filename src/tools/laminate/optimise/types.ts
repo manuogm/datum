@@ -27,8 +27,10 @@ export interface LayupCandidate {
 }
 
 export interface SearchSummary {
-  /** Smallest and largest ply count analysed. */
+  /** Smallest and largest ply count analysed. The largest can be below maxPlies: the search stops at the first count that reaches the target, and the rules can rule out larger counts. */
   readonly plyCounts: readonly [number, number]
+  /** The largest laminate the search was allowed to build (the input, or DEFAULT_MAX_PLIES). */
+  readonly maxPlies: number
   readonly sequencesAnalysed: number
   /** False when some rule-compliant sequences were not analysed (the MAX_SEQUENCES_PER_PLY_COUNT cap): `best` is then the best found. */
   readonly exhaustive: boolean

@@ -1,11 +1,18 @@
 import { describe, expect, it } from 'vitest'
 import { NO_LOADS } from '../state/lamInputs'
-import { leadingLoad } from './loads'
+import { failureLoadNote, leadingLoad } from './loads'
 
 describe('leadingLoad', () => {
   it('quotes the largest force, else the largest moment', () => {
     expect(leadingLoad({ ...NO_LOADS, nxNPerMm: 250, nxyNPerMm: -300, mxN: 900 })?.symbol).toBe('Nxy')
     expect(leadingLoad({ ...NO_LOADS, myN: -2, mxN: 1 })?.symbol).toBe('My')
     expect(leadingLoad(NO_LOADS)).toBeNull()
+  })
+})
+
+describe('failureLoadNote', () => {
+  it('lists the other loads at first-ply failure', () => {
+    expect(failureLoadNote({ ...NO_LOADS, nxNPerMm: 316.8, nxyNPerMm: 101.4 }, 'si')).toBe('All loads × RF · Nxy 101.4 N/mm')
+    expect(failureLoadNote({ ...NO_LOADS, nxNPerMm: 316.8 }, 'si')).toBeNull()
   })
 })

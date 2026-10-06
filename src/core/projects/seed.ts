@@ -351,7 +351,7 @@ const OTHER_PROJECTS: Project[] = [
     parts: parts('Endplate skin', 'Footplate', 'Mounting brackets'),
     calculations: [
       calculation('CL-0090', 'lam', 'endplate-skin', [
-        { at: '2026-09-19T10:00:00', by: AL, status: 'fail', title: '[0/90]s', note: 'Too soft in torsion: with no ±45 plies the shear cracks the matrix.',
+        { at: '2026-09-19T10:00:00', by: AL, status: 'fail', title: '[0/90]s', note: 'No ±45 plies: τ12 = 200 MPa against S = 95 MPa cracks the matrix.',
           figures: [['RF min', '0.42'], ['Critical plies', '2–3'], ['h', '0.500', 'mm']],
           inputs: laminateInputs(CROSS_PLY, 'cfrp-t700-m21-ud', ENDPLATE_LOADS), materialIds: ['cfrp-t700-m21-ud'] },
         { at: '2026-09-23T15:30:00', by: AL, status: 'review', title: '[0/±45]s', note: 'Added ±45 plies.',

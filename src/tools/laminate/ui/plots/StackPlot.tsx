@@ -1,14 +1,18 @@
 // The exploded ply stack: every ply in isometric view with its fibres drawn
-// at the ply angle, numbered from the top. Critical plies are drawn in the
-// failure colour, the ply chosen in the list in the accent colour.
+// at the ply angle, numbered from the top. A ply below the target is filled in
+// its status colour (the same rule as the failure index bars), the critical
+// plies get a heavy outline, and the ply chosen in the list is drawn in the
+// accent colour.
 import { useId } from 'react'
-import { cx } from '../../../../app/ui'
+import { cx, type Status } from '../../../../app/ui'
 import { angleText } from '../logic/labels'
 import { distinctAngles, fibreRotation, LEADER, PLY_HALF_SIDE, STACK_FRAME, stackLayout, X_ARROW } from '../logic/stackPlot'
 import styles from './plots.module.css'
 
 interface StackPlotProps {
   anglesDeg: readonly number[]
+  /** Status of each ply, top ply first; ok plies are drawn neutral. */
+  tones: readonly Status[]
   criticalPlies: readonly number[]
   selectedPly?: number | null
   onSelect?: (index: number) => void
@@ -17,8 +21,9 @@ interface StackPlotProps {
 const SIDE = PLY_HALF_SIDE * 2
 const HATCH = 5
 const SHADOW_OFFSET = 4
+const TONE_CLASS: Record<Status, string | undefined> = { ok: undefined, warn: styles.warn, bad: styles.bad }
 
-export function StackPlot({ anglesDeg, criticalPlies, selectedPly = null, onSelect }: StackPlotProps) {
+export function StackPlot({ anglesDeg, tones, criticalPlies, selectedPly = null, onSelect }: StackPlotProps) {
   // useId() contains characters that do not survive in url(#…); keep letters and digits.
   const id = useId().replace(/[^a-zA-Z0-9]/g, '')
   const patternId = (angle: number) => `lam${id}-fibre-${angle < 0 ? 'm' : ''}${String(Math.abs(angle)).replace('.', '_')}`
@@ -39,9 +44,9 @@ export function StackPlot({ anglesDeg, criticalPlies, selectedPly = null, onSele
       </defs>
       {plies.map((ply) => {
         const selected = ply.index === selectedPly
-        const tone = ply.critical ? styles.critical : selected ? styles.selected : undefined
+        const tone = selected ? styles.selected : TONE_CLASS[tones[ply.index - 1]]
         return (
-          <g key={ply.index} className={cx(styles.ply, tone)} onClick={onSelect && (() => onSelect(ply.index))}>
+          <g key={ply.index} className={cx(styles.ply, tone, ply.critical && styles.critical)} onClick={onSelect && (() => onSelect(ply.index))}>
             <g transform={ply.transform}>
               <rect className={styles.plyShadow} x={-PLY_HALF_SIDE + SHADOW_OFFSET} y={-PLY_HALF_SIDE + SHADOW_OFFSET} width={SIDE} height={SIDE} />
               <rect className={styles.plyFace} x={-PLY_HALF_SIDE} y={-PLY_HALF_SIDE} width={SIDE} height={SIDE} />

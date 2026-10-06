@@ -1,11 +1,11 @@
 // Results column: the first-ply failure verdict against the target, the
 // reserve factor and the failure load, the laminate's in-plane constants,
 // the failure index of every ply, then the laminate stiffness.
-import { Callout, Readout } from '../../../../app/ui'
+import { Callout, MonoLabel, Readout } from '../../../../app/ui'
 import { formatQuantity, unitOf, type UnitSystem } from '../../../../core/units'
 import type { LaminateAnalysis } from '../../calc'
 import { formatFactor } from '../logic/labels'
-import { leadingLoad } from '../logic/loads'
+import { failureLoadNote, leadingLoad } from '../logic/loads'
 import { constantViews } from '../logic/stiffness'
 import { laminateHeadline } from '../logic/verdict'
 import { PlyFailureList } from './PlyFailureList'
@@ -26,6 +26,7 @@ export function LaminateResults({ analysis, system, selectedPly, onSelectPly }: 
   const { firstPlyFailure } = analysis
   const headline = laminateHeadline(analysis)
   const load = leadingLoad(firstPlyFailure.loads)
+  const loadNote = failureLoadNote(firstPlyFailure.loads, system)
   return (
     <>
       <section className={styles.summary} aria-label="Summary">
@@ -43,6 +44,12 @@ export function LaminateResults({ analysis, system, selectedPly, onSelectPly }: 
             />
           )}
         </div>
+        {loadNote && <p className={styles.loadNote}>{loadNote}</p>}
+        {analysis.constants.apparent && (
+          <MonoLabel tone="faint" as="div">
+            apparent constants: B ≠ 0
+          </MonoLabel>
+        )}
         <dl className={styles.constants}>
           {constantViews(analysis.constants, system)
             .slice(0, SUMMARY_CONSTANTS)

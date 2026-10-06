@@ -116,12 +116,6 @@
 }
 
 .caution,
-.unused {
-  margin: 0;
-  font-size: var(--fs-11-5);
-  color: var(--text-faint);
-}
-
 .usage {
   display: flex;
   flex-direction: column;

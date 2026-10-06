@@ -97,6 +97,12 @@
   color: var(--text-secondary);
 }
 
+.alternatives {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
 .candidates {
   display: flex;
   flex-direction: column;
@@ -124,4 +130,38 @@
 
 .candidateRf {
   color: var(--text-muted);
+}
+
+.candidateRfBelow {
+  color: var(--warn-text);
+}
+
+.rules {
+  font-size: var(--fs-11-5);
+  color: var(--text-muted);
+}
+
+.rules summary {
+  width: fit-content;
+  border-radius: var(--radius-xs);
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.rules summary:hover {
+  color: var(--text);
+}
+
+.rules summary:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.rules ul {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin: var(--space-6) 0 0;
+  padding-left: var(--space-16);
+  line-height: var(--leading-normal);
 }

@@ -46,3 +46,18 @@ export function formatFactor(value: number): string {
 export function plyMaterialName(materialId: string): string {
   return plyMaterialOf(materialId)?.name ?? materialId
 }
+
+/**
+ * The failure mode as a criterion can state it. Max stress names the stress
+ * that fails; Tsai-Hill and Tsai-Wu are interaction criteria that predict no
+ * mode, and for them the engine reports the stress that dominates (and Tsai-Wu
+ * is the one the design notes word that way): 'dominant stress: matrix tension'.
+ */
+export function modeText(criterion: FailureCriterion, mode: FailureMode): string {
+  return criterion === 'tsai-wu' && mode !== 'none' ? `dominant stress: ${MODE_LABELS[mode]}` : MODE_LABELS[mode]
+}
+
+/** 'critical in matrix tension', or for Tsai-Wu 'critical · dominant stress: matrix tension'. */
+export function criticalPhrase(criterion: FailureCriterion, mode: FailureMode): string {
+  return criterion === 'tsai-wu' ? `critical · ${modeText(criterion, mode)}` : `critical in ${MODE_LABELS[mode]}`
+}

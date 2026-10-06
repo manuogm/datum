@@ -7,8 +7,8 @@ export type LamAction =
   /** Plain edits of top-level fields (criterion, target), or all inputs at once (a reopened revision). */
   | { type: 'change'; changes: Partial<LaminateInputs> }
   | { type: 'loads'; changes: Partial<LoadSpec> }
-  /** New ply angles from the stacking notation, top ply first. */
-  | { type: 'layup'; anglesDeg: readonly number[] }
+  /** New ply angles from the stacking notation, top ply first; with a material (an optimiser result), every ply is of it. */
+  | { type: 'layup'; anglesDeg: readonly number[]; materialId?: string }
   | { type: 'ply'; index: number; changes: Partial<PlySpec> }
   /** A copy of the bottom ply, added under it. */
   | { type: 'addPly' }
@@ -25,7 +25,7 @@ export function lamReducer(inputs: LaminateInputs, action: LamAction): LaminateI
     case 'loads':
       return { ...inputs, loads: { ...inputs.loads, ...action.changes } }
     case 'layup':
-      return action.anglesDeg.length === 0 ? inputs : withPlies(withAngles(plies, action.anglesDeg))
+      return action.anglesDeg.length === 0 ? inputs : withPlies(withAngles(plies, action.anglesDeg, action.materialId))
     case 'ply':
       return withPlies(plies.map((ply, i) => (i === action.index ? plyWith(ply, action.changes) : ply)))
     case 'addPly':
@@ -45,11 +45,12 @@ const plyWith = (ply: PlySpec, changes: Partial<PlySpec>): PlySpec => {
 /**
  * The stack at new angles. With as many plies as before each ply keeps its
  * material (a re-ordered or re-angled stack); otherwise every ply takes the
- * material of the top ply.
+ * material of the top ply. With a material given, every ply takes it.
  */
-function withAngles(plies: readonly PlySpec[], anglesDeg: readonly number[]): PlySpec[] {
+function withAngles(plies: readonly PlySpec[], anglesDeg: readonly number[], materialId?: string): PlySpec[] {
   const sameCount = anglesDeg.length === plies.length
-  return anglesDeg.map((angleDeg, i) => ({ materialId: (sameCount ? plies[i] : plies[0]).materialId, angleDeg: normaliseAngleDeg(angleDeg) }))
+  const materialOf = (i: number) => materialId ?? (sameCount ? plies[i] : plies[0]).materialId
+  return anglesDeg.map((angleDeg, i) => ({ materialId: materialOf(i), angleDeg: normaliseAngleDeg(angleDeg) }))
 }
 
 function moved<T>(items: readonly T[], from: number, to: number): T[] {

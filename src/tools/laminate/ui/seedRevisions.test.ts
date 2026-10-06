@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { seedProjects } from '../../../core/projects'
 import { expectOk } from '../../../core/testing'
 import { lamSnapshot } from './lamSnapshot'
+import { DEFAULT_LAMINATE_INPUTS, NO_LOADS } from './state/lamInputs'
 import { lamInputsFrom } from './state/readInputs'
 
 const seedLamRevisions = seedProjects().projects.flatMap((project) =>
@@ -27,5 +28,12 @@ describe('demo project laminate revisions', () => {
       figures: revision.snapshot.figures,
       materialIds: revision.snapshot.materialIds,
     })
+  })
+})
+
+describe('lamSnapshot', () => {
+  it('saves nothing for an unloaded laminate (RF ∞ is no verdict)', () => {
+    expect(lamSnapshot({ ...DEFAULT_LAMINATE_INPUTS, loads: NO_LOADS })).toEqual({ ok: false, error: expect.stringMatching(/^No load applied/) })
+    expect(expectOk(lamSnapshot(DEFAULT_LAMINATE_INPUTS)).status).toBe('review')
   })
 })

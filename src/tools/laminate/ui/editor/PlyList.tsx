@@ -1,9 +1,10 @@
 // The plies from the top down, one row each: material and fibre angle (each
 // ply has its material's cured thickness). A row is dragged by its handle to re-stack the laminate (or
-// moved with the arrow keys on the handle); critical plies are marked, and
+// moved with the arrow keys on the handle); a ply's number takes its status
+// colour (the rule of the failure index bars), critical plies in bold, and
 // the ply chosen here is the one highlighted in the plots.
 import { useState, type DragEvent } from 'react'
-import { CloseButton, cx, InputWell, NumberInput, Select } from '../../../../app/ui'
+import { CloseButton, cx, InputWell, NumberInput, Select, type Status } from '../../../../app/ui'
 import { PLY_MATERIALS } from '../../calc'
 import type { PlySpec } from '../state/lamInputs'
 import styles from './editor.module.css'
@@ -13,6 +14,8 @@ const MATERIALS = PLY_MATERIALS.map((m) => ({ value: m.id, label: m.name.replace
 
 interface PlyListProps {
   plies: readonly PlySpec[]
+  /** Status of each ply from the analysis, top ply first (empty when it did not run). */
+  tones: readonly Status[]
   criticalPlies: readonly number[]
   selectedPly: number | null
   onSelect: (index: number) => void
@@ -21,7 +24,7 @@ interface PlyListProps {
   onRemove: (index: number) => void
 }
 
-export function PlyList({ plies, criticalPlies, selectedPly, onSelect, onChange, onMove, onRemove }: PlyListProps) {
+export function PlyList({ plies, tones, criticalPlies, selectedPly, onSelect, onChange, onMove, onRemove }: PlyListProps) {
   const [dragged, setDragged] = useState<number | null>(null)
   const [target, setTarget] = useState<number | null>(null)
   const endDrag = () => {
@@ -76,7 +79,7 @@ export function PlyList({ plies, criticalPlies, selectedPly, onSelect, onChange,
             >
               <span aria-hidden="true">⠿</span>
             </button>
-            <span className={cx(styles.plyNumber, criticalPlies.includes(index) && styles.critical)}>{index}</span>
+            <span className={cx(styles.plyNumber, tones[i] && styles[tones[i]], criticalPlies.includes(index) && styles.critical)}>{index}</span>
             <Select size="sm" aria-label={`Ply ${index} material`} options={MATERIALS} value={ply.materialId} onChange={(materialId) => onChange(i, { materialId })} />
             <InputWell unit="°">
               <NumberInput label={`Ply ${index} angle`} decimals={1} fixed={false} value={ply.angleDeg} onChange={(angleDeg) => onChange(i, { angleDeg })} />

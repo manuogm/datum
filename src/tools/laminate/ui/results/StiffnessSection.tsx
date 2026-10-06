@@ -8,7 +8,7 @@ import { abdMatrices, constantViews, COUPLING_FLAGS } from '../logic/stiffness'
 import styles from './results.module.css'
 
 interface StiffnessSectionProps {
-  analysis: Pick<LaminateAnalysis, 'stiffness' | 'coupling' | 'constants'>
+  analysis: Pick<LaminateAnalysis, 'stiffness' | 'coupling' | 'constants' | 'layup'>
   system: UnitSystem
 }
 
@@ -23,7 +23,7 @@ export function StiffnessSection({ analysis, system }: StiffnessSectionProps) {
             const present = coupling[flag.key]
             return (
               <li key={flag.key} className={styles.coupling}>
-                <Badge tone={present ? 'warn' : 'ok'}>{present ? flag.present : flag.absent}</Badge>
+                <Badge tone={present ? (flag.warns ? 'warn' : 'neutral') : 'ok'}>{present ? flag.present : flag.absent}</Badge>
                 <span>
                   {flag.label}
                   {present && <span className={styles.effect}>: {flag.effect}</span>}
@@ -36,7 +36,7 @@ export function StiffnessSection({ analysis, system }: StiffnessSectionProps) {
 
       <section className={styles.section} aria-label="ABD matrix">
         <MonoLabel>ABD matrix</MonoLabel>
-        {abdMatrices(analysis.stiffness, system).map((matrix) => (
+        {abdMatrices(analysis.stiffness, analysis.layup.thicknessMm, system).map((matrix) => (
           <div key={matrix.symbol} className={styles.matrix}>
             <span className={styles.matrixSymbol}>{matrix.symbol}</span>
             <table className={styles.matrixTable} aria-label={`${matrix.symbol} matrix, ${matrix.unit}`}>

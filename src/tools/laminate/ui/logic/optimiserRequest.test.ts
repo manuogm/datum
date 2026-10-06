@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import { expectError, expectOk } from '../../../../core/testing'
 import { DEFAULT_LAMINATE_INPUTS } from '../state/lamInputs'
-import { DEFAULT_OPTIMISER_SETTINGS, directionLabel, optimiseRequest } from './optimiserRequest'
+import { DESIGN_RULES } from '../../optimise'
+import { appliedRules, DEFAULT_OPTIMISER_SETTINGS, directionLabel, optimiseRequest } from './optimiserRequest'
 
 describe('optimiseRequest', () => {
   it('asks for the top ply material, ±θ pairs and the target on screen', () => {
@@ -16,5 +17,12 @@ describe('optimiseRequest', () => {
 
   it('labels the pairs', () => {
     expect([0, 45, 90].map(directionLabel)).toEqual(['0°', '±45°', '90°'])
+  })
+})
+
+describe('appliedRules', () => {
+  it('drops the ±45° outer-ply rule when ±45° is not allowed', () => {
+    expect(appliedRules(DESIGN_RULES, [0, 45, -45, 90])).toHaveLength(DESIGN_RULES.length)
+    expect(appliedRules(DESIGN_RULES, [0, 90]).map((r) => r.id)).not.toContain('outer-plies')
   })
 })

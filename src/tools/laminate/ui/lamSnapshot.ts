@@ -3,22 +3,23 @@
 // the complete inputs so the revision reopens exactly as saved, and the ply
 // materials for "Used in" on the Materials page.
 import type { ToolSnapshot } from '../../../core/projects'
-import { ok, type Result } from '../../../core/result'
+import { fail, ok, type Result } from '../../../core/result'
 import { formatQuantity } from '../../../core/units'
 import { analyse, materialIdsOf } from './logic/lamResults'
 import { formatFactor, plyRangeText } from './logic/labels'
-import { PROJECT_STATUS } from './logic/verdict'
+import { laminateStatus } from './logic/verdict'
 import type { LaminateInputs } from './state/lamInputs'
 
-/** Fails, with the engine's explanation, when the inputs cannot be analysed. */
+/** Fails, with the engine's explanation, when the inputs cannot be analysed, and when nothing loads the laminate (RF ∞ is no verdict to save). */
 export function lamSnapshot(inputs: LaminateInputs): Result<ToolSnapshot<LaminateInputs>> {
   const analysis = analyse(inputs)
   if (!analysis.ok) return analysis
   const { layup, firstPlyFailure } = analysis.value
+  if (!Number.isFinite(firstPlyFailure.reserveFactor)) return fail('No load applied: enter running loads to check first-ply failure.')
   return ok({
     tool: 'lam',
     title: layup.notation,
-    status: PROJECT_STATUS[firstPlyFailure.status],
+    status: laminateStatus(firstPlyFailure),
     figures: [
       { label: 'RF min', value: formatFactor(firstPlyFailure.reserveFactor) },
       { label: 'Critical plies', value: firstPlyFailure.criticalPlies.length > 0 ? plyRangeText(firstPlyFailure.criticalPlies) : '—' },

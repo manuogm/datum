@@ -18,9 +18,22 @@ describe('laminate report content', () => {
     expect(laminateWarnings(analysisOf())).toEqual(['RF 1.27 is below the target of 1.50.'])
     const unsymmetric = laminateWarnings(analysisOf({ plies: pliesAt([0, 90]), loads: { ...NO_LOADS, nxNPerMm: 1 } }))
     expect(unsymmetric).toHaveLength(1)
-    expect(unsymmetric[0]).toMatch(/not symmetric/)
-    expect(laminateWarnings(analysisOf({ plies: pliesAt([45, 0, 0, 45]) }))[1]).toMatch(/not balanced/)
+    expect(unsymmetric[0]).toMatch(/^Bending–extension coupling \(B ≠ 0\)/)
+    expect(laminateWarnings(analysisOf({ plies: pliesAt([45, 0, 0, 45]) }))[1]).toMatch(/^Shear–extension coupling/)
+    // Bend–twist alone (a standard quasi-isotropic layup) is no warning.
+    expect(analysisOf().coupling.bendTwist).toBe(true)
     expect(laminateWarnings(analysisOf({ loads: NO_LOADS }))).toEqual(['No load is applied: first-ply failure is not checked.'])
+  })
+
+  it('reads the couplings from the engine, not from the stacking words', () => {
+    const analysis = analysisOf()
+    expect(laminateWarnings({ ...analysis, coupling: { ...analysis.coupling, bendingExtension: true } })[1]).toMatch(/^Bending–extension/)
+  })
+
+  it('words a failing ply by what the criterion can state', () => {
+    const failing = { plies: pliesAt([0, 90, 90, 0]) }
+    expect(laminateWarnings(analysisOf(failing))[0]).toMatch(/fail \(dominant stress: [a-z -]+\) under the applied loads/)
+    expect(laminateWarnings(analysisOf({ ...failing, criterion: 'max-stress' }))[0]).toMatch(/fail in [a-z -]+ under the applied loads/)
   })
 
   it('reports each ply at its critical face', () => {

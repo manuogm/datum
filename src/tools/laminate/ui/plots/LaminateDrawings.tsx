@@ -4,6 +4,7 @@ import { LegendItem, Marker } from '../../../../app/ui'
 import type { UnitSystem } from '../../../../core/units'
 import type { LaminateAnalysis } from '../../calc'
 import { formatFactor } from '../logic/labels'
+import { plyTones } from '../logic/verdict'
 import { PLOT_COMPONENTS, type PlotComponent } from '../logic/thicknessPlot'
 import styles from './drawings.module.css'
 import { StackPlot } from './StackPlot'
@@ -27,6 +28,7 @@ export function LaminateDrawings({ analysis, component, system, selectedPly, onS
         <div className={styles.plot}>
           <StackPlot
             anglesDeg={analysis.plies.map((p) => p.angleDeg)}
+            tones={plyTones(analysis)}
             criticalPlies={analysis.firstPlyFailure.criticalPlies}
             selectedPly={selectedPly}
             onSelect={onSelectPly}

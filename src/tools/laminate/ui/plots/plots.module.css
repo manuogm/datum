@@ -14,16 +14,31 @@
   --ply-ink: var(--text-secondary);
 }
 
-.critical {
+.warn {
+  --ply-edge: var(--warn);
+  --ply-face: var(--warn-soft);
+  --ply-ink: var(--warn-text);
+}
+
+.bad {
   --ply-edge: var(--bad);
   --ply-face: var(--bad-soft);
-  --ply-ink: var(--bad);
+  --ply-ink: var(--bad-text);
 }
 
 .selected {
   --ply-edge: var(--accent);
   --ply-face: var(--accent-wash);
   --ply-ink: var(--accent-fg);
+}
+
+.critical .plyFibres {
+  stroke-width: var(--chart-stroke-emphasis);
+  vector-effect: non-scaling-stroke;
+}
+
+.critical .plyLabel {
+  font-weight: var(--weight-bold);
 }
 
 .plyShadow {

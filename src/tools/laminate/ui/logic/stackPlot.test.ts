@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { distinctAngles, fibreRotation, stackLayout } from './stackPlot'
+import { distinctAngles, fibreRotation, PROJECTED_X, stackLayout, X_ARROW } from './stackPlot'
 
 describe('stackLayout', () => {
   it('draws the bottom ply first and spaces eight plies 48 apart from the top', () => {
@@ -24,5 +24,12 @@ describe('fibres', () => {
   it('rotate against the angle in the ply plane, one pattern per angle', () => {
     expect(fibreRotation(45)).toBe('rotate(-45)')
     expect(distinctAngles([0, 45, -45, 135, 0])).toEqual([0, 45, -45])
+  })
+})
+
+describe('X_ARROW', () => {
+  it('runs along the projected ply x axis', () => {
+    const slope = (X_ARROW.y2 - X_ARROW.y1) / (X_ARROW.x2 - X_ARROW.x1)
+    expect(slope).toBeCloseTo(PROJECTED_X.dy / PROJECTED_X.dx, 6)
   })
 })

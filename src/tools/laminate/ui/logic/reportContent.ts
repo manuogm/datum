@@ -4,7 +4,7 @@ import type { ReportFact } from '../../../../app/report'
 import { formatDecimal, formatQuantity, unitOf, type UnitSystem } from '../../../../core/units'
 import { DEFAULT_TSAI_WU_F12_STAR, type LaminateAnalysis, type PlyResult } from '../../calc'
 import type { LaminateInputs } from '../state/lamInputs'
-import { angleText, CRITERION_LABELS, formatFactor, MODE_LABELS, plyMaterialName } from './labels'
+import { angleText, CRITERION_LABELS, formatFactor, MODE_LABELS, modeText, plyMaterialName } from './labels'
 import { LOAD_COMPONENTS } from './loads'
 import { criticalText } from './verdict'
 
@@ -29,16 +29,18 @@ export function laminateFacts(inputs: LaminateInputs, { layup }: Pick<LaminateAn
   ]
 }
 
-export function laminateWarnings({ layup, firstPlyFailure, plies }: Pick<LaminateAnalysis, 'layup' | 'firstPlyFailure' | 'plies'>): string[] {
+export function laminateWarnings({ coupling, firstPlyFailure, plies, criterion }: Pick<LaminateAnalysis, 'coupling' | 'firstPlyFailure' | 'plies' | 'criterion'>): string[] {
   const { reserveFactor, targetReserveFactor, status, mode } = firstPlyFailure
   const warnings: string[] = []
   if (!Number.isFinite(reserveFactor)) warnings.push('No load is applied: first-ply failure is not checked.')
   else if (status === 'fail') {
     const verb = firstPlyFailure.criticalPlies.length === 1 ? 'fails' : 'fail'
-    warnings.push(`${criticalText({ firstPlyFailure, plies })} ${verb} in ${MODE_LABELS[mode]} under the applied loads (RF ${formatFactor(reserveFactor)}).`)
+    const how = criterion === 'tsai-wu' ? ` (${modeText(criterion, mode)})` : ` in ${MODE_LABELS[mode]}`
+    warnings.push(`${criticalText({ firstPlyFailure, plies })} ${verb}${how} under the applied loads (RF ${formatFactor(reserveFactor)}).`)
   } else if (status === 'warn') warnings.push(`RF ${formatFactor(reserveFactor)} is below the target of ${formatFactor(targetReserveFactor)}.`)
-  if (!layup.symmetric) warnings.push('The laminate is not symmetric (B ≠ 0): it warps on cure and bends under in-plane load. Its engineering constants are apparent values.')
-  if (!layup.balanced) warnings.push('The laminate is not balanced (A16, A26 ≠ 0): tension or compression shears it.')
+  // The engine's coupling flags, read off the matrices (a stack can be unsymmetric and still have B = 0).
+  if (coupling.bendingExtension) warnings.push('Bending–extension coupling (B ≠ 0): the laminate warps on cure and bends under in-plane load. Its engineering constants are apparent values.')
+  if (coupling.shearExtension) warnings.push('Shear–extension coupling (A16, A26 ≠ 0): tension or compression shears the laminate.')
   return warnings
 }
 

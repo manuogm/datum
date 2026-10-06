@@ -161,6 +161,6 @@ export function optimiseLayup(input: OptimiseInput): Result<LayupOptimisation> {
     candidates: ranked.slice(0, CANDIDATES_SHOWN),
     targetReserveFactor,
     rules: DESIGN_RULES,
-    search: { plyCounts: [smallestPlyCount, ranked[0].plyCount], sequencesAnalysed, exhaustive, orderMatters },
+    search: { plyCounts: [smallestPlyCount, ranked[0].plyCount], maxPlies, sequencesAnalysed, exhaustive, orderMatters },
   })
 }

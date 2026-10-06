@@ -4,10 +4,10 @@
 // FI = 1 (first-ply failure) and 1/target.
 import { cx, type Status } from '../../../../app/ui'
 import { formatDecimal, formatQuantity, unitOf, type UnitSystem } from '../../../../core/units'
-import { plyBoundariesMm, reserveStatus, type LaminateAnalysis } from '../../calc'
+import { plyBoundariesMm, type LaminateAnalysis } from '../../calc'
 import { formatFactor } from '../logic/labels'
 import { componentUnit, PLOT_COMPONENTS, pointValue, THICKNESS_FRAME as FRAME, thicknessLayout, type PlotComponent } from '../logic/thicknessPlot'
-import { STATUS_TONE } from '../logic/verdict'
+import { plyTones } from '../logic/verdict'
 import styles from './plots.module.css'
 
 interface ThicknessPlotProps {
@@ -22,6 +22,7 @@ const TONE_CLASS: Record<Status, string> = { ok: styles.okBar, warn: styles.warn
 export function ThicknessPlot({ analysis, component, system, selectedPly = null }: ThicknessPlotProps) {
   const { plies, layup, firstPlyFailure } = analysis
   const target = firstPlyFailure.targetReserveFactor
+  const tones = plyTones(analysis)
   const faces = plyBoundariesMm(plies.map((p) => p.thicknessMm))
   const layout = thicknessLayout(
     plies.map((ply, i) => ({
@@ -29,7 +30,7 @@ export function ThicknessPlot({ analysis, component, system, selectedPly = null 
       ...faces[i],
       top: pointValue(ply.top, component, system),
       bottom: pointValue(ply.bottom, component, system),
-      tone: STATUS_TONE[reserveStatus(ply.reserveFactor, target)],
+      tone: tones[i],
     })),
     layup.thicknessMm,
     component === 'fi' ? [1 / target, 1] : [],

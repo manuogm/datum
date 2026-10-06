@@ -8,10 +8,10 @@ import {
 import { cx } from '../../../../app/ui'
 import { formatQuantity, unitOf, type UnitSystem } from '../../../../core/units'
 import type { LaminateAnalysis } from '../../calc'
-import { CRITERION_LABELS, formatFactor, MODE_LABELS, plyMaterialName, plyRangeText } from '../logic/labels'
+import { CRITERION_LABELS, formatFactor, modeText, plyMaterialName, plyRangeText } from '../logic/labels'
 import { leadingLoad } from '../logic/loads'
 import { laminateFacts, laminateWarnings, plyRows, unitsLine } from '../logic/reportContent'
-import { PROJECT_STATUS } from '../logic/verdict'
+import { laminateStatus, plyTones } from '../logic/verdict'
 import { StackPlot } from '../plots/StackPlot'
 import { ThicknessPlot } from '../plots/ThicknessPlot'
 import type { LaminateInputs } from '../state/lamInputs'
@@ -34,7 +34,7 @@ interface LaminateReportProps {
 
 export function LaminateReport({ analysis, inputs, system }: LaminateReportProps) {
   const { layup, firstPlyFailure } = analysis
-  const status = PROJECT_STATUS[firstPlyFailure.status]
+  const status = laminateStatus(firstPlyFailure)
   const warnings = laminateWarnings(analysis)
   const load = leadingLoad(firstPlyFailure.loads)
   const materials = [...new Set(inputs.plies.map((p) => p.materialId))].map(plyMaterialName).join(', ')
@@ -52,7 +52,7 @@ export function LaminateReport({ analysis, inputs, system }: LaminateReportProps
         <ReportSummaryCell
           label="CRITICAL PLIES"
           value={critical.length > 0 ? plyRangeText(critical) : '—'}
-          note={critical.length > 0 ? MODE_LABELS[firstPlyFailure.mode] : undefined}
+          note={critical.length > 0 ? modeText(analysis.criterion, firstPlyFailure.mode) : undefined}
         />
         {load && (
           <ReportFigure
@@ -72,7 +72,7 @@ export function LaminateReport({ analysis, inputs, system }: LaminateReportProps
         <ReportSection heading="2 · Ply stack and failure index" note="FI = 1/RF through the thickness">
           <div className={report.drawings}>
             <div className={cx(styles.diagram, report.drawing)}>
-              <StackPlot anglesDeg={analysis.plies.map((p) => p.angleDeg)} criticalPlies={critical} />
+              <StackPlot anglesDeg={analysis.plies.map((p) => p.angleDeg)} tones={plyTones(analysis)} criticalPlies={critical} />
             </div>
             <div className={cx(styles.diagram, report.drawing)}>
               <ThicknessPlot analysis={analysis} component="fi" system={system} />
@@ -110,7 +110,7 @@ function PlyTable({ analysis, system }: { analysis: LaminateAnalysis; system: Un
           <th className={styles.number}>τ12 {stress}</th>
           <th className={styles.number}>FI</th>
           <th className={styles.number}>RF</th>
-          <th>MODE</th>
+          <th>{analysis.criterion === 'tsai-wu' ? 'DOMINANT STRESS' : 'MODE'}</th>
         </tr>
       </thead>
       <tbody>

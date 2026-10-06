@@ -1,7 +1,9 @@
 // The running loads per unit width: in-plane forces N on the left, moments M
 // on the right, in the CLT sign convention (a positive Mx stretches the top).
+// Each column's unit is in its head, not in the fields: lbf·in/in would leave
+// no room for the value.
 import { PanelSection, QuantityField } from '../../../../app/ui'
-import type { UnitSystem } from '../../../../core/units'
+import { unitOf, type UnitSystem } from '../../../../core/units'
 import { LOAD_COMPONENTS } from '../logic/loads'
 import type { LoadSpec } from '../state/lamInputs'
 import styles from './editor.module.css'
@@ -19,12 +21,15 @@ export function LoadsFields({ loads, system, onChange }: LoadsFieldsProps) {
   return (
     <PanelSection label="Running loads · per unit width">
       <div className={styles.loads}>
+        <span className={styles.loadsHead}>N · {unitOf('lineLoad', system)}</span>
+        <span className={styles.loadsHead}>M · {unitOf('lineMoment', system)}</span>
         {BY_ROW.map(({ key, symbol, quantity }) => (
           <QuantityField
             key={key}
             size="md"
             prefix={symbol}
-            aria-label={symbol}
+            showUnit={false}
+            aria-label={`${symbol}, ${unitOf(quantity, system)}`}
             quantity={quantity}
             system={system}
             value={loads[key]}

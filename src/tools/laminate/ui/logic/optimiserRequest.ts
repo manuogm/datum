@@ -2,7 +2,7 @@
 // criterion and target on screen, one ply material (the top ply's), the
 // ply directions the engineer allows and the largest laminate to search.
 import { fail, ok, type Result } from '../../../../core/result'
-import { DEFAULT_MAX_PLIES, type OptimiseInput } from '../../optimise'
+import { DEFAULT_MAX_PLIES, type DesignRule, type OptimiseInput } from '../../optimise'
 import type { LaminateInputs } from '../state/lamInputs'
 import { plyMaterialOf } from './lamResults'
 
@@ -34,4 +34,9 @@ export function optimiseRequest(inputs: LaminateInputs, settings: OptimiserSetti
     targetReserveFactor: inputs.targetReserveFactor,
     maxPlies: settings.maxPlies,
   })
+}
+
+/** The design rules a search applied: the ±45° outer-ply rule only applies when ±45° is allowed. */
+export function appliedRules(rules: readonly DesignRule[], anglesDeg: readonly number[]): DesignRule[] {
+  return rules.filter((rule) => rule.id !== 'outer-plies' || anglesDeg.includes(45))
 }

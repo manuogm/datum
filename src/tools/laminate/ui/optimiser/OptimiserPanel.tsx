@@ -1,13 +1,17 @@
 // Optimise layup: searches, on request and off the main thread, for the
 // symmetric, balanced laminate of the top ply's material with the fewest
 // plies that reaches the target under the loads on screen. The best
-// sequence and its alternatives can each replace the layup being edited.
+// sequence and its alternatives can each replace the layup being edited:
+// every ply then takes the material searched, so a hybrid stack becomes one
+// the optimiser analysed. The design rules the search applied are listed under
+// the result.
 import { useState } from 'react'
-import { Button, Chip, InputWell, NumberInput, PanelSection, ValueRow } from '../../../../app/ui'
+import { countOf } from '../../../../app/format/count'
+import { Button, Chip, InputWell, MonoLabel, NumberInput, PanelSection, ValueRow } from '../../../../app/ui'
 import { formatQuantity, type UnitSystem } from '../../../../core/units'
 import type { LayupCandidate } from '../../optimise'
 import { formatFactor, plyMaterialName } from '../logic/labels'
-import { DEFAULT_OPTIMISER_SETTINGS, DIRECTION_CHOICES, directionLabel, optimiseRequest, type OptimiserSettings } from '../logic/optimiserRequest'
+import { appliedRules, DEFAULT_OPTIMISER_SETTINGS, DIRECTION_CHOICES, directionLabel, optimiseRequest, type OptimiserSettings } from '../logic/optimiserRequest'
 import type { LaminateInputs } from '../state/lamInputs'
 import styles from './optimiser.module.css'
 import { requestKey, useOptimiser, type OptimiserRun } from './useOptimiser'
@@ -15,8 +19,12 @@ import { requestKey, useOptimiser, type OptimiserRun } from './useOptimiser'
 interface OptimiserPanelProps {
   inputs: LaminateInputs
   system: UnitSystem
-  onUse: (anglesDeg: readonly number[]) => void
+  /** The layup at these angles, every ply of this material. */
+  onUse: (anglesDeg: readonly number[], materialId: string) => void
 }
+
+/** '8–10 plies', '8 plies' */
+const plyCountsText = ([fewest, most]: readonly [number, number]) => (fewest === most ? countOf(fewest, 'ply', 'plies') : `${fewest}–${most} plies`)
 
 /** An even ply count of at least 2 (the optimiser only builds symmetric laminates). */
 const evenPlies = (value: number) => Math.max(2, 2 * Math.round(value / 2))
@@ -74,40 +82,62 @@ interface OptimiserResultProps {
   /** The result answers the inputs on screen. */
   current: boolean
   system: UnitSystem
-  onUse: (anglesDeg: readonly number[]) => void
+  onUse: (anglesDeg: readonly number[], materialId: string) => void
 }
 
 function OptimiserResult({ run, current, system, onUse }: OptimiserResultProps) {
-  if (!run.result.ok) return <p className={styles.warnNote}>{run.result.error}</p>
-  const { best, candidates, search, targetReserveFactor } = run.result.value
+  const stale = !current && <p className={styles.warnNote}>The inputs have changed since this search: run it again.</p>
+  if (!run.result.ok)
+    return (
+      <div className={styles.result}>
+        {stale}
+        <p className={styles.warnNote}>{run.result.error}</p>
+      </div>
+    )
+  const { best, candidates, search, targetReserveFactor, rules } = run.result.value
+  const material = run.input.material
+  const use = (anglesDeg: readonly number[]) => onUse(anglesDeg, material.id)
   const others = candidates.filter((c) => c.notation !== best?.notation)
+  const target = formatFactor(targetReserveFactor)
+  const applied = appliedRules(rules, run.input.anglesDeg ?? [])
   return (
     <div className={styles.result}>
-      {!current && <p className={styles.warnNote}>The inputs have changed since this search: run it again.</p>}
+      {stale}
       {best ? (
-        <CandidateCard candidate={best} system={system} disabled={!current} onUse={onUse} />
+        <CandidateCard candidate={best} system={system} disabled={!current} onUse={use} />
       ) : (
         <p className={styles.warnNote}>
-          No laminate up to {search.plyCounts[1]} plies reaches RF {formatFactor(targetReserveFactor)}.
+          No laminate up to {search.maxPlies} plies reaches RF {target}.
         </p>
       )}
       {others.length > 0 && (
-        <ul className={styles.candidates} aria-label="Alternatives">
-          {others.map((candidate) => (
-            <li key={candidate.notation} className={styles.candidate}>
-              <span className={styles.candidateNotation}>{candidate.notation}</span>
-              <span className={styles.candidateRf}>RF {formatFactor(candidate.reserveFactor)}</span>
-              <Button variant="link" size="sm" disabled={!current} onClick={() => onUse(candidate.anglesDeg)}>
-                Use
-              </Button>
-            </li>
-          ))}
-        </ul>
+        <div className={styles.alternatives}>
+          <MonoLabel>{best ? 'Alternatives' : `Closest · below RF ${target}`}</MonoLabel>
+          <ul className={styles.candidates} aria-label={best ? 'Alternatives' : `Closest laminates, below RF ${target}`}>
+            {others.map((candidate) => (
+              <li key={candidate.notation} className={styles.candidate}>
+                <span className={styles.candidateNotation}>{candidate.notation}</span>
+                <span className={candidate.reserveFactor < targetReserveFactor ? styles.candidateRfBelow : styles.candidateRf}>RF {formatFactor(candidate.reserveFactor)}</span>
+                <Button variant="link" size="sm" disabled={!current} onClick={() => use(candidate.anglesDeg)}>
+                  Use
+                </Button>
+              </li>
+            ))}
+          </ul>
+        </div>
       )}
       <p className={styles.note}>
-        {search.sequencesAnalysed} sequences, {search.plyCounts[0]}–{search.plyCounts[1]} plies, {run.seconds.toFixed(1)} s
+        {material.name} · {countOf(search.sequencesAnalysed, 'sequence', 'sequences')}, {plyCountsText(search.plyCounts)}, {run.seconds.toFixed(1)} s
         {search.exhaustive ? '' : ' · not exhaustive: best found'}
       </p>
+      <details className={styles.rules}>
+        <summary>Design rules applied ({applied.length})</summary>
+        <ul>
+          {applied.map((rule) => (
+            <li key={rule.id}>{rule.description}</li>
+          ))}
+        </ul>
+      </details>
     </div>
   )
 }
