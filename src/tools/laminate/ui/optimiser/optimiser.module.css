@@ -1,0 +1,127 @@
+/* The optimiser panel: direction chips, the running state and the result. */
+.note {
+  margin: 0;
+  font-size: var(--fs-11-5);
+  color: var(--text-faint);
+}
+
+.warnNote {
+  margin: 0;
+  font-size: var(--fs-11-5);
+  color: var(--warn-text);
+}
+
+.directions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-6);
+}
+
+.running {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-6) var(--space-10);
+}
+
+/* An indeterminate bar: the search has no known length. */
+.progress {
+  position: relative;
+  grid-column: 1 / -1;
+  height: 3px;
+  overflow: hidden;
+  border-radius: var(--radius-pill);
+  background: var(--surface-sunken);
+}
+
+.progress::after {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 30%;
+  border-radius: inherit;
+  background: var(--accent);
+  animation: search 1.2s ease-in-out infinite;
+  content: '';
+}
+
+@keyframes search {
+  from {
+    left: -30%;
+  }
+
+  to {
+    left: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .progress::after {
+    width: 100%;
+    animation: none;
+    opacity: 0.5;
+  }
+}
+
+.runningText {
+  font-family: var(--font-mono);
+  font-size: var(--fs-12);
+  color: var(--text-secondary);
+}
+
+.result {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-10);
+}
+
+.best {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-6);
+  padding: var(--space-12) var(--space-14);
+  border: var(--border-width) solid var(--accent-border);
+  border-radius: var(--radius-md);
+  background: var(--accent-wash);
+}
+
+.bestNotation {
+  font-family: var(--font-mono);
+  font-size: var(--fs-16);
+  font-weight: var(--weight-semibold);
+}
+
+.bestFacts {
+  font-family: var(--font-mono);
+  font-size: var(--fs-11-5);
+  color: var(--text-secondary);
+}
+
+.candidates {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.candidate {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: var(--space-10);
+  min-height: 30px;
+  border-top: var(--border-width) solid var(--border-faint);
+  font-family: var(--font-mono);
+  font-size: var(--fs-12);
+}
+
+.candidateNotation {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.candidateRf {
+  color: var(--text-muted);
+}

@@ -1,0 +1,53 @@
+/* Composite Laminate report: the drawings side by side, tight input rows, the
+   stiffness tables in a row and the ply table. */
+.drawings {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: var(--space-10);
+  align-items: start;
+}
+
+.drawing {
+  height: 300px;
+  padding: var(--space-6);
+}
+
+@media screen and (max-width: 640px) {
+  .drawings {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.facts dt,
+.facts dd {
+  padding: var(--space-3) 0;
+}
+
+.stiffness {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) minmax(0, 0.9fr);
+  gap: var(--space-16);
+  align-items: start;
+}
+
+@media screen and (max-width: 640px) {
+  .stiffness {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.couplings {
+  grid-column: 1 / -1;
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--fs-10-5);
+  color: var(--text-muted);
+}
+
+.plyTable thead {
+  display: table-header-group;
+}
+
+.plyTable tr {
+  break-inside: avoid;
+}

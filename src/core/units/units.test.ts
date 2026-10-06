@@ -35,7 +35,7 @@ describe('formatQuantityRange', () => {
 
 describe('toDisplay / fromDisplay', () => {
   it('round-trips every quantity in both systems', () => {
-    for (const quantity of ['length', 'deviation', 'temperature', 'expansion', 'density', 'modulus', 'strength', 'conductivity', 'force', 'torque', 'area', 'stiffness', 'resilience'] as const) {
+    for (const quantity of ['length', 'deviation', 'temperature', 'expansion', 'density', 'modulus', 'strength', 'conductivity', 'force', 'torque', 'area', 'stiffness', 'resilience', 'lineLoad', 'lineMoment', 'bendingStiffness', 'curvature', 'arealMass'] as const) {
       for (const system of ['si', 'imperial'] as const) {
         expect(fromDisplay(quantity, system, toDisplay(quantity, system, 37.25))).toBeCloseTo(37.25, 9)
       }
@@ -46,6 +46,16 @@ describe('toDisplay / fromDisplay', () => {
     expect(fromDisplay('length', 'imperial', 1)).toBe(25.4)
     expect(fromDisplay('deviation', 'imperial', 1)).toBe(25.4)
     expect(fromDisplay('temperature', 'imperial', 212)).toBe(100)
+  })
+})
+
+describe('laminate running loads', () => {
+  it('shows N/mm and N·mm/mm, D in N·m, and their Imperial counterparts', () => {
+    expect(formatQuantity('lineLoad', 'si', 250, { withUnit: true })).toBe('250.0 N/mm')
+    expect(formatQuantity('lineLoad', 'imperial', 250, { withUnit: true })).toBe('1427.5 lbf/in')
+    expect(formatQuantity('lineMoment', 'imperial', 100, { withUnit: true })).toBe('22.48 lbf·in/in')
+    expect(formatQuantity('bendingStiffness', 'si', 5000, { withUnit: true })).toBe('5.00 N·m')
+    expect(formatQuantity('curvature', 'si', 0.002, { withUnit: true })).toBe('2.000 1/m')
   })
 })
 

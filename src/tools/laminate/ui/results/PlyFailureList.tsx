@@ -1,0 +1,48 @@
+// The failure index of every ply, top ply first: FI = 1/RF grows in
+// proportion to the load and reaches 1 at first-ply failure. Bars are
+// coloured by the ply's reserve factor against the target; a row picks the
+// ply shown in the plots and the ply list.
+import { cx, MonoLabel, ScoreBar } from '../../../../app/ui'
+import { reserveStatus, type LaminateAnalysis } from '../../calc'
+import { angleText, formatFactor, MODE_LABELS } from '../logic/labels'
+import { STATUS_TONE } from '../logic/verdict'
+import styles from './results.module.css'
+
+interface PlyFailureListProps {
+  analysis: Pick<LaminateAnalysis, 'plies' | 'firstPlyFailure'>
+  selectedPly: number | null
+  onSelect: (index: number) => void
+}
+
+export function PlyFailureList({ analysis, selectedPly, onSelect }: PlyFailureListProps) {
+  const target = analysis.firstPlyFailure.targetReserveFactor
+  return (
+    <section className={styles.section} aria-label="Failure index per ply">
+      <div className={styles.sectionHead}>
+        <MonoLabel>Failure index per ply</MonoLabel>
+        <MonoLabel tone="faint">FI = 1/RF · 1 fails</MonoLabel>
+      </div>
+      <ol className={styles.plies}>
+        {analysis.plies.map((ply) => {
+          const tone = STATUS_TONE[reserveStatus(ply.reserveFactor, target)]
+          return (
+            <li key={ply.index}>
+              <button
+                type="button"
+                className={cx(styles.plyRow, ply.index === selectedPly && styles.plyRowSelected)}
+                aria-pressed={ply.index === selectedPly}
+                title={`Ply ${ply.index}: RF ${formatFactor(ply.reserveFactor)}, ${MODE_LABELS[ply.mode]}`}
+                onClick={() => onSelect(ply.index)}
+              >
+                <span className={styles.plyIndex}>{ply.index}</span>
+                <span>{angleText(ply.angleDeg)}°</span>
+                <ScoreBar value={Math.min(100, ply.failureIndex * 100)} tone={tone} label={`Ply ${ply.index} failure index`} />
+                <span className={cx(styles.plyFi, styles[tone])}>{formatFactor(ply.failureIndex)}</span>
+              </button>
+            </li>
+          )
+        })}
+      </ol>
+    </section>
+  )
+}

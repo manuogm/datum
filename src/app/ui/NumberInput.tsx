@@ -11,8 +11,10 @@ import { useQuantityDraft, type QuantityValueProps } from './useQuantityDraft'
 interface PlainValueProps {
   value: number
   onChange: (value: number) => void
-  /** Decimals shown (with trailing zeros) when not editing. */
+  /** Decimals shown when not editing. */
   decimals?: number
+  /** Keep trailing zeros (1.50); false shows 45 and 22.5. */
+  fixed?: boolean
 }
 
 type NumberInputProps = { /** Accessible name, e.g. "Lowest service temperature". */ label: string } & (
@@ -24,8 +26,8 @@ export function NumberInput({ label, ...value }: NumberInputProps) {
   return value.quantity === undefined ? <PlainInput label={label} {...value} /> : <QuantityInput label={label} {...value} />
 }
 
-function PlainInput({ label, value, onChange, decimals = 2 }: PlainValueProps & { label: string }) {
-  return <BareInput label={label} draft={useNumberDraft(formatDecimal(value, decimals, true), onChange)} />
+function PlainInput({ label, value, onChange, decimals = 2, fixed = true }: PlainValueProps & { label: string }) {
+  return <BareInput label={label} draft={useNumberDraft(formatDecimal(value, decimals, fixed), onChange)} />
 }
 
 function QuantityInput({ label, ...value }: QuantityValueProps & { label: string }) {

@@ -3,7 +3,8 @@
  * screens convert to the viewer's unit system only when showing or reading a
  * value. Imperial shows lengths in inches, small deviations in thou
  * (0.001 in), temperatures in °F and material properties in lb/in³, Msi,
- * ksi and BTU/(h·ft·°F); forces in lbf and torques in lbf·ft.
+ * ksi and BTU/(h·ft·°F); forces in lbf and torques in lbf·ft; laminate
+ * running loads in lbf/in and lbf·in/in.
  */
 
 export const UNIT_SYSTEMS = ['si', 'imperial'] as const
@@ -20,12 +21,16 @@ export type UnitSystem = (typeof UNIT_SYSTEMS)[number]
  * - force (SI unit N, shown in kN) and torque (N·m), e.g. bolt preload and
  *   tightening torque; torque also serves for moments;
  * - area (mm²), stiffness (N/mm, shown in kN/mm) and resilience, its inverse
- *   (mm/N, shown in µm/kN), e.g. a bolt's stress area and elastic resilience.
+ *   (mm/N, shown in µm/kN), e.g. a bolt's stress area and elastic resilience;
+ * - per unit width of a laminate: lineLoad N (N/mm), lineMoment M (N·mm/mm),
+ *   bendingStiffness D (N·mm, shown in N·m), curvature κ (1/mm, shown in 1/m)
+ *   and arealMass (kg/m²). A (N/mm) is a 'stiffness' and B (N) a 'force'.
  */
 export type Quantity =
   | 'length' | 'deviation' | 'temperature' | 'expansion'
   | 'density' | 'modulus' | 'strength' | 'conductivity' | 'force' | 'torque'
   | 'area' | 'stiffness' | 'resilience'
+  | 'lineLoad' | 'lineMoment' | 'bendingStiffness' | 'curvature' | 'arealMass'
 
 interface DisplayUnit {
   readonly unit: string
@@ -49,6 +54,9 @@ const KN_PER_MM_PER_N_PER_MM = 1e-3
 const KLBF_PER_IN_PER_N_PER_MM = (LBF_PER_N * MM_PER_INCH) / 1000
 const UM_PER_KN_PER_MM_PER_N = 1e6
 const UIN_PER_LBF_PER_MM_PER_N = 1e6 / (MM_PER_INCH * LBF_PER_N)
+const LBF_PER_IN_PER_N_PER_MM = LBF_PER_N * MM_PER_INCH
+const LBF_IN_PER_N_MM = LBF_PER_N / MM_PER_INCH
+const LB_PER_FT2_PER_KG_PER_M2 = 0.2048161
 const identity = (value: number) => value
 
 /** A unit that is a fixed multiple of the SI unit. */
@@ -83,6 +91,12 @@ const DISPLAY_UNITS: Record<Quantity, Record<UnitSystem, DisplayUnit>> = {
   area: { si: scaled('mm²', 2, 1), imperial: scaled('in²', 4, IN2_PER_MM2) },
   stiffness: { si: scaled('kN/mm', 1, KN_PER_MM_PER_N_PER_MM), imperial: scaled('klbf/in', 1, KLBF_PER_IN_PER_N_PER_MM) },
   resilience: { si: scaled('µm/kN', 3, UM_PER_KN_PER_MM_PER_N), imperial: scaled('µin/lbf', 3, UIN_PER_LBF_PER_MM_PER_N) },
+  lineLoad: { si: scaled('N/mm', 1, 1), imperial: scaled('lbf/in', 1, LBF_PER_IN_PER_N_PER_MM) },
+  // N·mm/mm and lbf·in/in are a force: 1 N·mm/mm = 1 N.
+  lineMoment: { si: scaled('N·mm/mm', 1, 1), imperial: scaled('lbf·in/in', 2, LBF_PER_N) },
+  bendingStiffness: { si: scaled('N·m', 2, 1e-3), imperial: scaled('lbf·in', 1, LBF_IN_PER_N_MM) },
+  curvature: { si: scaled('1/m', 3, 1e3), imperial: scaled('1/in', 4, MM_PER_INCH) },
+  arealMass: { si: scaled('kg/m²', 3, 1), imperial: scaled('lb/ft²', 4, LB_PER_FT2_PER_KG_PER_M2) },
 }
 
 /** Unit symbol shown next to a quantity, e.g. 'µm' or 'thou'. */

@@ -30,6 +30,18 @@ describe('materialDetails', () => {
     expect(rows.find((r) => r.label === 'Yield Rp0.2')?.value).toBe('—')
   })
 
+  it('adds the lamina data of a composite ply, from its own source', () => {
+    const { lamina, sources } = materialDetails(material('cfrp-im7-8552-ud'), 'si')
+    expect(lamina?.form).toBe('ud')
+    expect(lamina?.rows.map((r) => r.label)).toEqual([
+      'Modulus E1', 'Modulus E2', 'Shear modulus G12', "Poisson's ν12", 'Tension Xt', 'Compression Xc', 'Tension Yt', 'Compression Yc', 'Shear S', 'Ply thickness t',
+    ])
+    expect(lamina?.rows[1]).toMatchObject({ value: '9.1', unit: 'GPa' })
+    expect(lamina?.rows[9]).toMatchObject({ value: '0.125', unit: 'mm' })
+    expect(sources[(lamina?.rows[0].sourceNumber ?? 0) - 1].properties).toContain('Ply data')
+    expect(materialDetails(material('ti-6al-4v'), 'si').lamina).toBeNull()
+  })
+
   it('converts to Imperial', () => {
     const { rows } = materialDetails(material('ti-6al-4v'), 'imperial')
     expect(rows.find((r) => r.label === 'Yield Rp0.2')).toMatchObject({ value: '127.6', unit: 'ksi' })

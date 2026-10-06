@@ -1,0 +1,195 @@
+/* The laminate results column: summary, failure index per ply, couplings,
+   ABD matrix and engineering constants. */
+.summary {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-16);
+  padding: var(--space-18) var(--space-20);
+  border-bottom: var(--border-width) solid var(--border-subtle);
+}
+
+.readouts {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-24);
+}
+
+.constants {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-8);
+  margin: 0;
+}
+
+.constants dd {
+  margin: 0;
+}
+
+.constantSymbol {
+  font-size: var(--fs-11);
+  color: var(--text-muted);
+}
+
+.constantValue {
+  font-family: var(--font-mono);
+  font-size: var(--fs-16);
+}
+
+.constantUnit {
+  font-family: var(--font-mono);
+  font-size: var(--fs-10-5);
+  color: var(--text-faint);
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-10);
+  padding: var(--space-14) var(--space-20);
+  border-bottom: var(--border-width) solid var(--border-subtle);
+}
+
+.sectionHead {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-8);
+}
+
+.plies {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.plyRow {
+  display: grid;
+  grid-template-columns: 22px 44px minmax(0, 1fr) 40px;
+  align-items: center;
+  gap: var(--space-8);
+  width: 100%;
+  min-height: 26px;
+  padding: 0 var(--space-4);
+  border: var(--border-width) solid transparent;
+  border-radius: var(--radius-xs);
+  background: none;
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: var(--fs-12);
+  text-align: left;
+  cursor: pointer;
+}
+
+.plyRow:hover {
+  background: var(--surface-hover);
+}
+
+.plyRow:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.plyRowSelected {
+  border-color: var(--accent-border);
+  background: var(--accent-wash);
+}
+
+.plyIndex {
+  color: var(--text-muted);
+}
+
+.plyFi {
+  font-weight: var(--weight-semibold);
+  text-align: right;
+}
+
+.ok {
+  color: var(--ok-text);
+}
+
+.warn {
+  color: var(--warn-text);
+}
+
+.bad {
+  color: var(--bad-text);
+}
+
+.couplings {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--fs-12-5);
+}
+
+.coupling {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-8);
+}
+
+.effect {
+  color: var(--text-muted);
+}
+
+.matrix {
+  display: grid;
+  grid-template-columns: 16px minmax(0, 1fr) 52px;
+  align-items: center;
+  gap: var(--space-8);
+}
+
+.matrixSymbol {
+  font-family: var(--font-mono);
+  font-size: var(--fs-13);
+  font-weight: var(--weight-semibold);
+}
+
+.matrixTable {
+  width: 100%;
+  border-collapse: collapse;
+  border-right: var(--border-width) solid var(--border-strong);
+  border-left: var(--border-width) solid var(--border-strong);
+  font-family: var(--font-mono);
+  font-size: var(--fs-11-5);
+}
+
+.matrixTable td {
+  padding: var(--space-1) var(--space-6);
+  text-align: right;
+  white-space: nowrap;
+}
+
+.matrixUnit {
+  font-family: var(--font-mono);
+  font-size: var(--fs-10-5);
+  color: var(--text-faint);
+}
+
+.constantList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  margin: 0;
+  font-size: var(--fs-12-5);
+}
+
+.constantRow {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-8);
+}
+
+.constantRow dt {
+  color: var(--text-secondary);
+}
+
+.constantRow dd {
+  margin: 0;
+  font-family: var(--font-mono);
+}

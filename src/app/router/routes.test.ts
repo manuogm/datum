@@ -24,6 +24,7 @@ describe('parseHash', () => {
   it('parses the fit report page', () => {
     expect(parseHash('#/fit/report')).toEqual({ name: 'fitReport' })
     expect(parseHash('#/bolt/report?m=pattern')).toEqual({ name: 'boltReport' })
+    expect(parseHash('#/lam/report?s=[0/90]s')).toEqual({ name: 'lamReport' })
   })
 
   it('ignores the query that carries tool inputs', () => {
@@ -44,6 +45,7 @@ describe('routeHref', () => {
       { name: 'fit' },
       { name: 'fitReport' },
       { name: 'boltReport' },
+      { name: 'lamReport' },
       { name: 'project', id: 'P 01/a' },
     ] as const
     for (const route of routes) expect(parseHash(routeHref(route))).toEqual(route)
@@ -55,6 +57,7 @@ describe('sectionOf', () => {
     expect(sectionOf({ name: 'project', id: 'P-0142' })).toBe('projects')
     expect(sectionOf({ name: 'fitReport' })).toBe('fit')
     expect(sectionOf({ name: 'boltReport' })).toBe('bolt')
+    expect(sectionOf({ name: 'lamReport' })).toBe('lam')
     expect(sectionOf({ name: 'notFound', path: 'x' })).toBeNull()
   })
 })

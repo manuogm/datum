@@ -1,0 +1,4 @@
+/* Composite Laminate page: the note shown when the laminate cannot be analysed. */
+.problem {
+  padding: var(--space-20);
+}

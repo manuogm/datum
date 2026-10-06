@@ -4,7 +4,7 @@
 import { useEffect, useState } from 'react'
 import { currentRevision, partOf, projectStats, revisionsNewestFirst, type Project } from '../../../core/projects'
 import { AppLayout } from '../../AppLayout'
-import { PlaceholderPage } from '../../pages/PlaceholderPage'
+import { NotFoundPage } from '../../pages/NotFoundPage'
 import { routeHref } from '../../router/routes'
 import { Badge, Button, PageTitle, TabBar } from '../../ui'
 import { PROJECT_STATUS_TONE } from '../projectSummary'
@@ -24,13 +24,11 @@ export function ProjectDetailPage({ id }: { id: string }) {
   const project = projects.find((p) => p.id === id)
   if (!project) {
     return (
-      <PlaceholderPage
+      <NotFoundPage
         section="projects"
         eyebrow={`Projects / ${id}`}
         title="Project not found"
-        status="missing"
         message="There is no project with this code in this browser. Projects are stored locally, per browser."
-        scope={[]}
       />
     )
   }
