@@ -1,6 +1,7 @@
-// The strip under the zone diagram: the fit's clearance band at each service
-// temperature on one clearance axis, against the required window, so the
-// effect of temperature is seen at a glance.
+// The fit spectrum: the fit's clearance band at each service temperature on
+// one clearance axis, against the required window, so the effect of
+// temperature is seen at a glance. It sits beside the service step and under
+// the zone diagram in the results' details.
 import type { CSSProperties } from 'react'
 import { cx, MonoLabel } from '../../../../app/ui'
 import { formatQuantity, fromDisplay, toDisplay, unitOf, type UnitSystem } from '../../../../core/units'
@@ -15,11 +16,13 @@ interface FitSpectrumProps {
   service: ServiceClearance
   window: FitInputs['requiredClearanceUm']
   system: UnitSystem
+  /** Without its own title, rule and padding, inside a container that gives them (a step's side column). */
+  bare?: boolean
 }
 
 const spanStyle = ({ left, width }: Span): CSSProperties => ({ left: `${left}%`, width: `${width}%` })
 
-export function FitSpectrum({ service, window, system }: FitSpectrumProps) {
+export function FitSpectrum({ service, window, system, bare = false }: FitSpectrumProps) {
   const shown = (um: number) => toDisplay('deviation', system, um)
   const layout = spectrumLayout(
     service.bands.map((band) => ({ kind: band.kind, min: shown(band.minUm), max: shown(band.maxUm) })),
@@ -27,9 +30,9 @@ export function FitSpectrum({ service, window, system }: FitSpectrumProps) {
   )
   const lastTick = layout.ticks.length - 1
   return (
-    <div className={styles.spectrum}>
+    <div className={cx(styles.spectrum, bare && styles.bare)}>
       <div className={styles.spectrumHead}>
-        <MonoLabel>Fit spectrum</MonoLabel>
+        {!bare && <MonoLabel>Fit spectrum</MonoLabel>}
         <span className={styles.legend}>
           <BandLegend bands={service.bands} system={system} />
         </span>

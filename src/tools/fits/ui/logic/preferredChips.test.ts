@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { preferredFitsOfType } from './preferredChips'
+import { isPreferredFit, preferredFitsOfType } from './preferredChips'
 
 const designations = (nominalMm: number, type: 'clearance' | 'transition' | 'interference') =>
   preferredFitsOfType(nominalMm, type).map((fit) => fit.designation)
@@ -14,5 +14,12 @@ describe('preferredFitsOfType', () => {
   it('follows the size: H7/p6 is a transition fit up to 3 mm', () => {
     expect(designations(2, 'transition')).toContain('H7/p6')
     expect(designations(2, 'interference')).not.toContain('H7/p6')
+  })
+})
+
+describe('isPreferredFit', () => {
+  it('knows the preferred fits by designation', () => {
+    expect(isPreferredFit('H7/g6')).toBe(true)
+    expect(isPreferredFit('H7/k5')).toBe(false)
   })
 })

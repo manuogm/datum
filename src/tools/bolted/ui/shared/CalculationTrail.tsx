@@ -3,14 +3,13 @@
 // message, any inputs the step asks for, every intermediate value and the
 // clause it comes from.
 import type { ReactNode } from 'react'
-import { Badge, ResultRow, type MarkerColor } from '../../../../app/ui'
+import { Badge, ResultRow } from '../../../../app/ui'
 import { formatDecimal, type UnitSystem } from '../../../../core/units'
-import type { CalculationStep, StepId, StepStatus } from '../../calc'
+import type { CalculationStep, StepId } from '../../calc'
+import { STEP_MARKER } from '../logic/labels'
 import { shownValue, stepHeadline } from '../logic/trailValues'
 import { formatUtilisation } from '../logic/verdict'
 import styles from './trail.module.css'
-
-const STATUS_MARKER: Record<StepStatus, MarkerColor> = { pass: 'ok', warn: 'warn', fail: 'bad', info: 'faint' }
 
 interface CalculationTrailProps {
   steps: readonly CalculationStep[]
@@ -46,7 +45,7 @@ function StepRow({ step, system, defaultOpen, inputs }: StepRowProps) {
       label={`${step.rStep} · ${step.title}`}
       value={step.check ? `SF ${headline.value}` : headline.value}
       unit={headline.unit}
-      marker={{ color: STATUS_MARKER[step.status], shape: 'dot' }}
+      marker={{ color: STEP_MARKER[step.status], shape: 'dot' }}
       defaultOpen={defaultOpen}
     >
       <p className={styles.message}>{step.message}</p>

@@ -1,26 +1,6 @@
-/* Calculator mode: inputs, diagram area, fit spectrum and results summary. */
+/* Calculator mode: fit inputs, zone diagram area, fit spectrum and result values. */
 
-/* Inputs */
-.nominal {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-6);
-}
-
-.nominalHead {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  font-size: var(--fs-13);
-  color: var(--text-secondary);
-}
-
-.hint {
-  font-family: var(--font-mono);
-  font-size: var(--fs-11);
-  color: var(--text-faint);
-}
-
+/* Size & fit step */
 .chips {
   display: flex;
   flex-wrap: wrap;
@@ -60,7 +40,7 @@
   font-weight: var(--weight-semibold);
 }
 
-/* Centre */
+/* Zone diagram: beside the Size & fit step and in the results' details */
 .diagramArea {
   display: flex;
   flex: 1;
@@ -74,6 +54,12 @@
   }
 }
 
+/* In the results' details the page is wide: keep the drawing to the verdict's width. */
+.detailsDiagram {
+  height: 420px;
+  max-width: 960px;
+}
+
 .spectrum {
   display: flex;
   flex-direction: column;
@@ -81,6 +67,11 @@
   flex: none;
   padding: var(--space-16) var(--space-20) var(--space-20);
   border-top: var(--border-width) solid var(--border-subtle);
+}
+
+.spectrum.bare {
+  padding: 0;
+  border-top: 0;
 }
 
 .spectrumHead {
@@ -180,33 +171,7 @@
   color: var(--text);
 }
 
-/* Results summary */
-.summary {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-16);
-  padding: var(--space-18) var(--space-20);
-  border-bottom: var(--border-width) solid var(--border-subtle);
-}
-
-.fitLine {
-  display: flex;
-  align-items: center;
-  gap: var(--space-10);
-}
-
-.fitName {
-  font-family: var(--font-mono);
-  font-size: var(--fs-13);
-  color: var(--text-secondary);
-}
-
-.readouts {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space-12);
-}
-
-.readouts.stacked {
-  grid-template-columns: 1fr;
+/* Results details: the limits and clearances under the charts */
+.values {
+  border-top: var(--border-width) solid var(--border-subtle);
 }

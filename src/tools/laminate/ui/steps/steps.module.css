@@ -1,0 +1,50 @@
+/* The laminate steps: what the step pages add to the shared StepPage. */
+
+/* A step fills the height under the step bar, so its footer sits at the bottom. */
+.step {
+  flex: 1 0 auto;
+}
+
+.note {
+  font-size: var(--fs-11-5);
+  color: var(--text-faint);
+}
+
+/* Symmetric · balanced badges and h · areal mass under the notation. */
+.layupSummary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-6);
+}
+
+.summaryText {
+  font-family: var(--font-mono);
+  font-size: var(--fs-11-5);
+  color: var(--text-muted);
+}
+
+.fault {
+  padding: var(--space-16) var(--space-20);
+}
+
+/* Results, details: the two drawings get a fixed height to fill. */
+.drawings {
+  display: flex;
+  height: 440px;
+  border-bottom: var(--border-width) solid var(--border-subtle);
+}
+
+@media (max-width: 900px) {
+  .drawings {
+    height: auto;
+  }
+}
+
+.sources {
+  margin: 0;
+  max-width: 72ch;
+  font-size: var(--fs-12-5);
+  line-height: var(--leading-normal);
+  color: var(--text-secondary);
+}

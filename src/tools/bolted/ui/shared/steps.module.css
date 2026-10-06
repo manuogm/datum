@@ -1,0 +1,66 @@
+/* The guided flow around the steps: the step bar stays in view while a step
+   scrolls, and the step fills the rest of the page. */
+.bar {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+.stage {
+  display: flex;
+  flex: 1 0 auto;
+  flex-direction: column;
+}
+
+.stage > * {
+  flex: 1 0 auto;
+}
+
+.problem {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  padding: var(--space-16) var(--space-20) 0;
+}
+
+.problemVerdict {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+
+/* The drawing beside a step: kept to a readable size in a wide column. */
+.figure {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-12);
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto;
+}
+
+/* A drawing's part list or legend under it. */
+.legend {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-family: var(--font-mono);
+  font-size: var(--fs-11);
+  color: var(--text-muted);
+}
+
+.note {
+  font-size: var(--fs-12-5);
+  color: var(--text-muted);
+  text-align: center;
+}
+
+/* The load case tabs above the verdict. */
+.verdict {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-16);
+}

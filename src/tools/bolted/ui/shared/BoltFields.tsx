@@ -1,6 +1,6 @@
-// The bolt: ISO thread (diameter and pitch), property class, head type and
-// washers.
-import { PanelSection, SegmentedControl, Select, Switch } from '../../../../app/ui'
+// The bolt: ISO thread (diameter and pitch), property class and head type.
+// Washers go with the tightening (TighteningFields).
+import { PanelSection, SegmentedControl, Select } from '../../../../app/ui'
 import { NOMINAL_DIAMETERS_MM, pitchesForMm, PROPERTY_CLASSES, type HeadType } from '../../calc'
 import { threadOfNominal } from '../logic/designEdits'
 import { HEAD_LABELS } from '../logic/labels'
@@ -49,9 +49,6 @@ export function BoltFields({ design, onChange }: BoltFieldsProps) {
         />
         <SegmentedControl label="Head" options={HEADS} value={design.headType} onChange={(headType) => onChange({ headType })} size="sm" fill />
       </div>
-      <Switch checked={design.washers} onChange={(washers) => onChange({ washers })}>
-        ISO 7089 washers
-      </Switch>
     </PanelSection>
   )
 }

@@ -1,8 +1,28 @@
-/* Advisor mode: inputs, recommendation and ranked list. */
+/* Advisor mode: application chips, and the results' chart, candidates and ranked list. */
 .chips {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-6);
+}
+
+.chartHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-6) var(--space-12);
+  padding: var(--space-16) var(--space-20) 0;
+}
+
+.chartMeta {
+  font-family: var(--font-mono);
+  font-size: var(--fs-11);
+  color: var(--text-faint);
+}
+
+.legend {
+  display: flex;
+  gap: var(--space-12);
+  margin-left: auto;
 }
 
 .chartArea {
@@ -13,7 +33,27 @@
 }
 
 @media (max-width: 900px) {
-  .chartArea {
+  .chartHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-6) var(--space-12);
+  padding: var(--space-16) var(--space-20) 0;
+}
+
+.chartMeta {
+  font-family: var(--font-mono);
+  font-size: var(--fs-11);
+  color: var(--text-faint);
+}
+
+.legend {
+  display: flex;
+  gap: var(--space-12);
+  margin-left: auto;
+}
+
+.chartArea {
     min-height: var(--chart-height-stacked);
   }
 }
@@ -35,9 +75,17 @@
   gap: var(--space-8);
 }
 
-.actions {
+.summaries {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  border-top: var(--border-width) solid var(--border-subtle);
+}
+
+.sources {
   display: flex;
-  gap: var(--space-8);
+  flex-wrap: wrap;
+  gap: var(--space-6);
+  padding: var(--space-12) var(--space-20) var(--space-20);
 }
 
 /* Ranked list */

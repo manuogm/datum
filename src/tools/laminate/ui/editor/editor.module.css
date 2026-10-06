@@ -1,4 +1,4 @@
-/* The laminate inputs: notation field, ply rows, layup summary and loads. */
+/* The laminate inputs: notation field, ply rows and loads. */
 .notation {
   display: flex;
   flex-direction: column;
@@ -13,6 +13,12 @@
 .warnNote {
   font-size: var(--fs-11-5);
   color: var(--warn-text);
+}
+
+.plyEditor {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
 }
 
 /* handle · # · material · θ · remove */
@@ -109,34 +115,10 @@
   color: var(--text-muted);
 }
 
-.warn {
-  color: var(--warn-text);
-}
-
-.bad {
-  color: var(--bad-text);
-}
-
-.critical {
-  font-weight: var(--weight-bold);
-}
-
-.summary {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-6);
-}
-
-.summaryText {
-  font-family: var(--font-mono);
-  font-size: var(--fs-11-5);
-  color: var(--text-muted);
-}
-
 .loads {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr);
+  max-width: 280px;
   gap: var(--space-10);
 }
 

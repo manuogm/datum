@@ -1,0 +1,136 @@
+// Calculator, results: the verdict in service first (the clearance edge that
+// governs, against the required window), then on request the details (zone
+// diagram, fit spectrum and every limit and clearance) and the calculation
+// (each value's formula and source).
+import { Button, Callout, cx, PanelSection, ResultRow, ResultsLayout, StepPage, VerdictCard } from '../../../../app/ui'
+import { formatQuantity, unitOf, type UnitSystem } from '../../../../core/units'
+import { REFERENCE_TEMP_C } from '../../advisor'
+import type { FitAnalysis } from '../../calc'
+import { fitQuantities, limitsText, thermalQuantities, type FitQuantity, type FitQuantityKey } from '../logic/fitQuantities'
+import { serviceClearance, type ServiceClearance } from '../logic/serviceClearance'
+import { serviceSummary } from '../logic/serviceSummary'
+import { governingEdge } from '../logic/verdict'
+import { FIT_TYPE_LABEL, nominalLabel, STATUS_TITLE } from '../shared/labels'
+import { QuantityDetails } from '../shared/QuantityDetails'
+import sharedStyles from '../shared/shared.module.css'
+import type { FitStepProps } from '../shared/stepProps'
+import { ZoneDiagram } from '../shared/ZoneDiagram'
+import type { FitInputs } from '../state/fitInputs'
+import styles from './calculator.module.css'
+import { FitSpectrum } from './FitSpectrum'
+
+const REFERENCE = 'ISO 286-1:2010'
+
+export function CalculatorResults({ inputs, results, system, flow }: FitStepProps) {
+  const calculation = results.calculation
+  if (!calculation.ok) {
+    return (
+      <StepPage {...flow.page} className={sharedStyles.step} title="Results" wide>
+        <ResultsLayout
+          verdict={
+            <Callout status="bad" title="Not defined by ISO 286">
+              {calculation.error}{' '}
+              <Button variant="link" size="sm" onClick={() => flow.goTo('fit')}>
+                Change the fit
+              </Button>
+            </Callout>
+          }
+        />
+      </StepPage>
+    )
+  }
+  const fit = calculation.value
+  const service = serviceClearance(fit, inputs, results.housing, results.shaft)
+  const quantities = fitQuantities(fit, system)
+  const pick = (...keys: FitQuantityKey[]) => quantities.filter((q) => keys.includes(q.key))
+  const thermal = thermalQuantities(service, system)
+  return (
+    <StepPage
+      {...flow.page}
+      className={sharedStyles.step}
+      title="Results"
+      hint={`${nominalLabel(fit.nominalMm, system)} ${fit.designation} in ${results.housing.name} and ${results.shaft.name}, in service.`}
+      wide
+    >
+      <ResultsLayout
+        memoryKey="fit"
+        verdict={<CalculatorVerdict fit={fit} service={service} inputs={inputs} system={system} />}
+        detailsSummary="Tolerance zones · fit spectrum · limits and clearances"
+        details={
+          <>
+            <div className={cx(styles.diagramArea, styles.detailsDiagram)}>
+              <ZoneDiagram fit={fit} system={system} variant="screen" />
+            </div>
+            <FitSpectrum service={service} window={inputs.requiredClearanceUm} system={system} />
+            <div className={styles.values}>
+              <ResultRow layout="stacked" marker={{ color: 'hole' }} label="Hole limits" value={limitsText(fit.hole, system)} unit={unitOf('length', system)} />
+              <ResultRow layout="stacked" marker={{ color: 'accent' }} label="Shaft limits" value={limitsText(fit.shaft, system)} unit={unitOf('length', system)} />
+              {pick('maxClearance', 'minClearance', 'meanClearance', 'fitTolerance').map((q) => (
+                <ResultRow key={q.key} label={q.label} value={q.value} unit={q.unit} />
+              ))}
+              {thermal.map((q) => (
+                <ResultRow key={q.key} label={q.label} value={q.value} unit={q.unit} marker={{ color: 'warn', shape: 'dot' }} />
+              ))}
+            </div>
+          </>
+        }
+        calculationSummary="Formulas and values · ISO 286-1, 286-2 · thermal shift"
+        calculation={
+          <>
+            <FormulaGroup label="Hole" quantities={pick('holeMax', 'holeMin', 'holeTolerance')} />
+            <FormulaGroup label="Shaft" quantities={pick('shaftMax', 'shaftMin', 'shaftTolerance')} />
+            <FormulaGroup label={`Clearance at ${referenceTemp(system)}`} quantities={pick('maxClearance', 'minClearance', 'meanClearance', 'fitTolerance')} />
+            {thermal.length > 0 && <FormulaGroup label="Clearance in service" quantities={thermal} />}
+          </>
+        }
+      />
+    </StepPage>
+  )
+}
+
+interface CalculatorVerdictProps {
+  fit: FitAnalysis
+  service: ServiceClearance
+  inputs: FitInputs
+  system: UnitSystem
+}
+
+/** In-service verdict: the governing edge of the clearance against its window limit, then the fit at 20 °C. */
+function CalculatorVerdict({ fit, service, inputs, system }: CalculatorVerdictProps) {
+  const deviation = (um: number) => formatQuantity('deviation', system, um)
+  const deviationUnit = unitOf('deviation', system)
+  const governing = governingEdge(service.inServiceUm, inputs.requiredClearanceUm)
+  const at20 = referenceTemp(system)
+  return (
+    <VerdictCard
+      status={service.status}
+      sentence={`${STATUS_TITLE[service.status]}.`}
+      detail={`In service ${serviceSummary(service, inputs, system)}.`}
+      reference={REFERENCE}
+      headline={{
+        label: governing.edge === 'min' ? 'Min clearance in service' : 'Max clearance in service',
+        value: deviation(governing.valueUm),
+        unit: deviationUnit,
+        target: `${governing.edge === 'min' ? '≥' : '≤'} ${deviation(governing.limitUm)} ${deviationUnit}`,
+      }}
+      figures={[
+        { label: `Min clearance, ${at20}`, symbol: 'Cmin', value: deviation(fit.minClearanceUm), unit: deviationUnit },
+        { label: `Max clearance, ${at20}`, symbol: 'Cmax', value: deviation(fit.maxClearanceUm), unit: deviationUnit },
+        { label: 'Fit type', value: FIT_TYPE_LABEL[fit.fitType] },
+        { label: 'Fit', value: `${nominalLabel(fit.nominalMm, system)} ${fit.designation}` },
+      ]}
+    />
+  )
+}
+
+/** '20 °C' (or '68 °F'), the temperature ISO 286 sizes are given at. */
+const referenceTemp = (system: UnitSystem) => formatQuantity('temperature', system, REFERENCE_TEMP_C, { withUnit: true })
+
+/** One group of worked formulas (hole, shaft, clearances) with their sources. */
+function FormulaGroup({ label, quantities }: { label: string; quantities: readonly FitQuantity<string>[] }) {
+  return (
+    <PanelSection label={label}>
+      <QuantityDetails quantities={quantities} />
+    </PanelSection>
+  )
+}

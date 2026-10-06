@@ -39,6 +39,16 @@ export function laminateHeadline(analysis: Pick<LaminateAnalysis, 'firstPlyFailu
   return { tone, title: `First ply fails: RF ${rf}`, detail: `${critical} under the applied loads` }
 }
 
+/**
+ * The verdict card's one sentence: what governs, the critical plies first.
+ * 'Below the 1.50 target · Plies 4–5 (90°) critical · dominant stress: matrix tension.'
+ */
+export function verdictSentence(analysis: Pick<LaminateAnalysis, 'firstPlyFailure' | 'plies' | 'criterion'>): string {
+  const { title, detail } = laminateHeadline(analysis)
+  if (!Number.isFinite(analysis.firstPlyFailure.reserveFactor)) return `${title}: ${detail.charAt(0).toLowerCase()}${detail.slice(1)}`
+  return analysis.firstPlyFailure.status === 'fail' ? `First ply fails: ${detail}.` : `${detail}.`
+}
+
 /** The status colour of every ply, top ply first: one rule for every drawing and list (bad RF < 1, warn below the target, ok meets it). */
 export function plyTones({ plies, firstPlyFailure }: Pick<LaminateAnalysis, 'plies' | 'firstPlyFailure'>): Status[] {
   return plies.map((ply) => STATUS_TONE[reserveStatus(ply.reserveFactor, firstPlyFailure.targetReserveFactor)])

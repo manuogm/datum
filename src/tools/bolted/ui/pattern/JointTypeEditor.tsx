@@ -1,5 +1,6 @@
-// The joint type being edited: all its design inputs, with copy and remove
-// (a joint type that bolts still use cannot be removed).
+// The joint type being edited: its design inputs (the advanced ones under
+// More options), with copy and remove (a joint type that bolts still use
+// cannot be removed).
 import { Button, PanelSection } from '../../../../app/ui'
 import type { UnitSystem } from '../../../../core/units'
 import { jointTitle } from '../logic/labels'
@@ -29,7 +30,7 @@ export function JointTypeEditor({ jointType, inUse, system, onChange, onCopy, on
           </Button>
         </div>
       </PanelSection>
-      <DesignInputs design={jointType.design} system={system} clampLengthMm={null} onChange={onChange} />
+      <DesignInputs design={jointType.design} system={system} onChange={onChange} />
     </>
   )
 }

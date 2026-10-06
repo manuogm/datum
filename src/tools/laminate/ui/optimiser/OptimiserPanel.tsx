@@ -1,13 +1,13 @@
-// Optimise layup: searches, on request and off the main thread, for the
-// symmetric, balanced laminate of the top ply's material with the fewest
-// plies that reaches the target under the loads on screen. The best
-// sequence and its alternatives can each replace the layup being edited:
-// every ply then takes the material searched, so a hybrid stack becomes one
-// the optimiser analysed. The design rules the search applied are listed under
-// the result.
+// Optimise layup, in a dialog over the results: searches, on request and off
+// the main thread, for the symmetric, balanced laminate of the top ply's
+// material with the fewest plies that reaches the target under the loads on
+// screen. The best sequence and its alternatives can each replace the layup
+// being edited: every ply then takes the material searched, so a hybrid
+// stack becomes one the optimiser analysed. The design rules the search
+// applied are listed under the result.
 import { useState } from 'react'
 import { countOf } from '../../../../app/format/count'
-import { Button, Chip, InputWell, MonoLabel, NumberInput, PanelSection, ValueRow } from '../../../../app/ui'
+import { Button, Chip, InputWell, MonoLabel, NumberInput, ValueRow } from '../../../../app/ui'
 import { formatQuantity, type UnitSystem } from '../../../../core/units'
 import type { LayupCandidate } from '../../optimise'
 import { formatFactor, plyMaterialName } from '../logic/labels'
@@ -39,7 +39,7 @@ export function OptimiserPanel({ inputs, system, onUse }: OptimiserPanelProps) {
     setSettings({ ...settings, directions })
   }
   return (
-    <PanelSection label="Optimise layup" aside="symmetric · balanced">
+    <div className={styles.panel}>
       <p className={styles.note}>
         Fewest plies of {plyMaterialName(inputs.plies[0].materialId)} that reach RF {formatFactor(inputs.targetReserveFactor)} under these loads.
       </p>
@@ -73,7 +73,7 @@ export function OptimiserPanel({ inputs, system, onUse }: OptimiserPanelProps) {
       )}
       {!request.ok && <p className={styles.warnNote}>{request.error}</p>}
       {run.status === 'done' && <OptimiserResult run={run} current={current} system={system} onUse={onUse} />}
-    </PanelSection>
+    </div>
   )
 }
 

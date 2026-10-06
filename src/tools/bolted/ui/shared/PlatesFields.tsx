@@ -1,9 +1,10 @@
-// The clamped parts from the head down, each with its limiting surface
-// pressure pG when entered, and the outer diameter DA of the clamped region
-// around the bolt.
+// The clamped parts from the head down, and the outer diameter DA of the
+// clamped region around the bolt. A polymer or composite part asks for its
+// limiting surface pressure pG right here, as R10 cannot be checked without
+// it; a metal part's pG is an advanced input (ContactFields).
 import { Button, CloseButton, PanelSection, QuantityField, ValueInputRow } from '../../../../app/ui'
 import { formatQuantity, unitOf, type UnitSystem } from '../../../../core/units'
-import { withLimitingPressure } from '../logic/designEdits'
+import { needsLimitingPressure, withLimitingPressure } from '../logic/designEdits'
 import type { JointDesignSpec, PlateSpec } from '../state/boltInputs'
 import styles from './design.module.css'
 import { MaterialSelect } from './MaterialSelect'
@@ -37,14 +38,11 @@ export function PlatesFields({ design, system, clampLengthMm, onChange }: Plates
             onChange={(thicknessMm) => edit(i, { thicknessMm })}
           />
           {plates.length > 1 ? <CloseButton label={`Remove part ${i + 1}`} onClick={() => setPlates(plates.filter((_, j) => j !== i))} /> : <span />}
-          <div className={styles.plateWide}>
-            <PressureField
-              plate={plate}
-              label={`Part ${i + 1}`}
-              system={system}
-              onChange={(pG) => replace(i, withLimitingPressure(plate, pG))}
-            />
-          </div>
+          {needsLimitingPressure(plate.materialId) && (
+            <div className={styles.plateWide}>
+              <PressureField plate={plate} label={`Part ${i + 1}`} system={system} onChange={(pG) => replace(i, withLimitingPressure(plate, pG))} />
+            </div>
+          )}
         </div>
       ))}
       <div>

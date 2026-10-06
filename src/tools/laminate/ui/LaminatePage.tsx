@@ -1,109 +1,53 @@
-// Composite Laminate tool (classical laminate theory): the layup, loads and
-// failure criterion on the left, the exploded ply stack and the ply values
-// through the thickness in the centre, first-ply failure and the laminate
-// stiffness on the right.
+// Composite Laminate tool (classical laminate theory), as guided steps from
+// the inputs to the results: Layup · Loads · Check · Results. One step is on
+// screen at a time; the step bar goes back to any step reached. The results
+// open in depths (verdict, details, calculation), and "Optimise layup" on the
+// verdict searches for a lighter layup that meets the target.
 //
 // The page shows one calculation of the library. "Save" stores the inputs on
-// screen; "Report" opens the printable report of the calculation.
+// screen; "Report" opens the printable report of the calculation. A saved
+// calculation opens on its results, a new one on its first step.
 import { useState } from 'react'
 import { AppLayout } from '../../../app/AppLayout'
 import { useSettings } from '../../../app/settings/settings'
 import { CalculationActions } from '../../../app/tools/CalculationActions'
-import { Badge, Button, Callout, Column, ColumnHeader, ColumnRow, SegmentedControl } from '../../../app/ui'
+import { StepBar, useStepFlow } from '../../../app/ui'
 import type { Calculation } from '../../../core/library'
-import { CriterionFields } from './editor/CriterionFields'
-import { LayupEditor } from './editor/LayupEditor'
-import { LoadsFields } from './editor/LoadsFields'
-import { CRITERION_LABELS } from './logic/labels'
-import { plyTones } from './logic/verdict'
-import { PLOT_COMPONENTS, type PlotComponent } from './logic/thicknessPlot'
-import { OptimiserPanel } from './optimiser/OptimiserPanel'
-import { LaminateDrawings } from './plots/LaminateDrawings'
-import { LaminateResults } from './results/LaminateResults'
-import styles from './LaminatePage.module.css'
-import { DEFAULT_LAMINATE_INPUTS } from './state/lamInputs'
+import { initialStep, lamSteps, stepFault, type LamStepId } from './logic/steps'
 import { useLaminateTool } from './state/useLaminateTool'
+import { CheckStep } from './steps/CheckStep'
+import { LayupStep } from './steps/LayupStep'
+import { LoadsStep } from './steps/LoadsStep'
+import { ResultsStep } from './steps/ResultsStep'
+import type { LamStepProps } from './steps/stepProps'
 
 export function LaminatePage({ calculation }: { calculation: Calculation }) {
   const { inputs, dispatch, analysis, unsaved, save } = useLaminateTool(calculation)
   const { unitSystem: system } = useSettings()
+  const fault = stepFault(inputs, analysis)
+  const steps = lamSteps(fault)
+  const flow = useStepFlow(steps, { memoryKey: `calc:${calculation.id}`, initial: initialStep(calculation, steps.length) })
+  // The ply picked in the ply list, the stack or the failure list; forgotten when the stack gets shorter.
   const [chosenPly, setChosenPly] = useState<number | null>(null)
-  const [component, setComponent] = useState<PlotComponent>('sx')
-  const result = analysis.ok ? analysis.value : null
   const selectedPly = chosenPly !== null && chosenPly <= inputs.plies.length ? chosenPly : null
-  const criticalPlies = result?.firstPlyFailure.criticalPlies ?? []
+  const props: LamStepProps = { inputs, analysis, dispatch, system, flow, fault, selectedPly, onSelectPly: setChosenPly }
   return (
     <AppLayout current={{ tab: 'calc', id: calculation.id }} actions={<CalculationActions calculationId={calculation.id} unsaved={unsaved} onSave={save} />}>
-      <ColumnRow>
-        <Column
-          width="inputs"
-          label="Inputs"
-          header={
-            <ColumnHeader
-              title="Inputs"
-              actions={
-                <Button variant="link" size="sm" onClick={() => dispatch({ type: 'change', changes: DEFAULT_LAMINATE_INPUTS })}>
-                  Reset
-                </Button>
-              }
-            />
-          }
-        >
-          <LayupEditor
-            plies={inputs.plies}
-            layup={result?.layup ?? null}
-            tones={result ? plyTones(result) : []}
-            criticalPlies={criticalPlies}
-            selectedPly={selectedPly}
-            onSelectPly={setChosenPly}
-            system={system}
-            dispatch={dispatch}
-          />
-          <LoadsFields loads={inputs.loads} system={system} onChange={(changes) => dispatch({ type: 'loads', changes })} />
-          <CriterionFields criterion={inputs.criterion} targetReserveFactor={inputs.targetReserveFactor} onChange={(changes) => dispatch({ type: 'change', changes })} />
-          <OptimiserPanel inputs={inputs} system={system} onUse={(anglesDeg, materialId) => dispatch({ type: 'layup', anglesDeg, materialId })} />
-        </Column>
-
-        <Column
-          label="Ply stack"
-          header={
-            <ColumnHeader
-              title="Ply stack"
-              meta={result?.layup.notation}
-              actions={<SegmentedControl label="Value through the thickness" size="sm" options={PLOT_COMPONENTS} value={component} onChange={setComponent} />}
-            />
-          }
-        >
-          {result ? (
-            <LaminateDrawings analysis={result} component={component} system={system} selectedPly={selectedPly} onSelectPly={setChosenPly} />
-          ) : (
-            <div className={styles.problem}>
-              <Callout status="bad" title="This laminate cannot be analysed">
-                {analysis.ok ? null : analysis.error}
-              </Callout>
-            </div>
-          )}
-        </Column>
-
-        <Column
-          width="results"
-          divider={false}
-          wrap
-          label="Results"
-          header={
-            <ColumnHeader
-              title="Results"
-              actions={
-                <Badge variant="reference" size="md">
-                  CLT · {CRITERION_LABELS[inputs.criterion]}
-                </Badge>
-              }
-            />
-          }
-        >
-          {result && <LaminateResults analysis={result} system={system} selectedPly={selectedPly} onSelectPly={setChosenPly} />}
-        </Column>
-      </ColumnRow>
+      <StepBar steps={steps} {...flow.bar} />
+      <CurrentStep id={flow.step.id as LamStepId} props={props} />
     </AppLayout>
   )
+}
+
+function CurrentStep({ id, props }: { id: LamStepId; props: LamStepProps }) {
+  switch (id) {
+    case 'layup':
+      return <LayupStep {...props} />
+    case 'loads':
+      return <LoadsStep {...props} />
+    case 'check':
+      return <CheckStep {...props} />
+    case 'results':
+      return <ResultsStep {...props} />
+  }
 }

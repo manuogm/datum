@@ -8,7 +8,7 @@ import {
 import { cx } from '../../../../app/ui'
 import { formatQuantity, unitOf, type UnitSystem } from '../../../../core/units'
 import type { LaminateAnalysis } from '../../calc'
-import { CRITERION_LABELS, formatFactor, modeText, plyMaterialName, plyRangeText } from '../logic/labels'
+import { CRITERION_LABELS, formatFactor, LAMINATE_STANDARDS, modeText, plyMaterialName, plyRangeText } from '../logic/labels'
 import { leadingLoad } from '../logic/loads'
 import { laminateFacts, laminateWarnings, plyRows, unitsLine } from '../logic/reportContent'
 import { laminateStatus, plyTones } from '../logic/verdict'
@@ -17,8 +17,6 @@ import { ThicknessPlot } from '../plots/ThicknessPlot'
 import type { LaminateInputs } from '../state/lamInputs'
 import report from './report.module.css'
 import { StiffnessTables } from './StiffnessTables'
-
-const STANDARDS = 'CLT (Jones 1999; Daniel & Ishai 2006), Tsai & Hahn (1980)'
 
 const STATUS_HEADLINE: Record<ReportStatus, string> = {
   pass: 'Meets RF target',
@@ -93,7 +91,7 @@ export function LaminateReport({ name, analysis, inputs, system }: LaminateRepor
       </ReportSection>
 
       <ReportWarnings heading="5 · Warnings" warnings={warnings} />
-      <ReportFooter standards={STANDARDS} />
+      <ReportFooter standards={LAMINATE_STANDARDS} />
     </Report>
   )
 }

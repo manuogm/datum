@@ -1,20 +1,14 @@
-// Tightening and contact: the method (with its tightening factor αA), the
-// lowest expected friction coefficients and the number of interfaces that
-// carry shear by friction, the surface roughness behind embedding, and where
-// the axial load enters the clamped parts.
-import { InputWell, NumberInput, PanelSection, Select, ValueRow } from '../../../../app/ui'
+// Tightening (advanced inputs of the bolt): washers, the method with its
+// tightening factor αA, the lowest expected friction coefficients and the
+// number of interfaces that carry shear by friction.
+import { InputWell, NumberInput, PanelSection, Select, Switch, ValueRow } from '../../../../app/ui'
 import { formatDecimal } from '../../../../core/units'
-import {
-  LOAD_INTRODUCTION_FACTOR, TIGHTENING_METHODS, type LoadIntroductionPosition, type SurfaceRoughness, type TighteningMethod,
-} from '../../calc'
-import { LOAD_INTRODUCTION_LABELS, ROUGHNESS_LABELS, TIGHTENING_LABELS } from '../logic/labels'
+import { TIGHTENING_METHODS, type TighteningMethod } from '../../calc'
+import { optionsOf, TIGHTENING_LABELS } from '../logic/labels'
 import type { JointDesignSpec } from '../state/boltInputs'
 import styles from './design.module.css'
 
-const optionsOf = <T extends string>(labels: Record<T, string>) => (Object.keys(labels) as T[]).map((value) => ({ value, label: labels[value] }))
 const METHODS = optionsOf<TighteningMethod>(TIGHTENING_LABELS)
-const ROUGHNESS = optionsOf<SurfaceRoughness>(ROUGHNESS_LABELS)
-const POSITIONS = optionsOf<LoadIntroductionPosition>(LOAD_INTRODUCTION_LABELS)
 
 type FrictionKey = 'threadFriction' | 'headFriction' | 'interfaceFriction'
 
@@ -32,6 +26,9 @@ interface TighteningFieldsProps {
 export function TighteningFields({ design, onChange }: TighteningFieldsProps) {
   return (
     <PanelSection label="Tightening">
+      <Switch checked={design.washers} onChange={(washers) => onChange({ washers })}>
+        ISO 7089 washers
+      </Switch>
       <Select
         size="md"
         aria-label="Tightening method"
@@ -66,22 +63,6 @@ export function TighteningFields({ design, onChange }: TighteningFieldsProps) {
           }
         />
       </div>
-      <Select
-        size="md"
-        aria-label="Surface roughness"
-        options={ROUGHNESS}
-        value={design.surfaceRoughness}
-        onChange={(surfaceRoughness) => onChange({ surfaceRoughness })}
-        meta="embedding"
-      />
-      <Select
-        size="md"
-        aria-label="Load introduction"
-        options={POSITIONS}
-        value={design.loadIntroduction}
-        onChange={(loadIntroduction) => onChange({ loadIntroduction })}
-        meta={`n ${formatDecimal(LOAD_INTRODUCTION_FACTOR[design.loadIntroduction], 1, true)}`}
-      />
     </PanelSection>
   )
 }

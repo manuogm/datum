@@ -2,6 +2,9 @@
 // logic/patternPlan): each bolt by its joint type's symbol, ringed in its
 // verdict colour with its utilisation u, the shear on it as an arrow, the
 // centroid and the load point. Choosing a bolt shows its calculation trail.
+// Beside the input steps it is drawn without results: the bolt positions
+// only (Bolts step), or with the load and the shear shared by position
+// (Load cases step).
 import type { KeyboardEvent } from 'react'
 import { cx } from '../../../../app/ui'
 import type { Result } from '../../../../core/result'
@@ -18,23 +21,27 @@ import type { LoadCaseSpec, PatternSpec } from '../state/boltInputs'
 interface PatternPlanProps {
   pattern: PatternSpec
   loadCase: LoadCaseSpec
-  analysis: Result<BoltPatternAnalysis>
+  /** Omitted: no verdict rings or utilisations, the shear shared by bolt position. */
+  analysis?: Result<BoltPatternAnalysis>
+  /** false: the bolt positions only, without the load point and the shear. */
+  showLoad?: boolean
   system: UnitSystem
-  selectedBolt: string | null
+  selectedBolt?: string | null
   /** Omitted: a drawing only, as in the report. */
   onSelectBolt?: (id: string) => void
 }
 
-export function PatternPlan({ pattern, loadCase, analysis, system, selectedBolt, onSelectBolt }: PatternPlanProps) {
+export function PatternPlan({ pattern, loadCase, analysis, showLoad = true, system, selectedBolt = null, onSelectBolt }: PatternPlanProps) {
+  const result = analysis?.ok ? analysis.value : null
   // Shear in display units, so the legend is a round force in kN or lbf.
-  const input = planInputOf(pattern, loadCase, analysis.ok ? analysis.value : null)
-  const shown = (n: number) => toDisplay('force', system, n)
+  const input = planInputOf(pattern, loadCase, result)
+  const shown = (n: number) => (showLoad ? toDisplay('force', system, n) : 0)
   const layout = planLayout({ ...input, bolts: input.bolts.map((b) => ({ ...b, shearX: shown(b.shearX), shearY: shown(b.shearY) })) })
-  const resultOf = (id: string) => (analysis.ok ? analysis.value.bolts.find((b) => b.bolt.id === id) ?? null : null)
+  const resultOf = (id: string) => result?.bolts.find((b) => b.bolt.id === id) ?? null
   const designOf = (jointTypeId: string) => pattern.jointTypes.find((j) => j.id === jointTypeId)?.design
   const { plate, centroid, loadPoint, force, shearScale } = layout
   return (
-    <svg className={styles.svg} viewBox={`0 0 ${FRAME.width} ${FRAME.height}`} role="img" aria-label={`Plan of the bolt pattern under ${loadCase.id}`}>
+    <svg className={styles.svg} viewBox={`0 0 ${FRAME.width} ${FRAME.height}`} role="img" aria-label={showLoad ? `Plan of the bolt pattern under ${loadCase.id}` : 'Plan of the bolt positions'}>
       <rect className={styles.plate} x={plate.x} y={plate.y} width={plate.width} height={plate.height} rx={plate.corner} />
       {layout.axes.map((axis, i) => (
         <line key={i} className={styles.centreLine} {...axis} />
@@ -83,13 +90,15 @@ export function PatternPlan({ pattern, loadCase, analysis, system, selectedBolt,
         )
       })}
 
-      <g className={styles.axial}>
-        {force && <Arrow segment={force} />}
-        <circle className={styles.loadPoint} cx={loadPoint.x} cy={loadPoint.y} r={5} />
-        <text className={styles.arrowLabel} x={loadPoint.x + 8} y={loadPoint.y - 8}>
-          load point
-        </text>
-      </g>
+      {showLoad && (
+        <g className={styles.axial}>
+          {force && <Arrow segment={force} />}
+          <circle className={styles.loadPoint} cx={loadPoint.x} cy={loadPoint.y} r={5} />
+          <text className={styles.arrowLabel} x={loadPoint.x + 8} y={loadPoint.y - 8}>
+            load point
+          </text>
+        </g>
+      )}
 
       {shearScale && (
         <g className={styles.shear}>

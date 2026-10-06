@@ -10,6 +10,9 @@ export const CRITERION_LABELS: Record<FailureCriterion, string> = {
   'tsai-wu': 'Tsai-Wu',
 }
 
+/** The sources of the analysis: laminate theory and the failure criteria. */
+export const LAMINATE_STANDARDS = 'CLT (Jones 1999; Daniel & Ishai 2006), Tsai & Hahn (1980)'
+
 export const MODE_LABELS: Record<FailureMode, string> = {
   'fibre-tension': 'fibre tension',
   'fibre-compression': 'fibre compression',
