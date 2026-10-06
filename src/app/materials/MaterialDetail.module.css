@@ -53,6 +53,11 @@
   border-bottom: var(--border-width) solid var(--border-subtle);
 }
 
+.inSection {
+  padding: 0;
+  border-bottom: 0;
+}
+
 .property {
   display: flex;
   flex-direction: column;
@@ -111,12 +116,6 @@
 }
 
 .caution,
-.unused {
-  margin: 0;
-  font-size: var(--fs-11-5);
-  color: var(--text-faint);
-}
-
 .usage {
   display: flex;
   flex-direction: column;

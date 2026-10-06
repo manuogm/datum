@@ -7,7 +7,12 @@ import { useQuantityDraft, type QuantityValueProps } from './useQuantityDraft'
 
 type FieldProps = Omit<ComponentProps<typeof Field>, 'value' | 'onChange' | 'unit' | 'type'>
 
-export function QuantityField({ quantity, system, value, onChange, ...fieldProps }: QuantityValueProps & FieldProps) {
+interface UnitProps {
+  /** False when a column head already names the unit, so narrow fields keep their room for the value. */
+  showUnit?: boolean
+}
+
+export function QuantityField({ quantity, system, value, onChange, showUnit = true, ...fieldProps }: QuantityValueProps & FieldProps & UnitProps) {
   const draft = useQuantityDraft({ quantity, system, value, onChange })
-  return <Field {...fieldProps} {...draft} unit={unitOf(quantity, system)} />
+  return <Field mono {...fieldProps} {...draft} unit={showUnit ? unitOf(quantity, system) : undefined} />
 }

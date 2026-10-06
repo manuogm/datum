@@ -1,16 +1,18 @@
 // MaterialDetail: the right column of the Materials page: the selected
-// material's properties (each marked with its reference number), the
-// references themselves, where the material is used in projects, and the
+// material's properties (each marked with its reference number), a composite
+// ply's lamina data, the references themselves, where the material is used in projects, and the
 // action to save it as a project part's material.
 import { MATERIAL_FAMILIES, type Material, type SourceKind } from '../../core/materials'
 import { materialUsage } from '../../core/projects'
 import type { UnitSystem } from '../../core/units'
 import { useProjects } from '../projects/useProjects'
 import { reopenRevisionHref } from '../projects/reopenLink'
-import { Badge, Button, Marker, markerColor, PanelSection, type Tone } from '../ui'
+import { Badge, Button, cx, EmptyState, Marker, markerColor, PanelSection, type Tone } from '../ui'
 import { mainSourceKind } from './materialFilter'
 import styles from './MaterialDetail.module.css'
-import { materialDetails } from './materialProperties'
+import { materialDetails, type PropertyRow } from './materialProperties'
+
+const LAMINA_FORM = { ud: 'unidirectional', fabric: 'woven fabric, 1 = warp' } as const
 
 const SOURCE_BADGE: Record<SourceKind, { tone: Tone; text: string }> = {
   standard: { tone: 'ok', text: 'Standard minimums' },
@@ -27,7 +29,7 @@ interface MaterialDetailProps {
 
 export function MaterialDetail({ material, unitSystem, onSaveToProject }: MaterialDetailProps) {
   const { projects, active } = useProjects()
-  const { rows, sources } = materialDetails(material, unitSystem)
+  const { rows, lamina, sources } = materialDetails(material, unitSystem)
   const badge = SOURCE_BADGE[mainSourceKind(material)]
   const usage = materialUsage(projects, material.id)
   const subtitle = [material.spec, material.condition, material.designation].filter(Boolean).join(' · ')
@@ -44,19 +46,12 @@ export function MaterialDetail({ material, unitSystem, onSaveToProject }: Materi
         <h2 className={styles.name}>{material.name}</h2>
         <span className={styles.spec}>{subtitle}</span>
       </header>
-      <dl className={styles.properties}>
-        {rows.map((row) => (
-          <div key={row.label} className={styles.property}>
-            <dt className={styles.label}>{row.label}</dt>
-            <dd className={styles.value}>
-              {row.value} <span className={styles.unit}>{row.value !== '—' && row.unit}</span>
-              <sup className={styles.ref} aria-label={`source ${row.sourceNumber}`}>
-                {row.sourceNumber}
-              </sup>
-            </dd>
-          </div>
-        ))}
-      </dl>
+      <PropertyList rows={rows} />
+      {lamina && (
+        <PanelSection label="Ply data" aside={LAMINA_FORM[lamina.form]}>
+          <PropertyList rows={lamina.rows} inSection />
+        </PanelSection>
+      )}
       <PanelSection label="Sources">
         <ol className={styles.sources}>
           {sources.map(({ number, source, properties }) => (
@@ -75,7 +70,7 @@ export function MaterialDetail({ material, unitSystem, onSaveToProject }: Materi
       </PanelSection>
       <PanelSection label="Used in" grow>
         {usage.length === 0 ? (
-          <p className={styles.unused}>Not used in any project yet.</p>
+          <EmptyState inset="none">Not used in any project yet.</EmptyState>
         ) : (
           <ul className={styles.usage}>
             {usage.map(({ project, part, calculation, revision }) => (
@@ -98,5 +93,24 @@ export function MaterialDetail({ material, unitSystem, onSaveToProject }: Materi
         </Button>
       </div>
     </div>
+  )
+}
+
+/** inSection: inside a PanelSection, which already pads and rules it. */
+function PropertyList({ rows, inSection = false }: { rows: readonly PropertyRow[]; inSection?: boolean }) {
+  return (
+    <dl className={cx(styles.properties, inSection && styles.inSection)}>
+      {rows.map((row) => (
+        <div key={row.label} className={styles.property}>
+          <dt className={styles.label}>{row.label}</dt>
+          <dd className={styles.value}>
+            {row.value} <span className={styles.unit}>{row.value !== '—' && row.unit}</span>
+            <sup className={styles.ref} aria-label={`source ${row.sourceNumber}`}>
+              {row.sourceNumber}
+            </sup>
+          </dd>
+        </div>
+      ))}
+    </dl>
   )
 }

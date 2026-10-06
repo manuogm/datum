@@ -1,4 +1,4 @@
-// Small schematic of each tool, drawn on its Home card and placeholder page:
+// Small schematic of each tool, drawn on its Home card:
 // tolerance zones, a bolt pattern, a ply stack and a property chart.
 import type { ComponentType } from 'react'
 import styles from './ToolIllustration.module.css'
@@ -76,15 +76,12 @@ const DIAGRAMS: Record<ToolSection, ComponentType> = {
   mat: MaterialsDiagram,
 }
 
-interface ToolIllustrationProps {
-  tool: ToolSection
-  width?: number
-}
+const WIDTH = 240
 
-export function ToolIllustration({ tool, width = 240 }: ToolIllustrationProps) {
+export function ToolIllustration({ tool }: { tool: ToolSection }) {
   const Diagram = DIAGRAMS[tool]
   return (
-    <svg className={styles.svg} width={width} height={(width * 140) / 240} viewBox="0 0 300 170" aria-hidden="true">
+    <svg className={styles.svg} width={WIDTH} height={(WIDTH * 140) / 240} viewBox="0 0 300 170" aria-hidden="true">
       <Diagram />
     </svg>
   )

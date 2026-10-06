@@ -1,0 +1,148 @@
+/* The laminate inputs: notation field, ply rows, layup summary and loads. */
+.notation {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.note {
+  font-size: var(--fs-11-5);
+  color: var(--text-faint);
+}
+
+.warnNote {
+  font-size: var(--fs-11-5);
+  color: var(--warn-text);
+}
+
+/* handle · # · material · θ · remove */
+.plyHead,
+.ply {
+  display: grid;
+  grid-template-columns: 12px 18px minmax(0, 1fr) 64px 20px;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.plyHead {
+  padding: 0 var(--space-6);
+  font-family: var(--font-mono);
+  font-size: var(--fs-10-5);
+  color: var(--text-faint);
+}
+
+.plyHead > :nth-child(4) {
+  text-align: center;
+}
+
+.plies {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ply {
+  position: relative;
+  padding: var(--space-2) var(--space-6);
+  border: var(--border-width) solid transparent;
+  border-radius: var(--radius-sm);
+}
+
+.plyAlt {
+  background: var(--surface-sunken);
+}
+
+.plySelected {
+  border-color: var(--accent-border);
+  background: var(--accent-wash);
+}
+
+.plyDragged {
+  opacity: 0.5;
+}
+
+/* Where a dragged ply will land: a rule above or below the row. */
+.dropAbove::before,
+.dropBelow::after {
+  position: absolute;
+  right: var(--space-4);
+  left: var(--space-4);
+  height: 2px;
+  border-radius: 1px;
+  background: var(--accent);
+  content: '';
+}
+
+.dropAbove::before {
+  top: -3px;
+}
+
+.dropBelow::after {
+  bottom: -3px;
+}
+
+.handle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-xs);
+  background: none;
+  color: var(--text-faint);
+  font-size: var(--fs-14);
+  cursor: grab;
+}
+
+.handle:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.plyNumber {
+  font-family: var(--font-mono);
+  font-size: var(--fs-12);
+  color: var(--text-muted);
+}
+
+.warn {
+  color: var(--warn-text);
+}
+
+.bad {
+  color: var(--bad-text);
+}
+
+.critical {
+  font-weight: var(--weight-bold);
+}
+
+.summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-6);
+}
+
+.summaryText {
+  font-family: var(--font-mono);
+  font-size: var(--fs-11-5);
+  color: var(--text-muted);
+}
+
+.loads {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--space-10);
+}
+
+.loadsHead {
+  margin-bottom: calc(-1 * var(--space-4));
+  font-family: var(--font-mono);
+  font-size: var(--fs-10-5);
+  color: var(--text-faint);
+}

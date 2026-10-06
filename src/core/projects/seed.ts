@@ -178,6 +178,31 @@ function caliperMount(m4: [id: string, design: BoltDesignSeed][], outer: string)
     shown: 'LC3',
   }
 }
+type LaminateLoadKey = 'nxNPerMm' | 'nyNPerMm' | 'nxyNPerMm' | 'mxN' | 'myN' | 'mxyN'
+
+/**
+ * Inputs of the Composite Laminate tool (its LaminateInputs shape): one ply
+ * material at the angles of the stack, top ply first, under running loads in
+ * N/mm and N·mm/mm, checked by Tsai-Wu against the composite reserve factor
+ * target. The tool's tests check that each reopens with these inputs and that
+ * its figures are the ones it computes.
+ */
+function laminateInputs(anglesDeg: number[], materialId: string, loads: Partial<Record<LaminateLoadKey, number>>) {
+  return {
+    plies: anglesDeg.map((angleDeg) => ({ materialId, angleDeg })),
+    loads: { nxNPerMm: 0, nyNPerMm: 0, nxyNPerMm: 0, mxN: 0, myN: 0, mxyN: 0, ...loads },
+    criterion: 'tsai-wu',
+    targetReserveFactor: TARGETS.minReserveFactorComposite,
+  }
+}
+
+/** Ply angles of the stacks in the demo projects. */
+const QUASI_ISO = [0, 45, -45, 90, 90, -45, 45, 0] // [0/±45/90]s
+const CROSS_PLY = [0, 90, 90, 0] // [0/90]s
+const ANGLE_PLY = [0, 45, -45, -45, 45, 0] // [0/±45]s
+/** Endplate skin, first three revisions: aero loads on the free edge. */
+const ENDPLATE_LOADS = { nxNPerMm: 168, nxyNPerMm: 100 }
+
 const UPRIGHT_PIN: [string, string] = ['al-7075-t6', 'steel-42crmo4-qt']
 const LOCATE_PIN = { functions: ['locate', 'transmit-torque'], serviceTempC: FW27_TEMP_C }
 
@@ -239,8 +264,9 @@ const REAR_UPRIGHT: Project = {
       {
         at: '2026-10-03T09:20:00', by: AL, status: 'review', title: '[0/±45/90]s',
         note: 'First pass. 90° plies critical under combined Nx + Nxy.',
-        figures: [['RF min', '1.09'], ['Critical plies', '4–5']],
-        materialIds: ['cfrp-t700-m21-qi'],
+        figures: [['RF min', '1.27'], ['Critical plies', '4–5'], ['h', '1.000', 'mm']],
+        inputs: laminateInputs(QUASI_ISO, 'cfrp-t700-m21-ud', { nxNPerMm: 250, nxyNPerMm: 80 }),
+        materialIds: ['cfrp-t700-m21-ud'],
       },
     ]),
     calculation('MD-0012', 'mat', 'wishbone-clevis', [
@@ -325,11 +351,18 @@ const OTHER_PROJECTS: Project[] = [
     parts: parts('Endplate skin', 'Footplate', 'Mounting brackets'),
     calculations: [
       calculation('CL-0090', 'lam', 'endplate-skin', [
-        { at: '2026-09-19T10:00:00', by: AL, status: 'fail', title: '[0/90]s', note: 'Too soft in torsion.', figures: [['RF min', '0.84']] },
-        { at: '2026-09-23T15:30:00', by: AL, status: 'review', title: '[0/±45]s', note: 'Added ±45 plies.', figures: [['RF min', '1.21']] },
-        { at: '2026-09-29T11:45:00', by: AL, status: 'pass', title: '[0/±45/90]s', note: 'Balanced stack.', figures: [['RF min', '1.62']] },
-        { at: '2026-10-02T11:20:00', by: AL, status: 'pass', title: '[0/±45/90]s', note: 'Updated to the new aero loads.', figures: [['RF min', '1.55']],
-          materialIds: ['cfrp-t700-m21-qi'] },
+        { at: '2026-09-19T10:00:00', by: AL, status: 'fail', title: '[0/90]s', note: 'No ±45 plies: τ12 = 200 MPa against S = 95 MPa cracks the matrix.',
+          figures: [['RF min', '0.42'], ['Critical plies', '2–3'], ['h', '0.500', 'mm']],
+          inputs: laminateInputs(CROSS_PLY, 'cfrp-t700-m21-ud', ENDPLATE_LOADS), materialIds: ['cfrp-t700-m21-ud'] },
+        { at: '2026-09-23T15:30:00', by: AL, status: 'review', title: '[0/±45]s', note: 'Added ±45 plies.',
+          figures: [['RF min', '1.47'], ['Critical plies', '3–4'], ['h', '0.750', 'mm']],
+          inputs: laminateInputs(ANGLE_PLY, 'cfrp-t700-m21-ud', ENDPLATE_LOADS), materialIds: ['cfrp-t700-m21-ud'] },
+        { at: '2026-09-29T11:45:00', by: AL, status: 'pass', title: '[0/±45/90]s', note: 'Quasi-isotropic stack.',
+          figures: [['RF min', '1.58'], ['Critical plies', '3, 6'], ['h', '1.000', 'mm']],
+          inputs: laminateInputs(QUASI_ISO, 'cfrp-t700-m21-ud', ENDPLATE_LOADS), materialIds: ['cfrp-t700-m21-ud'] },
+        { at: '2026-10-02T11:20:00', by: AL, status: 'pass', title: '[0/±45/90]s', note: 'Updated to the new aero loads.',
+          figures: [['RF min', '1.51'], ['Critical plies', '3, 6'], ['h', '1.000', 'mm']],
+          inputs: laminateInputs(QUASI_ISO, 'cfrp-t700-m21-ud', { nxNPerMm: 165, nxyNPerMm: 108 }), materialIds: ['cfrp-t700-m21-ud'] },
       ]),
     ],
   }),
@@ -351,7 +384,9 @@ const OTHER_PROJECTS: Project[] = [
     calculations: [
       calculation('CL-0088', 'lam', 'rear-lower', [
         { at: '2026-09-27T16:00:00', by: AL, status: 'review', title: '[0₂/±45]s', note: 'Buckling margin to be confirmed with the new wall.',
-          figures: [['RF min', '1.12']], materialIds: ['cfrp-ud-0'] },
+          figures: [['RF min', '1.23'], ['Critical plies', '1–2, 7–8'], ['h', '1.000', 'mm']],
+          inputs: laminateInputs([0, 0, 45, -45, -45, 45, 0, 0], 'cfrp-im7-8552-ud', { nxNPerMm: -400, nxyNPerMm: 80 }),
+          materialIds: ['cfrp-im7-8552-ud'] },
       ]),
     ],
   }),
@@ -394,8 +429,10 @@ const OTHER_PROJECTS: Project[] = [
     parts: parts('Crash rail', 'Tray floor', 'Rail brackets', 'Rivnut joints'),
     calculations: [
       calculation('CL-0081', 'lam', 'crash-rail', [
-        { at: '2026-09-09T15:00:00', by: AL, status: 'pass', title: 'GFRP crush tube', note: 'Released for the sled test.',
-          figures: [['RF min', '1.74']], materialIds: ['gfrp-e-glass-qi'] },
+        { at: '2026-09-09T15:00:00', by: AL, status: 'pass', title: '[±45/0₂]s', note: 'GFRP crush tube wall. Released for the sled test.',
+          figures: [['RF min', '1.71'], ['Critical plies', '3–6'], ['h', '1.000', 'mm']],
+          inputs: laminateInputs([45, -45, 0, 0, 0, 0, -45, 45], 'gfrp-e-glass-epoxy-ud', { nxNPerMm: -150 }),
+          materialIds: ['gfrp-e-glass-epoxy-ud'] },
       ]),
     ],
   }),

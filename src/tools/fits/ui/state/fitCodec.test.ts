@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest'
+import { DRAFT } from '../../../../core/projects/testData'
 import { FIT_INPUTS_CODEC } from './fitCodec'
 import { DEFAULT_FIT_INPUTS } from './fitInputs'
 
 describe('FIT_INPUTS_CODEC', () => {
   it("starts a fresh calculation at the active project's service temperatures", () => {
-    const projectServiceTempC = { minC: -30, maxC: 85 }
-    expect(FIT_INPUTS_CODEC.fresh(projectServiceTempC)).toEqual({ ...DEFAULT_FIT_INPUTS, serviceTempC: projectServiceTempC })
+    expect(FIT_INPUTS_CODEC.fresh(DRAFT.targets)).toEqual({ ...DEFAULT_FIT_INPUTS, serviceTempC: { minC: -20, maxC: 160 } })
     expect(FIT_INPUTS_CODEC.fresh()).toEqual(DEFAULT_FIT_INPUTS)
   })
 

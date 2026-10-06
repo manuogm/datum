@@ -1,7 +1,9 @@
 // How a tool screen's inputs travel: the query of the URL hash carries them
 // as a shareable link, a project revision stores them, and a fresh
-// calculation starts from defaults with the active project's service
-// temperatures. Each tool supplies a codec for its own inputs.
+// calculation starts from defaults with the active project's design targets
+// (service temperatures, minimum reserve factor). Each tool supplies a codec
+// for its own inputs.
+import type { DesignTargets } from '../../core/projects'
 
 export interface TemperatureRange {
   readonly minC: number
@@ -15,8 +17,8 @@ export interface ToolInputsCodec<Inputs> {
   fromSaved: (saved: unknown) => Inputs
   /** The tool's link with these inputs. */
   href: (inputs: Inputs) => string
-  /** A fresh calculation, at the active project's service temperatures when there is one. */
-  fresh: (projectServiceTempC?: TemperatureRange) => Inputs
+  /** A fresh calculation, with the active project's design targets when there is one. */
+  fresh: (projectTargets?: DesignTargets) => Inputs
 }
 
 /** The query part of the URL hash ('#/fit?d=25' → 'd=25'). */
@@ -29,12 +31,17 @@ export interface StartingPoint {
   saved?: unknown
   /** The query part of the URL hash, without '?'. */
   query: string
-  projectServiceTempC?: TemperatureRange
+  projectTargets?: DesignTargets
+}
+
+/** A project's service temperature range, as the tools hold it. */
+export function serviceTempOf(targets: DesignTargets): TemperatureRange {
+  return { minC: targets.serviceTempMinC, maxC: targets.serviceTempMaxC }
 }
 
 /** Where a tool screen starts: a reopened revision, else a shared link, else a fresh calculation. */
-export function startingInputs<Inputs>(codec: ToolInputsCodec<Inputs>, { saved, query, projectServiceTempC }: StartingPoint): Inputs {
+export function startingInputs<Inputs>(codec: ToolInputsCodec<Inputs>, { saved, query, projectTargets }: StartingPoint): Inputs {
   if (saved !== undefined) return codec.fromSaved(saved)
   if (query !== '') return codec.decode(query)
-  return codec.fresh(projectServiceTempC)
+  return codec.fresh(projectTargets)
 }
