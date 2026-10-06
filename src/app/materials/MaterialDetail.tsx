@@ -1,13 +1,9 @@
 // MaterialDetail: the right column of the Materials page: the selected
 // material's properties (each marked with its reference number), a composite
-// ply's lamina data, the references themselves, where the material is used in projects, and the
-// action to save it as a project part's material.
+// ply's lamina data and the references themselves.
 import { MATERIAL_FAMILIES, type Material, type SourceKind } from '../../core/materials'
-import { materialUsage } from '../../core/projects'
 import type { UnitSystem } from '../../core/units'
-import { useProjects } from '../projects/useProjects'
-import { reopenRevisionHref } from '../projects/reopenLink'
-import { Badge, Button, cx, EmptyState, Marker, markerColor, PanelSection, type Tone } from '../ui'
+import { Badge, cx, Marker, markerColor, PanelSection, type Tone } from '../ui'
 import { mainSourceKind } from './materialFilter'
 import styles from './MaterialDetail.module.css'
 import { materialDetails, type PropertyRow } from './materialProperties'
@@ -24,14 +20,11 @@ const SOURCE_BADGE: Record<SourceKind, { tone: Tone; text: string }> = {
 interface MaterialDetailProps {
   material: Material
   unitSystem: UnitSystem
-  onSaveToProject: () => void
 }
 
-export function MaterialDetail({ material, unitSystem, onSaveToProject }: MaterialDetailProps) {
-  const { projects, active } = useProjects()
+export function MaterialDetail({ material, unitSystem }: MaterialDetailProps) {
   const { rows, lamina, sources } = materialDetails(material, unitSystem)
   const badge = SOURCE_BADGE[mainSourceKind(material)]
-  const usage = materialUsage(projects, material.id)
   const subtitle = [material.spec, material.condition, material.designation].filter(Boolean).join(' · ')
   return (
     <div className={styles.detail}>
@@ -52,7 +45,7 @@ export function MaterialDetail({ material, unitSystem, onSaveToProject }: Materi
           <PropertyList rows={lamina.rows} inSection />
         </PanelSection>
       )}
-      <PanelSection label="Sources">
+      <PanelSection label="Sources" grow>
         <ol className={styles.sources}>
           {sources.map(({ number, source, properties }) => (
             <li key={number} className={styles.source}>
@@ -68,30 +61,6 @@ export function MaterialDetail({ material, unitSystem, onSaveToProject }: Materi
           Room-temperature values for screening, not design allowables (A-/B-basis).
         </p>
       </PanelSection>
-      <PanelSection label="Used in" grow>
-        {usage.length === 0 ? (
-          <EmptyState inset="none">Not used in any project yet.</EmptyState>
-        ) : (
-          <ul className={styles.usage}>
-            {usage.map(({ project, part, calculation, revision }) => (
-              <li key={revision.id}>
-                <a className={styles.use} href={reopenRevisionHref(project.id, revision)}>
-                  <Marker shape="diamond" size={7} color={project.id === active?.projectId ? 'accent' : 'faint'} />
-                  <span className={styles.useName}>
-                    {project.name} · {part.name}
-                  </span>
-                  <span className={styles.useId}>{calculation.id}</span>
-                </a>
-              </li>
-            ))}
-          </ul>
-        )}
-      </PanelSection>
-      <div className={styles.actions}>
-        <Button variant="primary" block onClick={onSaveToProject}>
-          Save to project
-        </Button>
-      </div>
     </div>
   )
 }

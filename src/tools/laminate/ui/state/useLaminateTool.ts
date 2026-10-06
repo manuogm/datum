@@ -1,17 +1,17 @@
-// The Composite Laminate tool's state: the inputs (see useToolInputs for the
-// URL, reopened revisions and project pre-fill) and the CLT analysis derived
-// from them. The analysis is in SI; the screens convert when they show it.
+// The Composite Laminate tool's state for one calculation: the inputs (loaded
+// from and autosaved to the library, see useCalculationInputs) and the CLT
+// analysis derived from them. The analysis is in SI; the screens convert when
+// they show it.
 import { useMemo } from 'react'
-import { useToolInputs } from '../../../../app/tools/useToolInputs'
+import { useCalculationInputs } from '../../../../app/tools/useCalculationInputs'
+import type { Calculation } from '../../../../core/library'
+import { lamSnapshot } from '../lamSnapshot'
 import { analyse } from '../logic/lamResults'
-import { LAM_INPUTS_CODEC } from './lamCodec'
-import type { LaminateInputs } from './lamInputs'
-import { lamReducer, type LamAction } from './lamReducer'
+import { lamReducer } from './lamReducer'
+import { lamInputsFrom } from './readInputs'
 
-const loadAll = (inputs: LaminateInputs): LamAction => ({ type: 'change', changes: inputs })
-
-export function useLaminateTool() {
-  const [inputs, dispatch] = useToolInputs({ tool: 'lam', reducer: lamReducer, load: loadAll, ...LAM_INPUTS_CODEC })
+export function useLaminateTool(calculation: Calculation) {
+  const [inputs, dispatch] = useCalculationInputs({ calculation, reducer: lamReducer, inputsFrom: lamInputsFrom, snapshot: lamSnapshot })
   const analysis = useMemo(() => analyse(inputs), [inputs])
   return { inputs, dispatch, analysis }
 }

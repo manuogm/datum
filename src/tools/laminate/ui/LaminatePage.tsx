@@ -3,19 +3,17 @@
 // through the thickness in the centre, first-ply failure and the laminate
 // stiffness on the right.
 //
-// "Save revision" saves a snapshot of the laminate to a project through the
-// Save-to-Project dialog. "PDF report" opens the printable report of the
-// same inputs.
-import { useMemo, useState } from 'react'
+// The page shows one calculation of the library and saves its inputs as they
+// change. "Report" opens the printable report of the calculation.
+import { useState } from 'react'
 import { AppLayout } from '../../../app/AppLayout'
-import { SaveRevisionDialog } from '../../../app/projects/SaveRevisionDialog'
-import { useProjects } from '../../../app/projects/useProjects'
 import { useSettings } from '../../../app/settings/settings'
+import { ReportButton } from '../../../app/tools/ReportButton'
 import { Badge, Button, Callout, Column, ColumnHeader, ColumnRow, SegmentedControl } from '../../../app/ui'
+import type { Calculation } from '../../../core/library'
 import { CriterionFields } from './editor/CriterionFields'
 import { LayupEditor } from './editor/LayupEditor'
 import { LoadsFields } from './editor/LoadsFields'
-import { lamSnapshot } from './lamSnapshot'
 import { CRITERION_LABELS } from './logic/labels'
 import { plyTones } from './logic/verdict'
 import { PLOT_COMPONENTS, type PlotComponent } from './logic/thicknessPlot'
@@ -23,28 +21,19 @@ import { OptimiserPanel } from './optimiser/OptimiserPanel'
 import { LaminateDrawings } from './plots/LaminateDrawings'
 import { LaminateResults } from './results/LaminateResults'
 import styles from './LaminatePage.module.css'
-import { LAM_INPUTS_CODEC } from './state/lamCodec'
-import { lamHref } from './state/urlState'
+import { DEFAULT_LAMINATE_INPUTS } from './state/lamInputs'
 import { useLaminateTool } from './state/useLaminateTool'
 
-export function LaminatePage() {
-  const { inputs, dispatch, analysis } = useLaminateTool()
+export function LaminatePage({ calculation }: { calculation: Calculation }) {
+  const { inputs, dispatch, analysis } = useLaminateTool(calculation)
   const { unitSystem: system } = useSettings()
-  const { activeProject } = useProjects()
-  const [saving, setSaving] = useState(false)
   const [chosenPly, setChosenPly] = useState<number | null>(null)
   const [component, setComponent] = useState<PlotComponent>('sx')
-  const snapshot = useMemo(() => lamSnapshot(inputs), [inputs])
   const result = analysis.ok ? analysis.value : null
   const selectedPly = chosenPly !== null && chosenPly <= inputs.plies.length ? chosenPly : null
   const criticalPlies = result?.firstPlyFailure.criticalPlies ?? []
-  const toolActions = {
-    onSaveRevision: () => setSaving(true),
-    onDownloadReport: () => window.location.assign(lamHref(inputs, 'report', true)),
-    saveBlockedReason: snapshot.ok ? undefined : `Nothing to save: ${snapshot.error}`,
-  }
   return (
-    <AppLayout section="lam" toolActions={toolActions}>
+    <AppLayout current={{ tab: 'calc', id: calculation.id }} actions={<ReportButton calculationId={calculation.id} />}>
       <ColumnRow>
         <Column
           width="inputs"
@@ -53,7 +42,7 @@ export function LaminatePage() {
             <ColumnHeader
               title="Inputs"
               actions={
-                <Button variant="link" size="sm" onClick={() => dispatch({ type: 'change', changes: LAM_INPUTS_CODEC.fresh(activeProject?.targets) })}>
+                <Button variant="link" size="sm" onClick={() => dispatch({ type: 'change', changes: DEFAULT_LAMINATE_INPUTS })}>
                   Reset
                 </Button>
               }
@@ -115,7 +104,6 @@ export function LaminatePage() {
           {result && <LaminateResults analysis={result} system={system} selectedPly={selectedPly} onSelectPly={setChosenPly} />}
         </Column>
       </ColumnRow>
-      {saving && snapshot.ok && <SaveRevisionDialog snapshot={snapshot.value} onClose={() => setSaving(false)} />}
     </AppLayout>
   )
 }

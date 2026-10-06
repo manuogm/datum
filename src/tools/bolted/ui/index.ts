@@ -1,6 +1,6 @@
 /**
  * Bolted Joint tool screens: the tool page (single joint and bolt pattern),
- * its printable report, and the snapshot it hands to a project on "Save revision".
+ * its printable report, and the snapshot that summarises a calculation in the library.
  */
 export { BoltedJointPage } from './BoltedJointPage'
 export { boltSnapshot } from './boltSnapshot'

@@ -1,11 +1,10 @@
-// What "Save revision" hands to a project: the laminate on screen, its
-// first-ply failure verdict against the target, its headline numbers in SI,
-// the complete inputs so the revision reopens exactly as saved, and the ply
-// materials for "Used in" on the Materials page.
-import type { ToolSnapshot } from '../../../core/projects'
+// What the library lists about a laminate calculation: the layup on screen
+// (in the title), its first-ply failure verdict against the target, its
+// headline numbers in SI and the complete inputs.
+import type { ToolSnapshot } from '../../../core/library'
 import { fail, ok, type Result } from '../../../core/result'
 import { formatQuantity } from '../../../core/units'
-import { analyse, materialIdsOf } from './logic/lamResults'
+import { analyse } from './logic/lamResults'
 import { formatFactor, plyRangeText } from './logic/labels'
 import { laminateStatus } from './logic/verdict'
 import type { LaminateInputs } from './state/lamInputs'
@@ -26,6 +25,5 @@ export function lamSnapshot(inputs: LaminateInputs): Result<ToolSnapshot<Laminat
       { label: 'h', value: formatQuantity('length', 'si', layup.thicknessMm), unit: 'mm' },
     ],
     inputs,
-    materialIds: materialIdsOf(inputs),
   })
 }

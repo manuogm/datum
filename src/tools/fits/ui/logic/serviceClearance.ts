@@ -1,9 +1,9 @@
 // A fit in service, as the screens show it: its clearance at the coldest and
 // hottest service temperature and at the 20 °C reference, and the advisor's
 // verdict on the in-service range against the required window (see
-// inServiceClearance), as a project status.
+// inServiceClearance), as a calculation status.
 import type { Material } from '../../../../core/materials'
-import type { ToolSnapshot } from '../../../../core/projects/revision'
+import type { CalculationStatus } from '../../../../core/library'
 import {
   clearanceAt, clearanceShiftUmPerK, inServiceClearance, REFERENCE_TEMP_C,
   type CheckStatus, type ClearanceAtTemperature, type ClearanceRangeUm,
@@ -11,7 +11,7 @@ import {
 import type { FitAnalysis } from '../../calc'
 import type { FitInputs } from '../state/fitInputs'
 
-export type FitStatus = ToolSnapshot['status']
+export type FitStatus = CalculationStatus
 
 /** Colder than, at, or hotter than the 20 °C reference temperature. */
 export type BandKind = 'cold' | 'reference' | 'hot'

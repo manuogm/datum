@@ -1,6 +1,6 @@
 /**
  * Fit Tolerance tool screens: the tool page (advisor and calculator), its
- * printable report, and the snapshot it hands to a project on "Save revision".
+ * printable report, and the snapshot that summarises a calculation in the library.
  */
 export { FitTolerancePage } from './FitTolerancePage'
 export { fitSnapshot } from './fitSnapshot'

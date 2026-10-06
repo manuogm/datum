@@ -115,42 +115,11 @@
   color: var(--text-faint);
 }
 
-.caution,
-.usage {
+.caution {
   display: flex;
   flex-direction: column;
   gap: var(--space-8);
   margin: 0;
   padding: 0;
   list-style: none;
-}
-
-.use {
-  display: flex;
-  align-items: center;
-  gap: var(--space-8);
-  font-size: var(--fs-12-5);
-  color: var(--text);
-}
-
-.use:hover {
-  color: var(--accent-fg);
-}
-
-.useName {
-  flex: 1;
-  min-width: 0;
-}
-
-.useId {
-  font-family: var(--font-mono);
-  font-size: var(--fs-11);
-  color: var(--text-muted);
-}
-
-.actions {
-  display: flex;
-  gap: var(--space-8);
-  padding: var(--space-14) var(--space-22);
-  border-top: var(--border-width) solid var(--border-subtle);
 }

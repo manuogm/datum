@@ -88,8 +88,3 @@ function jointType(spec: JointDesignSpec['joint']): Result<JointDesign['joint']>
     ...(spec.outerThread && { outerThread: spec.outerThread }),
   })
 }
-
-/** Ids of every material a set of joint designs uses, each once. */
-export function materialIdsOf(designs: readonly JointDesignSpec[]): string[] {
-  return [...new Set(designs.flatMap((d) => [...d.plates.map((p) => p.materialId), ...(d.joint.kind === 'through-bolt' ? [] : [d.joint.materialId])]))]
-}

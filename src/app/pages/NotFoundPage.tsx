@@ -1,22 +1,20 @@
-// NotFoundPage: what an address with nothing behind it shows (an unknown
-// route, a project code this browser does not hold), in the flush-column
-// language: the title on top, a hatched stage with the way back.
+// NotFoundPage: what an address with nothing behind it shows (a calculation
+// or folder deleted here or in another browser tab, or an old link), in the
+// flush-column language: the title on top, a hatched stage with the way back.
 import styles from './NotFoundPage.module.css'
 import { AppLayout } from '../AppLayout'
-import { routeHref, type Section } from '../router/routes'
+import { folderHref } from '../router/routes'
 import { Badge, Button, ColumnRow, PageTitle } from '../ui'
 
 interface NotFoundPageProps {
-  /** The header tab to keep selected, if any. */
-  section: Section | null
   eyebrow: string
   title: string
   message: string
 }
 
-export function NotFoundPage({ section, eyebrow, title, message }: NotFoundPageProps) {
+export function NotFoundPage({ eyebrow, title, message }: NotFoundPageProps) {
   return (
-    <AppLayout section={section}>
+    <AppLayout current={null}>
       <div className={styles.head}>
         <PageTitle eyebrow={eyebrow} title={title}>
           <Badge tone="bad" size="md">
@@ -28,10 +26,9 @@ export function NotFoundPage({ section, eyebrow, title, message }: NotFoundPageP
         <div className={styles.stage}>
           <p className={styles.message}>{message}</p>
           <div className={styles.actions}>
-            <Button variant="primary" href={routeHref({ name: 'home' })}>
+            <Button variant="primary" href={folderHref(null)}>
               Back to Home
             </Button>
-            <Button href={routeHref({ name: 'projects' })}>Open projects</Button>
           </div>
         </div>
       </ColumnRow>

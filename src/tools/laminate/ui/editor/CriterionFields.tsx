@@ -1,7 +1,5 @@
 // How the plies are judged: the failure criterion, and the reserve factor the
-// laminate must reach (a fresh calculation takes the active project's
-// composite minimum, marked as such while it still matches).
-import { useProjects } from '../../../../app/projects/useProjects'
+// laminate must reach.
 import { InputWell, NumberInput, PanelSection, Select, ValueRow } from '../../../../app/ui'
 import { formatDecimal } from '../../../../core/units'
 import { DEFAULT_TSAI_WU_F12_STAR, type FailureCriterion } from '../../calc'
@@ -17,10 +15,8 @@ interface CriterionFieldsProps {
 }
 
 export function CriterionFields({ criterion, targetReserveFactor, onChange }: CriterionFieldsProps) {
-  const { activeProject } = useProjects()
-  const fromProject = activeProject?.targets.minReserveFactorComposite === targetReserveFactor
   return (
-    <PanelSection label="Ply failure" aside={fromProject ? '◆ from project targets' : undefined}>
+    <PanelSection label="Ply failure">
       <Select
         size="md"
         aria-label="Failure criterion"

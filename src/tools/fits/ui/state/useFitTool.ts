@@ -1,19 +1,18 @@
-// The Fit Tolerance tool's state: the inputs (see useToolInputs for the URL,
-// reopened revisions and project pre-fill) and the engine results derived
-// from them.
+// The Fit Tolerance tool's state for one calculation: the inputs (loaded from
+// and autosaved to the library, see useCalculationInputs) and the engine
+// results derived from them.
 import { useMemo } from 'react'
 import { useSettings } from '../../../../app/settings/settings'
-import { useToolInputs } from '../../../../app/tools/useToolInputs'
+import { useCalculationInputs } from '../../../../app/tools/useCalculationInputs'
+import type { Calculation } from '../../../../core/library'
+import { fitSnapshot } from '../fitSnapshot'
 import { fitResults } from '../logic/fitResults'
-import { FIT_INPUTS_CODEC } from './fitCodec'
-import type { FitInputs } from './fitInputs'
-import { fitReducer, type FitAction } from './fitReducer'
+import { fitReducer } from './fitReducer'
+import { fitInputsFrom } from './readInputs'
 
-const loadAll = (inputs: FitInputs): FitAction => ({ type: 'change', changes: inputs })
-
-export function useFitTool() {
+export function useFitTool(calculation: Calculation) {
   const { unitSystem } = useSettings()
-  const [inputs, dispatch] = useToolInputs({ tool: 'fit', reducer: fitReducer, load: loadAll, ...FIT_INPUTS_CODEC })
+  const [inputs, dispatch] = useCalculationInputs({ calculation, reducer: fitReducer, inputsFrom: fitInputsFrom, snapshot: fitSnapshot })
   const results = useMemo(() => fitResults(inputs, unitSystem), [inputs, unitSystem])
   return { inputs, dispatch, results }
 }

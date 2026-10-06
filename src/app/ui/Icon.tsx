@@ -10,6 +10,9 @@ export type IconName =
   | 'download'
   | 'close'
   | 'arrow-right'
+  | 'plus'
+  | 'more'
+  | 'folder'
   | 'tool-fit'
   | 'tool-bolt'
   | 'tool-lam'
@@ -38,7 +41,11 @@ const ICONS: Record<IconName, { box: number; body: ReactElement }> = {
   download: { box: 12, body: <path d="M6 1v7M3 5l3 3 3-3M1.5 11h9" strokeWidth="1.6" /> },
   close: { box: 12, body: <path d="M2.5 2.5l7 7M9.5 2.5l-7 7" strokeWidth="1.4" /> },
   'arrow-right': { box: 12, body: <path d="M1.5 6h8.5M6.5 2.5L10 6l-3.5 3.5" strokeWidth="1.4" /> },
-  // Tool glyphs (drawn on a 20px grid, shown at 12px in the projects table).
+  plus: { box: 12, body: <path d="M6 1.5v9M1.5 6h9" strokeWidth="1.5" /> },
+  // Three dots of a row menu, drawn as zero-length round-capped strokes.
+  more: { box: 14, body: <path d="M3 7h0M7 7h0M11 7h0" strokeWidth="2.2" strokeLinecap="round" /> },
+  folder: { box: 20, body: <path d="M2 4.5h6l2 2.5h8v9.5H2Z" strokeWidth="1.8" strokeLinejoin="round" /> },
+  // Tool glyphs (drawn on a 20px grid, shown at 12–14px in tabs and folder lists).
   'tool-fit': {
     box: 20,
     body: (

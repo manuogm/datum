@@ -1,6 +1,6 @@
 // Verdicts for a joint or a pattern: the tone a utilisation is shown in, and
 // the load case that governs a pattern.
-import type { ToolSnapshot } from '../../../../core/projects'
+import type { CalculationStatus } from '../../../../core/library'
 import type { Result } from '../../../../core/result'
 import { formatDecimal } from '../../../../core/units'
 import type { BoltedJointAnalysis, StepStatus } from '../../calc'
@@ -29,8 +29,8 @@ export function utilisationTone(utilisation: number, status: CheckStatus): Utili
   return status === 'warn' || utilisation >= REVIEW_UTILISATION ? 'warn' : 'ok'
 }
 
-/** A check status as a project status. */
-export const PROJECT_STATUS: Record<CheckStatus, ToolSnapshot['status']> = { pass: 'pass', warn: 'review', fail: 'fail' }
+/** A check status as a calculation status. */
+export const CALCULATION_STATUS: Record<CheckStatus, CalculationStatus> = { pass: 'pass', warn: 'review', fail: 'fail' }
 
 const SEVERITY: Record<CheckStatus, number> = { pass: 0, warn: 1, fail: 2 }
 

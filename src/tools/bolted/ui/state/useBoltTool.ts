@@ -1,19 +1,18 @@
-// The Bolted Joint tool's state: the inputs (see useToolInputs for the URL,
-// reopened revisions and project pre-fill) and the engine results derived
-// from them.
+// The Bolted Joint tool's state for one calculation: the inputs (loaded from
+// and autosaved to the library, see useCalculationInputs) and the engine
+// results derived from them.
 import { useMemo } from 'react'
 import { useSettings } from '../../../../app/settings/settings'
-import { useToolInputs } from '../../../../app/tools/useToolInputs'
+import { useCalculationInputs } from '../../../../app/tools/useCalculationInputs'
+import type { Calculation } from '../../../../core/library'
+import { boltSnapshot } from '../boltSnapshot'
 import { boltResults } from '../logic/boltResults'
-import { BOLT_INPUTS_CODEC } from './boltCodec'
-import type { BoltInputs } from './boltInputs'
-import { boltReducer, type BoltAction } from './boltReducer'
+import { boltReducer } from './boltReducer'
+import { boltInputsFrom } from './readInputs'
 
-const loadAll = (inputs: BoltInputs): BoltAction => ({ type: 'change', changes: inputs })
-
-export function useBoltTool() {
+export function useBoltTool(calculation: Calculation) {
   const { unitSystem } = useSettings()
-  const [inputs, dispatch] = useToolInputs({ tool: 'bolt', reducer: boltReducer, load: loadAll, ...BOLT_INPUTS_CODEC })
+  const [inputs, dispatch] = useCalculationInputs({ calculation, reducer: boltReducer, inputsFrom: boltInputsFrom, snapshot: boltSnapshot })
   const results = useMemo(() => boltResults(inputs, unitSystem), [inputs, unitSystem])
   return { inputs, dispatch, results }
 }

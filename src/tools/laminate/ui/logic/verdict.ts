@@ -1,16 +1,15 @@
 // What the first-ply failure means for the laminate: the verdict words of the
-// results column and the report, its tone, and the project status of a saved
-// revision.
+// results column and the report, its tone, and the status the library lists.
 import type { Status } from '../../../../app/ui'
-import type { ToolSnapshot } from '../../../../core/projects'
+import type { CalculationStatus } from '../../../../core/library'
 import { reserveStatus, type LaminateAnalysis, type ReserveStatus } from '../../calc'
 import { angleText, criticalPhrase, formatFactor, plyRangeText } from './labels'
 
-const PROJECT_STATUS: Record<ReserveStatus, ToolSnapshot['status']> = { pass: 'pass', warn: 'review', fail: 'fail' }
+const CALCULATION_STATUS: Record<ReserveStatus, CalculationStatus> = { pass: 'pass', warn: 'review', fail: 'fail' }
 
-/** The project status of a laminate: review when nothing loads it (RF ∞ checks nothing), else the engine's verdict. */
-export function laminateStatus({ reserveFactor, status }: Pick<LaminateAnalysis['firstPlyFailure'], 'reserveFactor' | 'status'>): ToolSnapshot['status'] {
-  return Number.isFinite(reserveFactor) ? PROJECT_STATUS[status] : 'review'
+/** The calculation status of a laminate: review when nothing loads it (RF ∞ checks nothing), else the engine's verdict. */
+export function laminateStatus({ reserveFactor, status }: Pick<LaminateAnalysis['firstPlyFailure'], 'reserveFactor' | 'status'>): CalculationStatus {
+  return Number.isFinite(reserveFactor) ? CALCULATION_STATUS[status] : 'review'
 }
 
 export const STATUS_TONE: Record<ReserveStatus, Status> = { pass: 'ok', warn: 'warn', fail: 'bad' }

@@ -1,9 +1,9 @@
-// Small schematic of each tool, drawn on its Home card:
-// tolerance zones, a bolt pattern, a ply stack and a property chart.
+// Small schematic of each tool, drawn on its card in the New calculation
+// dialog: tolerance zones, a bolt pattern and a ply stack.
 import type { ComponentType } from 'react'
 import styles from './ToolIllustration.module.css'
 import { cx } from '../ui'
-import type { ToolSection } from './homeData'
+import type { ToolId } from '../../core/library'
 
 function FitDiagram() {
   return (
@@ -54,31 +54,15 @@ function LaminateDiagram() {
   )
 }
 
-function MaterialsDiagram() {
-  return (
-    <>
-      <line x1="30" x2="30" y1="10" y2="150" className={styles.strokeFaint} strokeWidth="1" />
-      <line x1="30" x2="290" y1="150" y2="150" className={styles.strokeFaint} strokeWidth="1" />
-      <line x1="40" x2="280" y1="140" y2="20" className={styles.strokeStrong} strokeWidth="1" strokeDasharray="4 3" />
-      <ellipse cx="110" cy="80" rx="26" ry="12" className={styles.strokeAluminium} strokeWidth="1.2" />
-      <ellipse cx="170" cy="58" rx="18" ry="10" className={styles.strokeTitanium} strokeWidth="1.2" />
-      <ellipse cx="240" cy="40" rx="26" ry="12" className={styles.strokeSteel} strokeWidth="1.2" />
-      <ellipse cx="80" cy="50" rx="18" ry="22" className={styles.strokeComposite} strokeWidth="1.2" />
-      <circle cx="170" cy="58" r="4" className={styles.fillAccent} />
-    </>
-  )
-}
-
-const DIAGRAMS: Record<ToolSection, ComponentType> = {
+const DIAGRAMS: Record<ToolId, ComponentType> = {
   fit: FitDiagram,
   bolt: BoltDiagram,
   lam: LaminateDiagram,
-  mat: MaterialsDiagram,
 }
 
 const WIDTH = 240
 
-export function ToolIllustration({ tool }: { tool: ToolSection }) {
+export function ToolIllustration({ tool }: { tool: ToolId }) {
   const Diagram = DIAGRAMS[tool]
   return (
     <svg className={styles.svg} width={WIDTH} height={(WIDTH * 140) / 240} viewBox="0 0 300 170" aria-hidden="true">

@@ -1,57 +1,37 @@
 // Materials Database page ("Materials" design): filters on the left, the
 // E–ρ chart and the matching materials in the centre, the selected material
-// with its sources on the right. Opening "#/mat?rev=…" selects the material
-// saved in that project revision.
+// with its sources on the right. A reference page, not a calculation: it is
+// opened from the Materials button of the top bar.
 import { useState } from 'react'
 import { MATERIALS, materialById } from '../../core/materials'
 import { AppLayout } from '../AppLayout'
-import { useReopenedRevision } from '../projects/reopenLink'
-import { SaveRevisionDialog } from '../projects/SaveRevisionDialog'
-import { useProjects } from '../projects/useProjects'
 import { useSettings } from '../settings/settings'
 import { Badge, Column, ColumnHeader, ColumnRow, EmptyState } from '../ui'
 import { MaterialDetail } from './MaterialDetail'
 import { defaultFilter, matchesFilter, type MaterialFilter } from './materialFilter'
 import { MaterialFilters } from './MaterialFilters'
-import { materialSnapshot } from './materialProperties'
 import styles from './MaterialsPage.module.css'
 import { MaterialTable } from './MaterialTable'
 import { PropertyChart } from './PropertyChart'
 
-function materialIdOf(inputs: unknown): string | undefined {
-  const id = (inputs as { materialId?: unknown } | null)?.materialId
-  return typeof id === 'string' ? id : undefined
-}
-
 export function MaterialsPage() {
   const { unitSystem } = useSettings()
-  const { activeProject } = useProjects()
-  const reopened = useReopenedRevision('mat')
-  const projectTempC = activeProject?.targets.serviceTempMaxC
-  const [filter, setFilter] = useState<MaterialFilter>(() => defaultFilter(projectTempC))
+  const [filter, setFilter] = useState<MaterialFilter>(() => defaultFilter())
   const [pickedId, setPickedId] = useState<string | null>(null)
-  const [saving, setSaving] = useState(false)
 
   const shown = MATERIALS.filter((m) => matchesFilter(m, filter))
-  const selectedId = pickedId ?? materialIdOf(reopened?.revision.snapshot.inputs) ?? shown[0]?.id ?? null
+  const selectedId = pickedId ?? shown[0]?.id ?? null
   const selected = selectedId ? materialById(selectedId) : null
-  const temperatureNote =
-    activeProject && filter.minServiceTempC === projectTempC ? `◆ from ${activeProject.name}` : undefined
 
   return (
-    <AppLayout section="mat">
+    <AppLayout current="materials">
       <ColumnRow>
         <Column
           width="filters"
           label="Filters"
           header={<ColumnHeader title="Filters" meta={`${shown.length} OF ${MATERIALS.length}`} />}
         >
-          <MaterialFilters
-            filter={filter}
-            onChange={setFilter}
-            unitSystem={unitSystem}
-            temperatureNote={temperatureNote}
-          />
+          <MaterialFilters filter={filter} onChange={setFilter} unitSystem={unitSystem} />
         </Column>
         <Column
           label="Materials"
@@ -78,15 +58,12 @@ export function MaterialsPage() {
         </Column>
         <Column width="results" divider={false} wrap label="Selected material">
           {selected?.ok ? (
-            <MaterialDetail material={selected.value} unitSystem={unitSystem} onSaveToProject={() => setSaving(true)} />
+            <MaterialDetail material={selected.value} unitSystem={unitSystem} />
           ) : (
             <EmptyState>Choose a material in the chart or the table.</EmptyState>
           )}
         </Column>
       </ColumnRow>
-      {saving && selected?.ok && (
-        <SaveRevisionDialog snapshot={materialSnapshot(selected.value)} onClose={() => setSaving(false)} />
-      )}
     </AppLayout>
   )
 }

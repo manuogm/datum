@@ -1,0 +1,121 @@
+/* ResultsLayout: the verdict, then two full-width disclosure bars. */
+.layout {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.verdict {
+  max-width: 960px;
+  padding: var(--space-20);
+}
+
+.depth {
+  display: flex;
+  flex-direction: column;
+  border-top: var(--border-width) solid var(--border);
+}
+
+.depth:last-child {
+  border-bottom: var(--border-width) solid var(--border);
+}
+
+.heading {
+  margin: 0;
+  font: inherit;
+}
+
+.toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-12);
+  width: 100%;
+  min-height: var(--bar-height);
+  box-sizing: border-box;
+  margin: 0;
+  padding: var(--space-12) var(--space-20);
+  border: 0;
+  background: none;
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.toggle:hover {
+  background: var(--surface-hover);
+}
+
+.toggle:focus-visible {
+  outline: var(--border-width) solid var(--accent);
+  outline-offset: -4px;
+}
+
+.label {
+  flex: none;
+  font-family: var(--font-mono);
+  font-size: var(--fs-11);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--accent-fg);
+}
+
+.toggle:hover .label {
+  color: var(--accent-fg-hover);
+}
+
+.summary {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  font-size: var(--fs-12-5);
+  color: var(--text-muted);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chevron {
+  flex: none;
+  margin-left: auto;
+  color: var(--text-faint);
+  transition: transform 120ms ease;
+}
+
+.open .chevron {
+  transform: rotate(180deg);
+  color: var(--text-secondary);
+}
+
+.open .toggle {
+  border-bottom: var(--border-width) solid var(--border-subtle);
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.panel[hidden] {
+  display: none;
+}
+
+@media (max-width: 640px) {
+  .verdict {
+    padding: var(--space-16);
+  }
+
+  .toggle {
+    flex-wrap: wrap;
+    gap: var(--space-4) var(--space-12);
+    padding-left: var(--space-16);
+    padding-right: var(--space-16);
+  }
+
+  /* The summary drops under the label instead of truncating to nothing. */
+  .summary {
+    order: 3;
+    flex-basis: 100%;
+    white-space: normal;
+  }
+}

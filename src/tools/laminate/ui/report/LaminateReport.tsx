@@ -1,8 +1,8 @@
 // The A4 report of a laminate: title block, first-ply failure verdict,
 // inputs, the ply stack and failure index through the thickness, the
-// laminate stiffness, every ply at its critical face, warnings and sign-off.
+// laminate stiffness, every ply at its critical face, warnings and footer.
 import {
-  Report, ReportFacts, ReportFigure, ReportSection, ReportSignOff, ReportSummary, ReportSummaryCell, ReportTitleBlock,
+  Report, ReportFacts, ReportFigure, ReportSection, ReportFooter, ReportSummary, ReportSummaryCell, ReportTitleBlock,
   ReportWarnings, reportStyles as styles, type ReportStatus,
 } from '../../../../app/report'
 import { cx } from '../../../../app/ui'
@@ -27,12 +27,14 @@ const STATUS_HEADLINE: Record<ReportStatus, string> = {
 }
 
 interface LaminateReportProps {
+  /** The calculation's name in the library. */
+  name: string
   analysis: LaminateAnalysis
   inputs: LaminateInputs
   system: UnitSystem
 }
 
-export function LaminateReport({ analysis, inputs, system }: LaminateReportProps) {
+export function LaminateReport({ name, analysis, inputs, system }: LaminateReportProps) {
   const { layup, firstPlyFailure } = analysis
   const status = laminateStatus(firstPlyFailure)
   const warnings = laminateWarnings(analysis)
@@ -43,6 +45,7 @@ export function LaminateReport({ analysis, inputs, system }: LaminateReportProps
     <Report>
       <ReportTitleBlock
         title="Composite Laminate Report"
+        calculation={name}
         subtitle={`${layup.notation} · ${materials}`}
         meta={[['Criterion', CRITERION_LABELS[inputs.criterion]], ['Units', unitsLine(system)]]}
       />
@@ -90,7 +93,7 @@ export function LaminateReport({ analysis, inputs, system }: LaminateReportProps
       </ReportSection>
 
       <ReportWarnings heading="5 · Warnings" warnings={warnings} />
-      <ReportSignOff standards={STANDARDS} />
+      <ReportFooter standards={STANDARDS} />
     </Report>
   )
 }

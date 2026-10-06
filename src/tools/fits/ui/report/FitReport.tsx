@@ -1,7 +1,7 @@
 // The content of the A4 fit report: title block, summary, inputs, zone
-// diagram, results with formulas and sources, warnings and sign-off.
+// diagram, results with formulas and sources, warnings and footer.
 import {
-  Report, ReportFacts, ReportFigure, ReportSection, ReportSignOff, ReportSummary, ReportSummaryCell, ReportTitleBlock,
+  Report, ReportFacts, ReportFigure, ReportSection, ReportFooter, ReportSummary, ReportSummaryCell, ReportTitleBlock,
   ReportWarnings, reportStyles as styles, type ReportStatus,
 } from '../../../../app/report'
 import { MathText } from '../../../../app/ui'
@@ -25,13 +25,15 @@ const STATUS_HEADLINE: Record<ReportStatus, string> = {
 }
 
 interface FitReportProps {
+  /** The calculation's name in the library. */
+  name: string
   fit: FitAnalysis
   inputs: FitInputs
   results: FitResults
   system: UnitSystem
 }
 
-export function FitReport({ fit, inputs, results, system }: FitReportProps) {
+export function FitReport({ name, fit, inputs, results, system }: FitReportProps) {
   const service = serviceClearance(fit, inputs, results.housing, results.shaft)
   const candidate = candidateFor(results, fit.designation)
   const materialNotes = results.advice.ok ? results.advice.value.materialNotes : []
@@ -45,6 +47,7 @@ export function FitReport({ fit, inputs, results, system }: FitReportProps) {
     <Report>
       <ReportTitleBlock
         title="Fit Tolerance Report"
+        calculation={name}
         subtitle={`${nominalLabel(fit.nominalMm, system)} ${fit.designation}${preferred ? ` · ${preferred.name}` : ''}`}
         meta={[['Selected by', source], ['Units', system === 'si' ? 'SI (mm, µm, °C)' : 'Imperial (in, thou, °F)']]}
       />
@@ -116,7 +119,7 @@ export function FitReport({ fit, inputs, results, system }: FitReportProps) {
       </ReportSection>
 
       <ReportWarnings heading="4 · Warnings" warnings={warnings} />
-      <ReportSignOff standards={STANDARDS} />
+      <ReportFooter standards={STANDARDS} />
     </Report>
   )
 }
