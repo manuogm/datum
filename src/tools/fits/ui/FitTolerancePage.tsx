@@ -5,12 +5,13 @@
 // One step is on screen at a time; the step bar goes back to any step reached.
 //
 // The page shows one calculation of the library. "Save" stores the inputs on
-// screen; "Report" opens the printable report of the calculation. A saved
-// calculation opens on its results, a new one on its first step.
+// screen; "Report" opens the printable report of the calculation. A new
+// calculation opens on its first step, any other on Results (useCalculationSteps).
 import { AppLayout } from '../../../app/AppLayout'
 import { useSettings } from '../../../app/settings/settings'
 import { CalculationActions } from '../../../app/tools/CalculationActions'
-import { StepBar, useStepFlow } from '../../../app/ui'
+import { useCalculationSteps } from '../../../app/tools/calculationSteps'
+import { StepBar } from '../../../app/ui'
 import type { Calculation } from '../../../core/library'
 import { AdvisorResults } from './advisor/AdvisorResults'
 import { ApplicationStep } from './advisor/ApplicationStep'
@@ -19,7 +20,7 @@ import { SizeMaterialsStep } from './advisor/SizeMaterialsStep'
 import { CalculatorResults } from './calculator/CalculatorResults'
 import { ServiceStep } from './calculator/ServiceStep'
 import { SizeFitStep } from './calculator/SizeFitStep'
-import { fitSteps, initialStep, stepFault, type FitStepId } from './logic/fitSteps'
+import { fitSteps, stepFault, type FitStepId } from './logic/fitSteps'
 import type { FitStepProps } from './shared/stepProps'
 import type { FitMode } from './state/fitInputs'
 import { useFitTool } from './state/useFitTool'
@@ -29,7 +30,7 @@ export function FitTolerancePage({ calculation }: { calculation: Calculation }) 
   const { unitSystem } = useSettings()
   const fault = stepFault(inputs, results)
   const steps = fitSteps(inputs, fault)
-  const flow = useStepFlow(steps, { memoryKey: `calc:${calculation.id}`, initial: initialStep(calculation, steps.length) })
+  const flow = useCalculationSteps(calculation, steps)
   // Another mode has other steps: start them over from the first.
   const changeMode = (mode: FitMode) => {
     dispatch({ type: 'change', changes: { mode } })

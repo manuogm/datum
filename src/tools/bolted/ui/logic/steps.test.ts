@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { DEFAULT_BOLT_INPUTS, type BoltInputs, type JointDesignSpec } from '../state/boltInputs'
 import { PATTERN_MISSING_THREAD, PATTERN_WITH_KEENSERT } from '../testFixtures'
 import { analyseJoint, boltResults } from './boltResults'
-import { boltSteps, jointFault, opensOnResults, patternFault, stepLabel } from './steps'
+import { boltSteps, jointFault, patternFault, stepLabel } from './steps'
 
 const withDesign = (changes: Partial<JointDesignSpec>): BoltInputs => ({
   ...DEFAULT_BOLT_INPUTS,
@@ -59,9 +59,3 @@ describe('boltSteps', () => {
   })
 })
 
-describe('opensOnResults', () => {
-  it('opens a calculation saved since it was created on its results', () => {
-    expect(opensOnResults({ createdAt: '2026-10-01T10:00', updatedAt: '2026-10-01T10:00' })).toBe(false)
-    expect(opensOnResults({ createdAt: '2026-10-01T10:00', updatedAt: '2026-10-02T09:00' })).toBe(true)
-  })
-})

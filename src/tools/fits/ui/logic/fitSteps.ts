@@ -4,8 +4,7 @@
 //   advisor:    Application · Size & materials · Requirements · Results
 // A step is marked when the engine rejects its inputs, so the step bar
 // points at what to fix.
-import type { StepDef, StepFlowState } from '../../../../app/ui'
-import type { Calculation } from '../../../../core/library'
+import type { StepDef } from '../../../../app/ui'
 import { nominalSizeRange } from '../../calc'
 import type { FitInputs } from '../state/fitInputs'
 import type { FitResults } from './fitResults'
@@ -58,13 +57,3 @@ export function fitSteps(inputs: FitInputs, fault: StepFault | null): readonly S
   return steps.map((step) => (step.id === fault?.step ? { ...step, invalid: fault.error } : step))
 }
 
-/**
- * Where a calculation opens when this page has not shown it yet: a new one
- * (never saved since it was created) on the first step, any other (a saved
- * calculation, an example) on its results.
- */
-export function initialStep(calculation: Pick<Calculation, 'inputs' | 'createdAt' | 'updatedAt'>, stepCount: number): StepFlowState {
-  const isNew = calculation.inputs !== null && calculation.createdAt === calculation.updatedAt
-  const last = stepCount - 1
-  return isNew ? { current: 0, reached: 0 } : { current: last, reached: last }
-}

@@ -8,10 +8,11 @@
 // "Optimise layup" opens the optimiser in a dialog; "Use this layup" applies
 // it and closes the dialog, so the new verdict shows at once.
 import { useState } from 'react'
-import { Button, Callout, Dialog, MonoLabel, ResultsLayout, SegmentedControl, StepPage } from '../../../../app/ui'
+import { Button, Dialog, MonoLabel, ProblemCallout, ResultsLayout, SegmentedControl, StepPage } from '../../../../app/ui'
 import { formatDecimal } from '../../../../core/units'
 import { DEFAULT_TSAI_WU_F12_STAR, type LaminateAnalysis } from '../../calc'
 import { appliedLoadsText } from '../logic/loads'
+import { FAULT_TITLE, stepLabel } from '../logic/steps'
 import { CRITERION_LABELS, LAMINATE_STANDARDS, plyMaterialName } from '../logic/labels'
 import { PLOT_COMPONENTS, type PlotComponent } from '../logic/thicknessPlot'
 import { OptimiserPanel } from '../optimiser/OptimiserPanel'
@@ -27,15 +28,12 @@ export function ResultsStep(props: LamStepProps) {
   const { inputs, analysis, flow, fault } = props
   if (!analysis.ok) {
     return (
-      <StepPage {...flow.page} className={styles.step} title="Results" wide>
+      <StepPage {...flow.page} title="Results" wide>
         <ResultsLayout
           verdict={
-            <Callout status="bad" title="This laminate cannot be analysed">
-              {analysis.error}{' '}
-              <Button variant="link" size="sm" onClick={() => flow.goTo(fault?.step ?? 'layup')}>
-                Fix the {fault?.step ?? 'layup'}
-              </Button>
-            </Callout>
+            <ProblemCallout title={FAULT_TITLE} back={{ label: stepLabel(fault?.step ?? 'layup'), onClick: () => flow.goTo(fault?.step ?? 'layup') }}>
+              {analysis.error}
+            </ProblemCallout>
           }
         />
       </StepPage>
@@ -44,19 +42,19 @@ export function ResultsStep(props: LamStepProps) {
   const materials = [...new Set(inputs.plies.map((p) => p.materialId))].map(plyMaterialName).join(', ')
   const loads = appliedLoadsText(inputs.loads, props.system) || 'no load'
   return (
-    <StepPage {...flow.page} className={styles.step} title="Results" hint={`${analysis.value.layup.notation} of ${materials}, under ${loads}.`} wide>
+    <StepPage {...flow.page} title="Results" hint={`${analysis.value.layup.notation} of ${materials} under ${loads}, checked for first-ply failure.`} wide>
       <Results {...props} result={analysis.value} />
     </StepPage>
   )
 }
 
-function Results({ inputs, dispatch, system, selectedPly, onSelectPly, result }: LamStepProps & { result: LaminateAnalysis }) {
+function Results({ inputs, dispatch, system, flow, selectedPly, onSelectPly, result }: LamStepProps & { result: LaminateAnalysis }) {
   const [component, setComponent] = useState<PlotComponent>('sx')
   const [optimising, setOptimising] = useState(false)
   return (
     <>
       <ResultsLayout
-        memoryKey="lam"
+        memoryKey={flow.memoryKey}
         verdict={
           <LaminateVerdict
             analysis={result}
@@ -72,14 +70,17 @@ function Results({ inputs, dispatch, system, selectedPly, onSelectPly, result }:
         details={
           <>
             <PlyFailureList analysis={result} selectedPly={selectedPly} onSelect={onSelectPly} />
-            <section className={resultStyles.section} aria-label="Ply stack and values through the thickness">
-              <div className={resultStyles.sectionHead}>
-                <MonoLabel>Ply stack · {result.layup.notation}</MonoLabel>
-                <SegmentedControl label="Value through the thickness" size="sm" options={PLOT_COMPONENTS} value={component} onChange={setComponent} />
-              </div>
-            </section>
             <div className={styles.drawings}>
-              <LaminateDrawings analysis={result} component={component} system={system} selectedPly={selectedPly} onSelectPly={onSelectPly} />
+              <LaminateDrawings
+                analysis={result}
+                component={component}
+                system={system}
+                selectedPly={selectedPly}
+                onSelectPly={onSelectPly}
+                componentSwitch={
+                  <SegmentedControl label="Value through the thickness" size="sm" options={PLOT_COMPONENTS} value={component} onChange={setComponent} />
+                }
+              />
             </div>
           </>
         }

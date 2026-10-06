@@ -45,7 +45,7 @@ export function PitHeader({
 }: PitHeaderProps) {
   return (
     <header className={styles.header}>
-      <Logo href={homeHref} />
+      <Logo href={homeHref} markOnPhone />
       <div className={styles.tabs}>{tabs}</div>
       {actions && <div className={styles.actions}>{actions}</div>}
       <span className={cx(styles.materials, materialsActive && styles.materialsActive)}>

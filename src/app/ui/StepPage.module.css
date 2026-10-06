@@ -1,8 +1,11 @@
 /* StepPage: header, inputs and footer in a column of reading width; with a
    side visual, a flush column on the right holds the chart. The footer sticks
    to the bottom of the scrolling area so Next is always in reach. Below 900px
-   the visual drops under the inputs. */
+   the visual drops under the inputs. The page fills the height left under
+   the step bar (it sits in the app's flex column), so the footer is at the
+   bottom even on a short step. */
 .page {
+  flex: 1 0 auto;
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   grid-template-areas:
@@ -64,6 +67,11 @@
   color: var(--text-muted);
 }
 
+/* Results: the hint says what was checked; it may run to the verdict's width. */
+.wide .hint {
+  max-width: 100ch;
+}
+
 .actions {
   display: flex;
   align-items: center;
@@ -77,6 +85,12 @@
   flex-direction: column;
   min-width: 0;
   border-top: var(--border-width) solid var(--border-subtle);
+}
+
+/* The engine's explanation, above the inputs of the step at fault. */
+.problem {
+  padding: var(--space-16) var(--space-20);
+  border-bottom: var(--border-width) solid var(--border-subtle);
 }
 
 /* Without a side visual, inputs keep a reading width. */
@@ -119,6 +133,14 @@
   justify-content: center;
   min-height: 0;
   padding: var(--space-20);
+}
+
+/* Inputs in the side column: PanelSections bring their own padding. */
+.asideInputs {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  max-width: 640px;
 }
 
 .foot {

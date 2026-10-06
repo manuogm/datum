@@ -5,13 +5,12 @@
 // joint type's most utilised bolt and the per-bolt table; "Show
 // calculation", the trail of the bolt chosen in the plan or the table.
 import { useState } from 'react'
-import { cx, LegendItem, Marker, MonoLabel, ResultsLayout, ScoreBar, VerdictCard } from '../../../../app/ui'
+import { cx, LegendItem, Marker, MonoLabel, ProblemCallout, ResultsLayout, ScoreBar, VerdictCard } from '../../../../app/ui'
 import { formatDecimal, formatQuantity, unitOf, type UnitSystem } from '../../../../core/units'
 import type { BoltResults } from '../logic/boltResults'
 import { stepLabel, type StepFault } from '../logic/steps'
 import { formatUtilisation, governingCase, loadCaseVerdict, REVIEW_UTILISATION, utilisationTone } from '../logic/verdict'
 import { CalculationTrail } from '../shared/CalculationTrail'
-import { ProblemNote } from '../shared/ProblemNote'
 import steps from '../shared/steps.module.css'
 import type { PatternSpec } from '../state/boltInputs'
 import { LoadCaseTabs } from './LoadCaseTabs'
@@ -31,9 +30,11 @@ interface PatternResultsProps {
   onSelectLoadCase: (id: string) => void
   /** Go back to the step at fault. */
   onFix: (stepId: string) => void
+  /** Remembers which depths are open: the step flow's key. */
+  memoryKey?: string
 }
 
-export function PatternResults({ pattern, results, fault, system, onSelectLoadCase, onFix }: PatternResultsProps) {
+export function PatternResults({ pattern, results, fault, system, onSelectLoadCase, onFix, memoryKey }: PatternResultsProps) {
   const [chosenBolt, setChosenBolt] = useState<string | null>(null)
   const { loadCase, analysis } = results.loadCases.find((c) => c.loadCase.id === pattern.loadCaseId) ?? results.loadCases[0]
   const tabs = <LoadCaseTabs loadCases={results.loadCases} selected={loadCase.id} onSelect={onSelectLoadCase} />
@@ -44,11 +45,12 @@ export function PatternResults({ pattern, results, fault, system, onSelectLoadCa
         verdict={
           <div className={steps.verdict}>
             {tabs}
-            <ProblemNote
+            <ProblemCallout
               title={`${loadCase.id} ${loadCase.name} cannot be analysed`}
-              error={analysis.error}
-              fix={fault ? { label: stepLabel('pattern', fault.step), onClick: () => onFix(fault.step) } : undefined}
-            />
+              back={fault ? { label: stepLabel('pattern', fault.step), onClick: () => onFix(fault.step) } : undefined}
+            >
+              {analysis.error}
+            </ProblemCallout>
           </div>
         }
       />
@@ -63,7 +65,7 @@ export function PatternResults({ pattern, results, fault, system, onSelectLoadCa
   const forceUnit = unitOf('force', system)
   return (
     <ResultsLayout
-      memoryKey="bolt"
+      memoryKey={memoryKey}
       verdict={
         <div className={steps.verdict}>
           {tabs}

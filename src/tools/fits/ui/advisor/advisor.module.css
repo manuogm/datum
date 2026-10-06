@@ -33,29 +33,17 @@
 }
 
 @media (max-width: 900px) {
-  .chartHead {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: var(--space-6) var(--space-12);
-  padding: var(--space-16) var(--space-20) 0;
-}
-
-.chartMeta {
-  font-family: var(--font-mono);
-  font-size: var(--fs-11);
-  color: var(--text-faint);
-}
-
-.legend {
-  display: flex;
-  gap: var(--space-12);
-  margin-left: auto;
-}
-
-.chartArea {
+  .chartArea {
     min-height: var(--chart-height-stacked);
   }
+}
+
+/* The details keep the verdict's width on a wide screen. */
+.chartHead,
+.chartArea,
+.summaries,
+.ranked {
+  max-width: 960px;
 }
 
 .notes {

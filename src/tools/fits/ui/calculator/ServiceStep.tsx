@@ -5,7 +5,6 @@
 import { MoreOptions, PanelSection, RangeInputRow, StepPage } from '../../../../app/ui'
 import { serviceClearance } from '../logic/serviceClearance'
 import { MaterialPair } from '../shared/MaterialPair'
-import sharedStyles from '../shared/shared.module.css'
 import type { FitStepProps } from '../shared/stepProps'
 import { DEFAULT_FIT_INPUTS, type FitInputs } from '../state/fitInputs'
 import { FitSpectrum } from './FitSpectrum'
@@ -18,9 +17,8 @@ export function ServiceStep({ inputs, results, system, dispatch, flow }: FitStep
   return (
     <StepPage
       {...flow.page}
-      className={sharedStyles.step}
-      title="Service conditions"
-      hint="What the fit is made of and the temperatures it works at. The fit is checked against the clearance it needs in service."
+      title="Service"
+      hint="What the housing and the shaft are made of, and the temperatures the fit works at. The clearance it needs in service is under More options."
       nextLabel="See results"
       aside={
         calculation.ok && (
@@ -56,7 +54,7 @@ export function ServiceStep({ inputs, results, system, dispatch, flow }: FitStep
         />
       </PanelSection>
 
-      <MoreOptions count={1} changed={windowChanged ? 1 : 0} memoryKey="fit-service">
+      <MoreOptions count={1} changed={windowChanged ? 1 : 0} memoryKey="fit:service">
         <PanelSection label="Required in service">
           <RangeInputRow
             label="Clearance in service"

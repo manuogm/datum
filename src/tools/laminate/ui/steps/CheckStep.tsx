@@ -3,17 +3,16 @@
 // options; the closed row notes when another one is chosen.
 import { MoreOptions, PanelSection, StepPage } from '../../../../app/ui'
 import { CriterionField, TargetField } from '../editor/CriterionFields'
-import { criterionChanged } from '../logic/steps'
+import { criterionChanged, stepProblem } from '../logic/steps'
 import type { LamStepProps } from './stepProps'
-import styles from './steps.module.css'
 
-export function CheckStep({ inputs, dispatch, flow }: LamStepProps) {
+export function CheckStep({ inputs, dispatch, flow, fault }: LamStepProps) {
   return (
     <StepPage
       {...flow.page}
-      className={styles.step}
+      problem={stepProblem(fault, 'check')}
       title="Check"
-      hint="Every ply is checked for first-ply failure. The laminate passes when its lowest reserve factor reaches the target."
+      hint="The reserve factor every ply must reach at first-ply failure. The failure criterion is under More options."
       nextLabel="See results"
     >
       <PanelSection label="Target">

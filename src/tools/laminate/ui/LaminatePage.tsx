@@ -5,15 +5,16 @@
 // verdict searches for a lighter layup that meets the target.
 //
 // The page shows one calculation of the library. "Save" stores the inputs on
-// screen; "Report" opens the printable report of the calculation. A saved
-// calculation opens on its results, a new one on its first step.
+// screen; "Report" opens the printable report of the calculation. A new
+// calculation opens on its first step, any other on Results (useCalculationSteps).
 import { useState } from 'react'
 import { AppLayout } from '../../../app/AppLayout'
 import { useSettings } from '../../../app/settings/settings'
 import { CalculationActions } from '../../../app/tools/CalculationActions'
-import { StepBar, useStepFlow } from '../../../app/ui'
+import { useCalculationSteps } from '../../../app/tools/calculationSteps'
+import { StepBar } from '../../../app/ui'
 import type { Calculation } from '../../../core/library'
-import { initialStep, lamSteps, stepFault, type LamStepId } from './logic/steps'
+import { lamSteps, stepFault, type LamStepId } from './logic/steps'
 import { useLaminateTool } from './state/useLaminateTool'
 import { CheckStep } from './steps/CheckStep'
 import { LayupStep } from './steps/LayupStep'
@@ -26,7 +27,7 @@ export function LaminatePage({ calculation }: { calculation: Calculation }) {
   const { unitSystem: system } = useSettings()
   const fault = stepFault(inputs, analysis)
   const steps = lamSteps(fault)
-  const flow = useStepFlow(steps, { memoryKey: `calc:${calculation.id}`, initial: initialStep(calculation, steps.length) })
+  const flow = useCalculationSteps(calculation, steps)
   // The ply picked in the ply list, the stack or the failure list; forgotten when the stack gets shorter.
   const [chosenPly, setChosenPly] = useState<number | null>(null)
   const selectedPly = chosenPly !== null && chosenPly <= inputs.plies.length ? chosenPly : null

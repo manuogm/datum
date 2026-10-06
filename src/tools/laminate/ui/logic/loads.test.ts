@@ -12,7 +12,7 @@ describe('leadingLoad', () => {
 
 describe('failureLoadNote', () => {
   it('lists the other loads at first-ply failure', () => {
-    expect(failureLoadNote({ ...NO_LOADS, nxNPerMm: 316.8, nxyNPerMm: 101.4 }, 'si')).toBe('All loads × RF · Nxy 101.4 N/mm')
+    expect(failureLoadNote({ ...NO_LOADS, nxNPerMm: 316.8, nxyNPerMm: 101.4 }, 'si')).toBe('FPF load with Nxy 101.4 N/mm')
     expect(failureLoadNote({ ...NO_LOADS, nxNPerMm: 316.8 }, 'si')).toBeNull()
   })
 })

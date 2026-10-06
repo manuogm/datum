@@ -1,8 +1,10 @@
 // useStepFlow: the step state of a guided tool (see stepFlow.ts) as a React
 // hook. Give it the tool's steps and, to keep the place while the page is
-// open, a memory key such as the calculation id.
+// open, a memory key such as the calculation's (a tool screen uses
+// useCalculationSteps in app/tools, which sets both the key and where the
+// steps open).
 //
-//   const flow = useStepFlow(STEPS, { memoryKey: `fit:${calc.id}` })
+//   const flow = useStepFlow(STEPS, { memoryKey: `calc:${calc.id}` })
 //   <StepBar steps={STEPS} {...flow.bar} />
 //   <StepPage {...flow.page} title="Geometry" hint="…">…</StepPage>
 import { useCallback, useState } from 'react'
@@ -13,13 +15,15 @@ import {
 } from './stepFlow'
 
 interface StepFlowOptions {
-  /** Remember the place under this key while the page is open. */
+  /** Remember the place under `<memoryKey>/steps` while the page is open. */
   memoryKey?: string
   /** Where a flow with nothing remembered starts, e.g. a reopened calculation on its results. */
   initial?: StepFlowState
 }
 
 export interface StepFlow {
+  /** The memory key the flow was given: pass it on to ResultsLayout so its depths are remembered with the steps. */
+  memoryKey: string | undefined
   /** Index of the step on screen. */
   index: number
   /** The step on screen. */
@@ -45,7 +49,7 @@ export interface StepFlow {
 }
 
 export function useStepFlow(steps: readonly StepDef[], { memoryKey, initial = INITIAL_STEP_FLOW }: StepFlowOptions = {}): StepFlow {
-  const key = memoryKey === undefined ? undefined : `steps:${memoryKey}`
+  const key = memoryKey === undefined ? undefined : `${memoryKey}/steps`
   const [stored, setStored] = useState<StepFlowState>(() => (key === undefined ? initial : recall(key, initial)))
   const [navigated, setNavigated] = useState(false)
   const count = steps.length
@@ -69,6 +73,7 @@ export function useStepFlow(steps: readonly StepDef[], { memoryKey, initial = IN
   const isFirst = state.current === 0
   const isLast = state.current >= count - 1
   return {
+    memoryKey,
     index: state.current,
     step: steps[state.current],
     isFirst,

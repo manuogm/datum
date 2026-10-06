@@ -20,12 +20,14 @@
 }
 
 .sectionHead {
+  max-width: 920px; /* inside the section's padding: ends with the verdict card */
   display: flex;
   justify-content: space-between;
   gap: var(--space-8);
 }
 
 .plies {
+  max-width: 920px; /* as .sectionHead */
   display: flex;
   flex-direction: column;
   gap: var(--space-2);

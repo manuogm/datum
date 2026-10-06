@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { fail } from '../../../../core/result'
 import { DEFAULT_LAMINATE_INPUTS, NO_LOADS, pliesAt } from '../state/lamInputs'
 import { analyse } from './lamResults'
-import { appliedMoments, criterionChanged, initialStep, lamSteps, mixedPlies, stepFault } from './steps'
+import { appliedMoments, criterionChanged, lamSteps, mixedPlies, stepFault } from './steps'
 
 describe('stepFault', () => {
   it('is null when the analysis runs', () => {
@@ -28,13 +28,6 @@ describe('lamSteps', () => {
   })
 })
 
-describe('initialStep', () => {
-  const at = '2026-01-01T00:00:00Z'
-  it('opens a new calculation on its first step and any other on its results', () => {
-    expect(initialStep({ inputs: {}, createdAt: at, updatedAt: at }, 4)).toEqual({ current: 0, reached: 0 })
-    expect(initialStep({ inputs: {}, createdAt: at, updatedAt: '2026-02-01T00:00:00Z' }, 4)).toEqual({ current: 3, reached: 3 })
-  })
-})
 
 describe('More options counts', () => {
   it('counts plies of another material than the top ply', () => {

@@ -1,13 +1,14 @@
 // The tolerance zone diagram, drawn to scale from the ISO 286 analysis: the
 // hole zone (blue, hatched) and shaft zone (accent) against the zero line,
 // with the min and max clearance dimensioned. The screen variant labels every
-// limit deviation; the report variant is the compact drawing of the PDF.
+// limit deviation (in a narrower frame on a phone); the report variant is the
+// compact drawing of the PDF.
 import { useId } from 'react'
-import { cx } from '../../../../app/ui'
+import { cx, useMediaQuery } from '../../../../app/ui'
 import { formatQuantity, fromDisplay, toDisplay, unitOf, type UnitSystem } from '../../../../core/units'
 import type { FitAnalysis, ToleranceZone } from '../../calc'
 import type { Segment } from '../../../../app/charts'
-import { REPORT_FRAME, SCREEN_FRAME, zoneDiagramLayout, type DiagramZone, type Dimension } from '../logic/zoneDiagram'
+import { COMPACT_FRAME, REPORT_FRAME, SCREEN_FRAME, zoneDiagramLayout, type DiagramZone, type Dimension } from '../logic/zoneDiagram'
 import styles from './ZoneDiagram.module.css'
 
 interface ZoneDiagramProps {
@@ -18,7 +19,8 @@ interface ZoneDiagramProps {
 
 export function ZoneDiagram({ fit, system, variant }: ZoneDiagramProps) {
   const hatchId = useId()
-  const frame = variant === 'screen' ? SCREEN_FRAME : REPORT_FRAME
+  const phone = useMediaQuery('(max-width: 640px)')
+  const frame = variant === 'report' ? REPORT_FRAME : phone ? COMPACT_FRAME : SCREEN_FRAME
   const shown = (um: number) => toDisplay('deviation', system, um)
   const limits = (zone: ToleranceZone) => ({ upper: shown(zone.upperDeviationUm), lower: shown(zone.lowerDeviationUm) })
   const layout = zoneDiagramLayout(limits(fit.hole), limits(fit.shaft), frame)

@@ -3,7 +3,6 @@
 import { Chip, PanelSection, Select, StepPage } from '../../../../app/ui'
 import { APPLICATION_FUNCTIONS, APPLICATIONS, CUSTOM_APPLICATION, FUNCTION_LABELS, applicationOf } from '../logic/applications'
 import { ModeChoice } from '../shared/ModeChoice'
-import sharedStyles from '../shared/shared.module.css'
 import type { FirstStepProps } from '../shared/stepProps'
 import styles from './advisor.module.css'
 
@@ -13,9 +12,8 @@ export function ApplicationStep({ inputs, dispatch, flow, onModeChange }: FirstS
   return (
     <StepPage
       {...flow.page}
-      className={sharedStyles.step}
-      title="What the fit is for"
-      hint="Pick the closest application, or switch the functions the fit must serve on and off."
+      title="Application"
+      hint="What the fit is for: the closest application, or the functions it must serve."
     >
       <ModeChoice mode={inputs.mode} onChange={onModeChange} />
 

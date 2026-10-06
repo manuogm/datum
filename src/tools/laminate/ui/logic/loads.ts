@@ -36,10 +36,10 @@ export function appliedLoadsText(loads: Required<LaminateLoads>, system: UnitSys
 
 /**
  * The rest of the first-ply failure load, beside the leading one the verdict
- * quotes: every applied load scales by RF together, so 'All loads × RF · Nxy
+ * quotes (every applied load scales by RF together): 'FPF load with Nxy
  * 101.4 N/mm'. Null when only one load is applied (the verdict says it all).
  */
 export function failureLoadNote(loads: Required<LaminateLoads>, system: UnitSystem): string | null {
   const others = appliedLoadsText(loads, system, leadingLoad(loads))
-  return others === '' ? null : `All loads × RF · ${others}`
+  return others === '' ? null : `FPF load with ${others}`
 }

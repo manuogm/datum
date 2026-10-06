@@ -3,8 +3,9 @@
 //   1. the verdict (a VerdictCard), always shown;
 //   2. "Show details": the per-check list and the main chart;
 //   3. "Show calculation": formulas, intermediate values, matrices, sources.
-// Depths 2 and 3 start collapsed; with a memoryKey (the tool, e.g. 'bolt')
-// each stays open or closed while the page is open.
+// Depths 2 and 3 start collapsed; with a memoryKey (the calculation's,
+// `flow.memoryKey`) each stays open or closed while the page is open, so a
+// new calculation's results always start collapsed.
 import { useId, type ReactNode } from 'react'
 import { cx } from './cx'
 import { Icon } from './Icon'
@@ -22,13 +23,13 @@ interface ResultsLayoutProps {
   calculation?: ReactNode
   /** e.g. "R0 … R13 · VDI 2230-1". */
   calculationSummary?: ReactNode
-  /** Remembers which depths are open, per tool: 'fit', 'bolt', 'lam'. */
+  /** Remembers which depths are open under `<memoryKey>/results/…`: the step flow's key (one per calculation). */
   memoryKey?: string
   className?: string
 }
 
 export function ResultsLayout({ verdict, details, detailsSummary, calculation, calculationSummary, memoryKey, className }: ResultsLayoutProps) {
-  const key = (depth: string) => (memoryKey === undefined ? undefined : `results:${memoryKey}:${depth}`)
+  const key = (depth: string) => (memoryKey === undefined ? undefined : `${memoryKey}/results/${depth}`)
   return (
     <div className={cx(styles.layout, className)}>
       <div className={styles.verdict}>{verdict}</div>

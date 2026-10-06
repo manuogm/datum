@@ -2,9 +2,8 @@
 // the service temperatures and the clearance needed across them. The largest
 // interference accepted at assembly is under More options.
 import { MoreOptions, PanelSection, RangeInputRow, StepPage, ValueInputRow } from '../../../../app/ui'
-import { FaultCallout } from '../shared/FaultCallout'
 import sharedStyles from '../shared/shared.module.css'
-import { nextBlock, type FitStepProps } from '../shared/stepProps'
+import { faultProps, type FitStepProps } from '../shared/stepProps'
 import { DEFAULT_FIT_INPUTS, type FitInputs } from '../state/fitInputs'
 
 export function RequirementsStep({ inputs, system, dispatch, flow, fault }: FitStepProps) {
@@ -13,10 +12,9 @@ export function RequirementsStep({ inputs, system, dispatch, flow, fault }: FitS
   return (
     <StepPage
       {...flow.page}
-      {...nextBlock(fault, 'requirements')}
-      className={sharedStyles.step}
+      {...faultProps(fault, 'requirements', 'These requirements cannot be checked')}
       title="Requirements"
-      hint="The temperatures the fit works at, and the clearance it needs at every one of them (negative is interference)."
+      hint="The temperatures the fit works at, and the clearance it needs at every one of them (negative is interference). The largest interference at assembly is under More options."
       nextLabel="See results"
     >
       <PanelSection label="In service">
@@ -40,9 +38,7 @@ export function RequirementsStep({ inputs, system, dispatch, flow, fault }: FitS
         </div>
       </PanelSection>
 
-      <FaultCallout fault={fault} step="requirements" title="These requirements cannot be checked" />
-
-      <MoreOptions count={1} changed={interferenceChanged ? 1 : 0} memoryKey="fit-requirements">
+      <MoreOptions count={1} changed={interferenceChanged ? 1 : 0} memoryKey="fit:requirements">
         <PanelSection label="Assembly">
           <ValueInputRow
             label="Max assembly interference"

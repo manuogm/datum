@@ -26,7 +26,7 @@ export function DesignInputs({ design, system, onChange }: DesignInputsProps) {
       <BoltFields design={design} onChange={onChange} />
       <JointKindFields design={design} system={system} onChange={onChange} />
       <PlatesFields design={design} system={system} clampLengthMm={null} onChange={onChange} />
-      <MoreOptions count={tightening.count + contact.count} changed={tightening.changed + contact.changed}>
+      <MoreOptions count={tightening.count + contact.count} changed={tightening.changed + contact.changed} memoryKey="bolt:design">
         <TighteningFields design={design} onChange={onChange} />
         <ContactFields design={design} system={system} onChange={onChange} />
       </MoreOptions>

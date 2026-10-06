@@ -17,9 +17,12 @@ export interface FitStepProps {
   fault: StepFault | null
 }
 
-/** StepPage props for Next on a step: blocked, with the reason, when this step is the faulty one. */
-export function nextBlock(fault: StepFault | null, step: StepFault['step']) {
-  return fault?.step === step ? { nextDisabled: true, nextNote: fault.note } : {}
+/**
+ * StepPage props for the step at fault: what cannot be analysed with the
+ * engine's explanation above the inputs, and Next blocked with the reason.
+ */
+export function faultProps(fault: StepFault | null, step: StepFault['step'], title: string) {
+  return fault?.step === step ? { problem: { title, detail: fault.error }, nextDisabled: true, nextNote: fault.note } : {}
 }
 
 /** The first step also holds the choice of mode. */

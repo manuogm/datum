@@ -2,17 +2,16 @@
 // governs, against the required window), then on request the details (zone
 // diagram, fit spectrum and every limit and clearance) and the calculation
 // (each value's formula and source).
-import { Button, Callout, cx, PanelSection, ResultRow, ResultsLayout, StepPage, VerdictCard } from '../../../../app/ui'
+import { cx, PanelSection, ProblemCallout, ResultRow, ResultsLayout, StepPage, VerdictCard } from '../../../../app/ui'
 import { formatQuantity, unitOf, type UnitSystem } from '../../../../core/units'
 import { REFERENCE_TEMP_C } from '../../advisor'
 import type { FitAnalysis } from '../../calc'
 import { fitQuantities, limitsText, thermalQuantities, type FitQuantity, type FitQuantityKey } from '../logic/fitQuantities'
 import { serviceClearance, type ServiceClearance } from '../logic/serviceClearance'
 import { serviceSummary } from '../logic/serviceSummary'
-import { governingEdge } from '../logic/verdict'
-import { FIT_TYPE_LABEL, nominalLabel, STATUS_TITLE } from '../shared/labels'
+import { calculatorSentence, governingEdge } from '../logic/verdict'
+import { FIT_TYPE_LABEL, nominalLabel } from '../shared/labels'
 import { QuantityDetails } from '../shared/QuantityDetails'
-import sharedStyles from '../shared/shared.module.css'
 import type { FitStepProps } from '../shared/stepProps'
 import { ZoneDiagram } from '../shared/ZoneDiagram'
 import type { FitInputs } from '../state/fitInputs'
@@ -25,15 +24,12 @@ export function CalculatorResults({ inputs, results, system, flow }: FitStepProp
   const calculation = results.calculation
   if (!calculation.ok) {
     return (
-      <StepPage {...flow.page} className={sharedStyles.step} title="Results" wide>
+      <StepPage {...flow.page} title="Results" wide>
         <ResultsLayout
           verdict={
-            <Callout status="bad" title="Not defined by ISO 286">
-              {calculation.error}{' '}
-              <Button variant="link" size="sm" onClick={() => flow.goTo('fit')}>
-                Change the fit
-              </Button>
-            </Callout>
+            <ProblemCallout title="Not defined by ISO 286" back={{ label: 'Size & fit', onClick: () => flow.goTo('fit') }}>
+              {calculation.error}
+            </ProblemCallout>
           }
         />
       </StepPage>
@@ -47,13 +43,12 @@ export function CalculatorResults({ inputs, results, system, flow }: FitStepProp
   return (
     <StepPage
       {...flow.page}
-      className={sharedStyles.step}
       title="Results"
-      hint={`${nominalLabel(fit.nominalMm, system)} ${fit.designation} in ${results.housing.name} and ${results.shaft.name}, in service.`}
+      hint={`${nominalLabel(fit.nominalMm, system)} ${fit.designation} in ${results.housing.name} and ${results.shaft.name}, checked in service to ISO 286.`}
       wide
     >
       <ResultsLayout
-        memoryKey="fit"
+        memoryKey={flow.memoryKey}
         verdict={<CalculatorVerdict fit={fit} service={service} inputs={inputs} system={system} />}
         detailsSummary="Tolerance zones · fit spectrum · limits and clearances"
         details={
@@ -104,7 +99,7 @@ function CalculatorVerdict({ fit, service, inputs, system }: CalculatorVerdictPr
   return (
     <VerdictCard
       status={service.status}
-      sentence={`${STATUS_TITLE[service.status]}.`}
+      sentence={calculatorSentence(service.status, governing.edge)}
       detail={`In service ${serviceSummary(service, inputs, system)}.`}
       reference={REFERENCE}
       headline={{

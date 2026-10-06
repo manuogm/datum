@@ -1,10 +1,5 @@
 /* Pieces shared by the advisor and calculator steps. */
 
-/* A step fills the height under the step bar, so its footer sits at the bottom. */
-.step {
-  flex: 1 0 auto;
-}
-
 /* Nominal size: label and ISO range, field, slider */
 .nominal {
   display: flex;

@@ -3,8 +3,7 @@
 // bar points at what to fix. Each input step keeps its less common inputs
 // under More options; the counts here say how many of those differ from
 // their defaults, so a hidden setting that matters shows on the closed row.
-import type { StepDef, StepFlowState } from '../../../../app/ui'
-import type { Calculation } from '../../../../core/library'
+import type { StepDef } from '../../../../app/ui'
 import type { Result } from '../../../../core/result'
 import type { LaminateAnalysis } from '../../calc'
 import { DEFAULT_LAMINATE_INPUTS, type LaminateInputs, type LoadSpec, type PlySpec } from '../state/lamInputs'
@@ -38,21 +37,20 @@ export function stepFault(inputs: LaminateInputs, analysis: Result<LaminateAnaly
   return { step, error: analysis.error }
 }
 
+/** The title of the engine's explanation on the step at fault, and of Results when it cannot run. */
+export const FAULT_TITLE = 'This laminate cannot be analysed'
+
+/** A step's name by its id, e.g. 'Layup' for 'layup'. */
+export const stepLabel = (id: LamStepId): string => STEPS.find((step) => step.id === id)?.label ?? id
+
+/** StepPage's `problem` on step `id`: the engine's explanation when the fault is there. */
+export const stepProblem = (fault: StepFault | null, id: LamStepId) => (fault?.step === id ? { title: FAULT_TITLE, detail: fault.error } : null)
+
 /** The four steps, the faulty one marked. */
 export function lamSteps(fault: StepFault | null): readonly StepDef[] {
   return STEPS.map((step) => (step.id === fault?.step ? { ...step, invalid: fault.error } : step))
 }
 
-/**
- * Where a calculation opens when this page has not shown it yet: a new one
- * (never saved since it was created) on the first step, any other (a saved
- * calculation, an example) on its results.
- */
-export function initialStep(calculation: Pick<Calculation, 'inputs' | 'createdAt' | 'updatedAt'>, stepCount: number): StepFlowState {
-  const isNew = calculation.inputs !== null && calculation.createdAt === calculation.updatedAt
-  const last = stepCount - 1
-  return isNew ? { current: 0, reached: 0 } : { current: last, reached: last }
-}
 
 /** Layup, "Edit plies one by one": the plies not of the top ply's material (a hybrid stack). */
 export function mixedPlies(plies: readonly PlySpec[]): number {

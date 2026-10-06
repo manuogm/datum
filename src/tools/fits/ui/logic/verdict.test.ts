@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { expectOk } from '../../../../core/testing'
 import { DEFAULT_FIT_INPUTS } from '../state/fitInputs'
 import { fitResults } from './fitResults'
-import { adviceVerdict, candidateStatus, governingEdge } from './verdict'
+import { adviceVerdict, calculatorSentence, candidateStatus, governingEdge } from './verdict'
 
 const window = { minUm: 0, maxUm: 40 }
 
@@ -44,5 +44,13 @@ describe('adviceVerdict', () => {
       detail: 'H7/k6 comes closest, with −1.5 … 3 µm.',
     })
     expect(adviceVerdict('Only one sentence.')).toEqual({ sentence: 'Only one sentence.', detail: null })
+  })
+})
+
+describe('calculatorSentence', () => {
+  it('says how the clearance in service stands and which edge governs', () => {
+    expect(calculatorSentence('review', 'max')).toBe('The clearance in service is partly outside the required window; the maximum clearance governs.')
+    expect(calculatorSentence('fail', 'min')).toBe('The clearance in service is outside the required window; the minimum clearance governs.')
+    expect(calculatorSentence('pass', 'min')).toMatch(/^The clearance in service stays inside the required window; .*\.$/)
   })
 })

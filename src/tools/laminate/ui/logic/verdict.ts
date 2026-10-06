@@ -3,7 +3,7 @@
 import type { Status } from '../../../../app/ui'
 import type { CalculationStatus } from '../../../../core/library'
 import { reserveStatus, type LaminateAnalysis, type ReserveStatus } from '../../calc'
-import { angleText, criticalPhrase, formatFactor, plyRangeText } from './labels'
+import { angleText, criticalPhrase, formatFactor, MODE_LABELS, plyRangeText } from './labels'
 
 const CALCULATION_STATUS: Record<ReserveStatus, CalculationStatus> = { pass: 'pass', warn: 'review', fail: 'fail' }
 
@@ -40,18 +40,36 @@ export function laminateHeadline(analysis: Pick<LaminateAnalysis, 'firstPlyFailu
 }
 
 /**
- * The verdict card's one sentence: what governs, the critical plies first.
- * 'Below the 1.50 target · Plies 4–5 (90°) critical · dominant stress: matrix tension.'
+ * The verdict card's one sentence, in the words of every tool's verdict:
+ * what governs and how it stands against the requirement, e.g.
+ * 'Plies 4–5 (90°) are below the 1.50 target and govern, in matrix tension.'
  */
 export function verdictSentence(analysis: Pick<LaminateAnalysis, 'firstPlyFailure' | 'plies' | 'criterion'>): string {
-  const { title, detail } = laminateHeadline(analysis)
-  if (!Number.isFinite(analysis.firstPlyFailure.reserveFactor)) return `${title}: ${detail.charAt(0).toLowerCase()}${detail.slice(1)}`
-  return analysis.firstPlyFailure.status === 'fail' ? `First ply fails: ${detail}.` : `${detail}.`
+  const { reserveFactor, targetReserveFactor, status, mode, criticalPlies } = analysis.firstPlyFailure
+  if (!Number.isFinite(reserveFactor)) return 'No load is applied: enter running loads to check first-ply failure.'
+  const plies = criticalText(analysis)
+  const one = criticalPlies.length === 1
+  const target = formatFactor(targetReserveFactor)
+  const how = `in ${MODE_LABELS[mode]}`
+  if (status === 'pass') return `Every ply meets the ${target} target; ${plies.charAt(0).toLowerCase()}${plies.slice(1)} ${one ? 'governs' : 'govern'}, ${how}.`
+  if (status === 'warn') return `${plies} ${one ? 'is' : 'are'} below the ${target} target and ${one ? 'governs' : 'govern'}, ${how}.`
+  return `${plies} ${one ? 'fails' : 'fail'} first, ${how}, under the applied loads.`
 }
 
 /** The status colour of every ply, top ply first: one rule for every drawing and list (bad RF < 1, warn below the target, ok meets it). */
 export function plyTones({ plies, firstPlyFailure }: Pick<LaminateAnalysis, 'plies' | 'firstPlyFailure'>): Status[] {
   return plies.map((ply) => STATUS_TONE[reserveStatus(ply.reserveFactor, firstPlyFailure.targetReserveFactor)])
+}
+
+/**
+ * The small line under the verdict sentence, as in every tool ('4 of 7
+ * checks pass'): '4 of 8 plies meet the target', with how many fail.
+ */
+export function plyCountText(tones: readonly Status[]): string {
+  const meeting = tones.filter((t) => t === 'ok').length
+  const failing = tones.filter((t) => t === 'bad').length
+  const text = `${meeting} of ${tones.length} plies meet the target`
+  return failing > 0 ? `${text} · ${failing} fail` : text
 }
 
 /** '2 fail', '4 below target', 'all meet target': what the ply list's tones add up to; 'no load' when nothing was checked. */

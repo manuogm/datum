@@ -5,18 +5,18 @@
 //
 // The page shows one calculation of the library. "Save" stores the inputs on
 // screen; "Report" opens the printable report of the calculation. A new
-// calculation starts on the first step; one saved before opens on Results.
-// The step on screen is remembered while the page is open.
+// calculation opens on its first step, any other on Results
+// (useCalculationSteps). The step on screen is remembered while the page is open.
 import { useMemo } from 'react'
 import { AppLayout } from '../../../app/AppLayout'
 import { useSettings } from '../../../app/settings/settings'
 import { CalculationActions } from '../../../app/tools/CalculationActions'
-import { StepBar, useStepFlow } from '../../../app/ui'
+import { useCalculationSteps } from '../../../app/tools/calculationSteps'
+import { StepBar } from '../../../app/ui'
 import type { Calculation } from '../../../core/library'
-import { boltSteps, jointFault, opensOnResults, patternFault } from './logic/steps'
+import { boltSteps, jointFault, patternFault } from './logic/steps'
 import { PatternSteps } from './pattern/PatternSteps'
 import { ModeField } from './shared/ModeField'
-import styles from './shared/steps.module.css'
 import { JointSteps } from './single/JointSteps'
 import type { BoltMode } from './state/boltInputs'
 import { useBoltTool } from './state/useBoltTool'
@@ -29,11 +29,7 @@ export function BoltedJointPage({ calculation }: { calculation: Calculation }) {
     [inputs, results, unitSystem],
   )
   const steps = useMemo(() => boltSteps(inputs.mode, fault), [inputs.mode, fault])
-  const last = steps.length - 1
-  const flow = useStepFlow(steps, {
-    memoryKey: `bolt:${calculation.id}`,
-    initial: opensOnResults(calculation) ? { current: last, reached: last } : undefined,
-  })
+  const flow = useCalculationSteps(calculation, steps)
 
   // The other mode has its own steps: start them from the first.
   const changeMode = (mode: BoltMode) => {
@@ -44,18 +40,16 @@ export function BoltedJointPage({ calculation }: { calculation: Calculation }) {
   const Steps = inputs.mode === 'joint' ? JointSteps : PatternSteps
   return (
     <AppLayout current={{ tab: 'calc', id: calculation.id }} actions={<CalculationActions calculationId={calculation.id} unsaved={unsaved} onSave={save} />}>
-      <StepBar steps={steps} {...flow.bar} label="Bolted joint steps" className={styles.bar} />
-      <div className={styles.stage}>
-        <Steps
-          flow={flow}
-          inputs={inputs}
-          results={results}
-          fault={fault}
-          system={unitSystem}
-          dispatch={dispatch}
-          modeField={<ModeField mode={inputs.mode} onChange={changeMode} />}
-        />
-      </div>
+      <StepBar steps={steps} {...flow.bar} />
+      <Steps
+        flow={flow}
+        inputs={inputs}
+        results={results}
+        fault={fault}
+        system={unitSystem}
+        dispatch={dispatch}
+        modeField={<ModeField mode={inputs.mode} onChange={changeMode} />}
+      />
     </AppLayout>
   )
 }

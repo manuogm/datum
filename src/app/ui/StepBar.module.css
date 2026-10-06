@@ -1,6 +1,9 @@
 /* StepBar: flush bar of numbered steps joined by hairlines, with the accent
-   underline on the step on screen. */
+   underline on the step on screen. It stays in view while a step scrolls. */
 .bar {
+  position: sticky;
+  top: 0;
+  z-index: 2;
   display: flex;
   align-items: stretch;
   min-height: var(--bar-height);

@@ -1,9 +1,9 @@
-// The joint type being edited: its design inputs (the advanced ones under
-// More options), with copy and remove (a joint type that bolts still use
-// cannot be removed).
+// The joint type being edited, beside the list on the Joint types step (its
+// id and name head that column): copy and remove (a joint type that bolts
+// still use cannot be removed), then its design inputs, the advanced ones
+// under More options.
 import { Button, PanelSection } from '../../../../app/ui'
 import type { UnitSystem } from '../../../../core/units'
-import { jointTitle } from '../logic/labels'
 import { DesignInputs } from '../shared/DesignInputs'
 import type { JointDesignSpec, PatternJointTypeSpec } from '../state/boltInputs'
 import styles from './pattern.module.css'
@@ -20,7 +20,7 @@ interface JointTypeEditorProps {
 export function JointTypeEditor({ jointType, inUse, system, onChange, onCopy, onRemove }: JointTypeEditorProps) {
   return (
     <>
-      <PanelSection label={`Editing ${jointType.id}`} aside={jointTitle(jointType.design)}>
+      <PanelSection>
         <div className={styles.actions}>
           <Button size="sm" onClick={onCopy}>
             Copy as new type

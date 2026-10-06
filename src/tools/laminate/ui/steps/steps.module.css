@@ -1,10 +1,5 @@
 /* The laminate steps: what the step pages add to the shared StepPage. */
 
-/* A step fills the height under the step bar, so its footer sits at the bottom. */
-.step {
-  flex: 1 0 auto;
-}
-
 .note {
   font-size: var(--fs-11-5);
   color: var(--text-faint);
@@ -24,8 +19,12 @@
   color: var(--text-muted);
 }
 
-.fault {
-  padding: var(--space-16) var(--space-20);
+/* Layup, beside the inputs: the stack at about its drawn size, not blown up
+   to the height of a tall column. */
+.stack {
+  width: 100%;
+  max-width: 360px;
+  margin: 0 auto;
 }
 
 /* Results, details: the two drawings get a fixed height to fill. */

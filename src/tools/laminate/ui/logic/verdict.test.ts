@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { expectOk } from '../../../../core/testing'
 import { DEFAULT_LAMINATE_INPUTS, NO_LOADS, pliesAt } from '../state/lamInputs'
 import { analyse } from './lamResults'
-import { laminateHeadline, laminateStatus, plyTally, plyTones, verdictSentence } from './verdict'
+import { laminateHeadline, laminateStatus, plyCountText, plyTally, plyTones, verdictSentence } from './verdict'
 
 const headlineOf = (changes: Partial<typeof DEFAULT_LAMINATE_INPUTS>) => laminateHeadline(expectOk(analyse({ ...DEFAULT_LAMINATE_INPUTS, ...changes })))
 
@@ -53,8 +53,16 @@ describe('laminateStatus', () => {
 describe('verdictSentence', () => {
   const sentenceOf = (changes: Partial<typeof DEFAULT_LAMINATE_INPUTS>) => verdictSentence(expectOk(analyse({ ...DEFAULT_LAMINATE_INPUTS, ...changes })))
   it('says what governs in one sentence', () => {
-    expect(sentenceOf({})).toBe('Below the 1.50 target · Plies 4–5 (90°) critical · dominant stress: matrix tension.')
-    expect(sentenceOf({ loads: { ...NO_LOADS, nxNPerMm: 2000 } })).toMatch(/^First ply fails: .* under the applied loads\.$/)
-    expect(sentenceOf({ loads: NO_LOADS })).toBe('No load applied: enter running loads to check first-ply failure.')
+    expect(sentenceOf({})).toBe('Plies 4–5 (90°) are below the 1.50 target and govern, in matrix tension.')
+    expect(sentenceOf({ targetReserveFactor: 1.2 })).toBe('Every ply meets the 1.20 target; plies 4–5 (90°) govern, in matrix tension.')
+    expect(sentenceOf({ loads: { ...NO_LOADS, nxNPerMm: 2000 } })).toMatch(/^Pl(y|ies) .* fails? first, in .*, under the applied loads\.$/)
+    expect(sentenceOf({ loads: NO_LOADS })).toBe('No load is applied: enter running loads to check first-ply failure.')
+  })
+})
+
+describe('plyCountText', () => {
+  it('counts the plies that meet the target, and those that fail', () => {
+    expect(plyCountText(['ok', 'warn', 'warn', 'ok'])).toBe('2 of 4 plies meet the target')
+    expect(plyCountText(['ok', 'bad', 'bad', 'warn'])).toBe('1 of 4 plies meet the target · 2 fail')
   })
 })

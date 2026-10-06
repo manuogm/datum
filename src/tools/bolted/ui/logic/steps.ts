@@ -7,7 +7,6 @@
 // the loads are at fault; if it can with the default tightening and
 // friction, the Bolt step is; otherwise the joint and its clamped parts.
 import type { StepDef } from '../../../../app/ui'
-import type { Calculation } from '../../../../core/library'
 import type { Result } from '../../../../core/result'
 import type { UnitSystem } from '../../../../core/units'
 import { analyseBoltedJoint, type BoltedJointAnalysis, type TemperatureRangeC } from '../../calc'
@@ -89,12 +88,4 @@ function designError(spec: JointDesignSpec, system: UnitSystem): string | null {
   if (!design.ok) return design.error
   const analysis = analyseBoltedJoint({ ...design.value, loads: UNLOADED, unitSystem: system })
   return analysis.ok ? null : analysis.error
-}
-
-/**
- * A calculation saved since it was created opens on its results; a new one
- * (and an example never saved) walks through the steps from the first.
- */
-export function opensOnResults(calculation: Pick<Calculation, 'createdAt' | 'updatedAt'>): boolean {
-  return calculation.updatedAt !== calculation.createdAt
 }

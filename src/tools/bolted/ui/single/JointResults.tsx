@@ -19,16 +19,18 @@ interface JointResultsProps {
   system: UnitSystem
   /** Inputs shown inside the trail's steps that ask for them (pG in R10). */
   stepInputs?: Partial<Record<StepId, ReactNode>>
+  /** Remembers which depths are open: the step flow's key. */
+  memoryKey?: string
 }
 
-export function JointResults({ analysis, axialN, system, stepInputs }: JointResultsProps) {
+export function JointResults({ analysis, axialN, system, stepInputs, memoryKey }: JointResultsProps) {
   const { summary, preload, steps } = analysis
   const { sentence, detail } = jointVerdict(analysis)
   const governing = steps.find((s) => s.id === summary.governing)
   const checks = steps.filter((s): s is CalculationStep & { check: StepCheck } => s.check !== null)
   return (
     <ResultsLayout
-      memoryKey="bolt"
+      memoryKey={memoryKey}
       verdict={
         <VerdictCard
           status={CALCULATION_STATUS[summary.status]}

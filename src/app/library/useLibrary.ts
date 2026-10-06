@@ -14,11 +14,13 @@ import {
   renameCalculation,
   renameFolder,
   updateCalculation,
+  folderAndBelow,
   type CalculationSummary,
   type ToolId,
 } from '../../core/library'
 import { ok, type Result } from '../../core/result'
 import { localTimestamp } from '../format/timestamp'
+import { forgetCalculations } from '../tools/calculationSteps'
 import { applyChange, getSnapshot, subscribe } from './libraryStore'
 import { newId } from './newId'
 
@@ -45,8 +47,14 @@ export const libraryActions = {
   moveFolder(id: string, parentId: string | null): Done {
     return done(applyChange((library) => moveFolder(library, id, parentId)))
   },
+  /** Deletes the folder with everything in it; the screens of its calculations forget their place. */
   deleteFolder(id: string): Done {
-    return done(applyChange((library) => deleteFolder(library, id)))
+    const library = getSnapshot().state
+    const doomed = folderAndBelow(library, id)
+    const calculations = library.calculations.filter((c) => c.folderId !== null && doomed.has(c.folderId)).map((c) => c.id)
+    const result = done(applyChange((current) => deleteFolder(current, id)))
+    if (result.ok) forgetCalculations(calculations)
+    return result
   },
 
   /** A new calculation, stored at once with the tool's starting inputs and their summary. */
@@ -64,8 +72,11 @@ export const libraryActions = {
   moveCalculation(id: string, folderId: string | null): Done {
     return done(applyChange((library) => moveCalculation(library, id, folderId)))
   },
+  /** Deletes the calculation; its screen forgets its place (step, open result depths). */
   deleteCalculation(id: string): Done {
-    return done(applyChange((library) => deleteCalculation(library, id)))
+    const result = done(applyChange((library) => deleteCalculation(library, id)))
+    if (result.ok) forgetCalculations([id])
+    return result
   },
 
   /** Save from a tool screen: the inputs on screen and the result they give. */

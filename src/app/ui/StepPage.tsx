@@ -5,6 +5,7 @@
 // right, and under the inputs on narrow screens.
 import { useEffect, useId, useRef, type ReactNode } from 'react'
 import { Button } from './Button'
+import { Callout } from './Callout'
 import { cx } from './cx'
 import { MonoLabel } from './MonoLabel'
 import styles from './StepPage.module.css'
@@ -15,6 +16,11 @@ interface StepPageProps {
   hint?: ReactNode
   /** The step's inputs (or, on the results step, the results). */
   children: ReactNode
+  /**
+   * The engine rejects this step's inputs: what cannot be analysed and its
+   * explanation, shown above the inputs. (On Results use ProblemCallout.)
+   */
+  problem?: { title: string; detail: ReactNode } | null | false
   /** Small actions right of the title, e.g. a Reset link. */
   actions?: ReactNode
   /** Chart or drawing that helps this step. */
@@ -23,6 +29,11 @@ interface StepPageProps {
   asideLabel?: string
   /** Note under the side visual's label, e.g. "[0/±45/90]s · to scale". */
   asideMeta?: ReactNode
+  /**
+   * The side column holds inputs (PanelSections, e.g. the item chosen in a
+   * list on the left) rather than a drawing: flush and top-aligned.
+   */
+  asideInputs?: boolean
   /** 1-based position, for the eyebrow. */
   stepNumber?: number
   stepCount?: number
@@ -51,10 +62,12 @@ export function StepPage({
   title,
   hint,
   children,
+  problem,
   actions,
   aside,
   asideLabel,
   asideMeta,
+  asideInputs = false,
   stepNumber,
   stepCount,
   onBack,
@@ -96,7 +109,16 @@ export function StepPage({
         {actions && <div className={styles.actions}>{actions}</div>}
       </header>
 
-      <div className={styles.body}>{children}</div>
+      <div className={styles.body}>
+        {problem && (
+          <div className={styles.problem}>
+            <Callout status="bad" title={problem.title}>
+              {problem.detail}
+            </Callout>
+          </div>
+        )}
+        {children}
+      </div>
 
       {aside != null && (
         <aside className={styles.aside} aria-labelledby={asideLabel ? asideId : undefined}>
@@ -110,7 +132,7 @@ export function StepPage({
               {asideMeta && <span className={styles.asideMeta}>{asideMeta}</span>}
             </div>
           )}
-          <div className={styles.visual}>{aside}</div>
+          <div className={asideInputs ? styles.asideInputs : styles.visual}>{aside}</div>
         </aside>
       )}
 

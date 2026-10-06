@@ -26,6 +26,25 @@ export function governingEdge(inServiceUm: ClearanceRangeUm, windowUm: Clearance
     : { edge: 'max', valueUm: inServiceUm.maxUm, limitUm: windowUm.maxUm }
 }
 
+const EDGE_WORD: Record<GoverningEdge['edge'], string> = { min: 'minimum', max: 'maximum' }
+
+/**
+ * The calculator's verdict in one sentence, in the words of every tool's
+ * verdict: how the clearance in service stands against the required window,
+ * and which edge governs.
+ */
+export function calculatorSentence(status: CalculationStatus, edge: GoverningEdge['edge']): string {
+  const governs = `the ${EDGE_WORD[edge]} clearance governs`
+  switch (status) {
+    case 'pass':
+      return `The clearance in service stays inside the required window; the ${EDGE_WORD[edge]} clearance is closest to its limit.`
+    case 'review':
+      return `The clearance in service is partly outside the required window; ${governs}.`
+    case 'fail':
+      return `The clearance in service is outside the required window; ${governs}.`
+  }
+}
+
 /** An advisor candidate as a status: every check passes, some only warn, or one fails. */
 export function candidateStatus(candidate: Pick<FitCandidate, 'checks'>): CalculationStatus {
   const statuses = candidate.checks.map((check) => check.status)

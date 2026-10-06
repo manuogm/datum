@@ -3,7 +3,7 @@
 // The zone diagram beside it follows the fit chosen. A fit ISO 286 does not
 // define at this size shows the engine's explanation and blocks Next.
 import { useState, type Dispatch } from 'react'
-import { Callout, Chip, MoreOptions, PanelSection, SegmentedControl, StepPage } from '../../../../app/ui'
+import { Chip, MoreOptions, PanelSection, SegmentedControl, StepPage } from '../../../../app/ui'
 import type { Result } from '../../../../core/result'
 import { unitOf } from '../../../../core/units'
 import { formatFit, parseFitDesignation, type FitAnalysis, type FitType } from '../../calc'
@@ -11,8 +11,7 @@ import { isPreferredFit, preferredFitsOfType } from '../logic/preferredChips'
 import { FIT_TYPE_LABEL, nominalLabel } from '../shared/labels'
 import { ModeChoice } from '../shared/ModeChoice'
 import { NominalSize } from '../shared/NominalSize'
-import sharedStyles from '../shared/shared.module.css'
-import { nextBlock, type FirstStepProps } from '../shared/stepProps'
+import { faultProps, type FirstStepProps } from '../shared/stepProps'
 import { ZoneDiagram } from '../shared/ZoneDiagram'
 import type { FitInputs } from '../state/fitInputs'
 import type { FitAction } from '../state/fitReducer'
@@ -28,9 +27,8 @@ export function SizeFitStep({ inputs, results, system, dispatch, flow, fault, on
   return (
     <StepPage
       {...flow.page}
-      {...nextBlock(fault, 'fit')}
-      className={sharedStyles.step}
-      title="Size and fit"
+      {...faultProps(fault, 'fit', 'Not defined by ISO 286')}
+      title="Size & fit"
       hint="The nominal diameter, then a preferred ISO fit. Any other hole and shaft class is under More options."
       aside={
         calculation.ok ? (
@@ -38,9 +36,7 @@ export function SizeFitStep({ inputs, results, system, dispatch, flow, fault, on
             <ZoneDiagram fit={calculation.value} system={system} variant="screen" />
           </div>
         ) : (
-          <Callout status="bad" title="No zones for this fit">
-            Choose a fit that ISO 286 defines at this size.
-          </Callout>
+          <p className={styles.asideNote}>The zones are drawn once ISO 286 defines the fit.</p>
         )
       }
       asideLabel="Tolerance zones"
@@ -54,15 +50,10 @@ export function SizeFitStep({ inputs, results, system, dispatch, flow, fault, on
 
       <PanelSection label="Fit">
         <PreferredFits inputs={inputs} calculation={calculation} dispatch={dispatch} />
-        {!calculation.ok && (
-          <Callout status="bad" title="Not defined by ISO 286">
-            {calculation.error}
-          </Callout>
-        )}
       </PanelSection>
 
       {/* A fit outside the preferred list counts as one change, so the closed row shows it was set by hand. */}
-      <MoreOptions label="Any hole and shaft class" count={2} changed={isPreferredFit(designation) ? 0 : 1} memoryKey="fit-zones">
+      <MoreOptions count={2} changed={isPreferredFit(designation) ? 0 : 1} memoryKey="fit:zones">
         <PanelSection>
           <div className={styles.zones}>
             <ZonePicker zone={inputs.hole} onChange={(hole) => change({ hole })} />

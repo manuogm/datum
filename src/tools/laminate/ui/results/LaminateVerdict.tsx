@@ -1,6 +1,7 @@
-// Depth 1 of the results: the first-ply failure verdict. The lowest reserve
-// factor against the target, one sentence on the critical plies, then the
-// load at first-ply failure and the laminate's in-plane moduli.
+// Depth 1 of the results: the first-ply failure verdict. One sentence on the
+// critical plies and how many plies meet the target, the lowest reserve
+// factor against the target, then the load at first-ply failure and the
+// laminate's in-plane moduli.
 import type { ReactNode } from 'react'
 import { VerdictCard, type VerdictFigure } from '../../../../app/ui'
 import { formatQuantity, unitOf, type UnitSystem } from '../../../../core/units'
@@ -8,7 +9,7 @@ import type { LaminateAnalysis } from '../../calc'
 import { CRITERION_LABELS, formatFactor } from '../logic/labels'
 import { failureLoadNote, leadingLoad } from '../logic/loads'
 import { constantViews } from '../logic/stiffness'
-import { laminateStatus, verdictSentence } from '../logic/verdict'
+import { laminateStatus, plyCountText, plyTones, verdictSentence } from '../logic/verdict'
 
 interface LaminateVerdictProps {
   analysis: LaminateAnalysis
@@ -36,13 +37,17 @@ export function LaminateVerdict({ analysis, system, actions }: LaminateVerdictPr
   const failureLoad: VerdictFigure[] = load
     ? [{ label: 'FPF load', symbol: load.symbol, value: formatQuantity(load.quantity, system, firstPlyFailure.loads[load.key]), unit: unitOf(load.quantity, system) }]
     : []
+  // How many plies meet the target, then the rest of the failure load.
+  const detail = Number.isFinite(firstPlyFailure.reserveFactor)
+    ? [plyCountText(plyTones(analysis)), failureLoadNote(firstPlyFailure.loads, system)].filter(Boolean).join(' · ')
+    : undefined
   return (
     <VerdictCard
       status={laminateStatus(firstPlyFailure)}
       sentence={verdictSentence(analysis)}
-      detail={failureLoadNote(firstPlyFailure.loads, system)}
+      detail={detail}
       reference={`CLT · ${CRITERION_LABELS[analysis.criterion]}`}
-      headline={{ label: 'RF min', value: formatFactor(firstPlyFailure.reserveFactor), target: `≥ ${formatFactor(firstPlyFailure.targetReserveFactor)}` }}
+      headline={{ label: 'Reserve factor', symbol: 'RF min', value: formatFactor(firstPlyFailure.reserveFactor), target: `≥ ${formatFactor(firstPlyFailure.targetReserveFactor)}` }}
       figures={[...failureLoad, ...moduli]}
       actions={actions}
     />

@@ -50,14 +50,29 @@
 
 @media (max-width: 900px) {
   .diagramArea {
-    min-height: var(--chart-height-stacked);
+    padding: 0;
   }
+}
+
+/* Beside the step while the fit is not defined: nothing to draw yet. */
+.asideNote {
+  margin: 0;
+  font-size: var(--fs-12-5);
+  color: var(--text-muted);
+  text-align: center;
 }
 
 /* In the results' details the page is wide: keep the drawing to the verdict's width. */
 .detailsDiagram {
   height: 420px;
   max-width: 960px;
+}
+
+@media (max-width: 900px) {
+  .detailsDiagram {
+    height: auto;
+    padding: var(--space-16);
+  }
 }
 
 .spectrum {
@@ -174,4 +189,10 @@
 /* Results details: the limits and clearances under the charts */
 .values {
   border-top: var(--border-width) solid var(--border-subtle);
+}
+
+/* The details keep the verdict's width on a wide screen. */
+.values,
+.spectrum:not(.bare) {
+  max-width: 960px;
 }

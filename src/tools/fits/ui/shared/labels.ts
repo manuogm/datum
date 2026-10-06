@@ -1,11 +1,9 @@
-// How engine results are named on screen: the modes, the in-service verdict
-// in words, the status icon of an advisor check, the words for fit types, and
-// the nominal size as a label.
+// How engine results are named on screen: the modes, the status icon of an
+// advisor check, the words for fit types, and the nominal size as a label.
 import type { SegmentOption, Status } from '../../../../app/ui'
 import { formatDecimal, toDisplay, type UnitSystem } from '../../../../core/units'
 import type { CheckStatus } from '../../advisor'
 import type { FitType } from '../../calc'
-import type { FitStatus } from '../logic/serviceClearance'
 import type { FitMode } from '../state/fitInputs'
 
 /** The modes offered on the first step: check a fit (calculator) or have the advisor choose one. */
@@ -14,11 +12,6 @@ export const FIT_MODES: readonly SegmentOption<FitMode>[] = [
   { value: 'advisor', label: 'Help me choose' },
 ]
 
-export const STATUS_TITLE: Record<FitStatus, string> = {
-  pass: 'Within the required window in service',
-  review: 'Partly outside the required window',
-  fail: 'Outside the required window',
-}
 
 export const CHECK_ICON: Record<CheckStatus, Status> = { pass: 'ok', warn: 'warn', fail: 'bad' }
 

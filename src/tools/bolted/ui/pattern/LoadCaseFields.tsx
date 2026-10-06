@@ -51,7 +51,7 @@ export function LoadCaseFields({ loadCase, canRemove, serviceTempC, system, onCh
           </Button>
         </div>
       </PanelSection>
-      <MoreOptions count={AXES.length} changed={pointMoved}>
+      <MoreOptions count={AXES.length} changed={pointMoved} memoryKey="bolt:load-point">
         <PanelSection label="Load point">
           <div className={styles.vector}>
             <AxisHeadings />

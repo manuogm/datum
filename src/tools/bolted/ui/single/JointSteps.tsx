@@ -2,8 +2,8 @@
 // the bolt screws into and the clamped parts, beside section A–A), Loads,
 // then Results. Advanced inputs wait under More options on their step.
 import type { Dispatch, ReactNode } from 'react'
-import { MoreOptions, ResultsLayout, StepPage, type StepFlow } from '../../../../app/ui'
-import { formatDecimal, type UnitSystem } from '../../../../core/units'
+import { MoreOptions, ProblemCallout, ResultsLayout, StepPage, type StepFlow } from '../../../../app/ui'
+import type { UnitSystem } from '../../../../core/units'
 import type { BoltResults } from '../logic/boltResults'
 import { contactOptions, tighteningOptions } from '../logic/designOptions'
 import { jointTitle } from '../logic/labels'
@@ -12,7 +12,6 @@ import { BoltFields } from '../shared/BoltFields'
 import { ContactFields } from '../shared/ContactFields'
 import { JointKindFields } from '../shared/JointKindFields'
 import { PlatesFields } from '../shared/PlatesFields'
-import { ProblemNote } from '../shared/ProblemNote'
 import styles from '../shared/steps.module.css'
 import { TighteningFields } from '../shared/TighteningFields'
 import type { BoltInputs, JointDesignSpec } from '../state/boltInputs'
@@ -39,17 +38,16 @@ export function JointSteps({ flow, inputs, results, fault, system, dispatch, mod
   const analysis = results.joint.ok ? results.joint.value : null
   const changeDesign = (changes: Partial<JointDesignSpec>) => dispatch({ type: 'design', target: { scope: 'joint' }, changes })
   // The engine's explanation, on the step where it can be fixed.
-  const problem = fault?.step === flow.step.id && <ProblemNote title="This joint cannot be analysed yet" error={fault.error} />
+  const problem = fault?.step === flow.step.id && { title: 'This joint cannot be analysed yet', detail: fault.error }
 
   switch (flow.step.id) {
     case 'bolt': {
       const tightening = tighteningOptions(design)
       return (
-        <StepPage {...flow.page} title="Bolt" hint="The bolt: ISO thread, property class and head. Tightening and friction are under More options.">
-          {problem}
+        <StepPage {...flow.page} problem={problem} title="Bolt" hint="The bolt: ISO thread, property class and head. Tightening and friction are under More options.">
           {modeField}
           <BoltFields design={design} onChange={changeDesign} />
-          <MoreOptions count={tightening.count} changed={tightening.changed}>
+          <MoreOptions count={tightening.count} changed={tightening.changed} memoryKey="bolt:tightening">
             <TighteningFields design={design} onChange={changeDesign} />
           </MoreOptions>
         </StepPage>
@@ -60,8 +58,9 @@ export function JointSteps({ flow, inputs, results, fault, system, dispatch, mod
       return (
         <StepPage
           {...flow.page}
+          problem={problem}
           title="Joint"
-          hint="What the bolt screws into, and the parts it clamps from the head down."
+          hint="What the bolt screws into, and the parts it clamps from the head down. Contact details are under More options."
           asideLabel="Section A–A"
           asideMeta={`${jointTitle(design)} · to scale`}
           aside={
@@ -72,10 +71,9 @@ export function JointSteps({ flow, inputs, results, fault, system, dispatch, mod
             )
           }
         >
-          {problem}
           <JointKindFields design={design} system={system} onChange={changeDesign} />
           <PlatesFields design={design} system={system} clampLengthMm={analysis?.geometry.clampLengthMm ?? null} onChange={changeDesign} />
-          <MoreOptions count={contact.count} changed={contact.changed}>
+          <MoreOptions count={contact.count} changed={contact.changed} memoryKey="bolt:contact">
             <ContactFields design={design} system={system} onChange={changeDesign} />
           </MoreOptions>
         </StepPage>
@@ -83,8 +81,7 @@ export function JointSteps({ flow, inputs, results, fault, system, dispatch, mod
     }
     case 'loads':
       return (
-        <StepPage {...flow.page} title="Loads" hint="The working loads on the bolt, and the temperature range it sees in service." nextLabel="See results">
-          {problem}
+        <StepPage {...flow.page} problem={problem} title="Loads" hint="The working loads on the bolt, and the temperature range it sees in service." nextLabel="See results">
           <LoadsFields
             loads={loads}
             serviceTempC={inputs.serviceTempC}
@@ -99,7 +96,7 @@ export function JointSteps({ flow, inputs, results, fault, system, dispatch, mod
         <StepPage
           {...flow.page}
           title="Results"
-          hint={analysis ? `${jointTitle(design)} · Φn ${formatDecimal(analysis.loadFactor, 3, true)}, checked to VDI 2230-1.` : undefined}
+          hint={`${jointTitle(design)}, checked to VDI 2230-1.`}
           wide
         >
           {analysis ? (
@@ -107,16 +104,18 @@ export function JointSteps({ flow, inputs, results, fault, system, dispatch, mod
               analysis={analysis}
               axialN={loads.axialMaxN}
               system={system}
+              memoryKey={flow.memoryKey}
               stepInputs={{ 'surface-pressure': <PressureInputs design={design} system={system} onChange={changeDesign} /> }}
             />
           ) : (
             <ResultsLayout
               verdict={
-                <ProblemNote
+                <ProblemCallout
                   title="This joint cannot be analysed"
-                  error={fault?.error ?? (results.joint.ok ? '' : results.joint.error)}
-                  fix={fault ? { label: stepLabel('joint', fault.step), onClick: () => flow.goTo(fault.step) } : undefined}
-                />
+                  back={fault ? { label: stepLabel('joint', fault.step), onClick: () => flow.goTo(fault.step) } : undefined}
+                >
+                  {fault?.error ?? (results.joint.ok ? '' : results.joint.error)}
+                </ProblemCallout>
               }
             />
           )}

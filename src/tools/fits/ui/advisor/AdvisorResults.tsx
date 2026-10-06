@@ -3,7 +3,7 @@
 // checks of the best and the compared fit, every candidate ranked) and the
 // calculation (the advisor's reasoning in full, and its sources).
 import { useState } from 'react'
-import { Badge, Button, Callout, MonoLabel, Rationale, ResultsLayout, StepPage, VerdictCard } from '../../../../app/ui'
+import { Badge, Button, MonoLabel, ProblemCallout, Rationale, ResultsLayout, StepPage, VerdictCard } from '../../../../app/ui'
 import { formatQuantityRange, unitOf, type UnitSystem } from '../../../../core/units'
 import type { FitAdvice, FitCandidate } from '../../advisor'
 import { formatFit, parseFitDesignation } from '../../calc'
@@ -13,7 +13,6 @@ import { serviceClearance } from '../logic/serviceClearance'
 import { adviceVerdict, candidateStatus } from '../logic/verdict'
 import { BandLegend } from '../shared/BandLegend'
 import { FIT_TYPE_LABEL, nominalLabel } from '../shared/labels'
-import sharedStyles from '../shared/shared.module.css'
 import type { FitStepProps } from '../shared/stepProps'
 import styles from './advisor.module.css'
 import { CandidateChart } from './CandidateChart'
@@ -26,17 +25,14 @@ export function AdvisorResults(props: FitStepProps) {
   const { inputs, results, flow, fault } = props
   const advice = results.advice
   if (!advice.ok) {
-    const step = fault?.step === 'size' ? { id: 'size', label: 'Change the size' } : { id: 'requirements', label: 'Change the requirements' }
+    const step = fault?.step === 'size' ? { id: 'size', label: 'Size & materials' } : { id: 'requirements', label: 'Requirements' }
     return (
-      <StepPage {...flow.page} className={sharedStyles.step} title="Results" wide>
+      <StepPage {...flow.page} title="Results" wide>
         <ResultsLayout
           verdict={
-            <Callout status="bad" title="No advice for these inputs">
-              {advice.error}{' '}
-              <Button variant="link" size="sm" onClick={() => flow.goTo(step.id)}>
-                {step.label}
-              </Button>
-            </Callout>
+            <ProblemCallout title="No advice for these inputs" back={{ label: step.label, onClick: () => flow.goTo(step.id) }}>
+              {advice.error}
+            </ProblemCallout>
           }
         />
       </StepPage>
@@ -45,9 +41,8 @@ export function AdvisorResults(props: FitStepProps) {
   return (
     <StepPage
       {...flow.page}
-      className={sharedStyles.step}
       title="Results"
-      hint={`The ISO fits ranked for ${nominalLabel(inputs.nominalMm, props.system)} in ${results.housing.name} and ${results.shaft.name}.`}
+      hint={`The ISO fits for ${nominalLabel(inputs.nominalMm, props.system)} in ${results.housing.name} and ${results.shaft.name}, ranked against the requirements.`}
       wide
     >
       <Recommendation {...props} advice={advice.value} />
@@ -76,7 +71,7 @@ function Recommendation({ advice, inputs, results, system, dispatch, flow }: Fit
 
   return (
     <ResultsLayout
-      memoryKey="fit-advisor"
+      memoryKey={flow.memoryKey}
       verdict={
         <VerdictCard
           status={candidateStatus(best)}
