@@ -1,8 +1,6 @@
-import { SOURCE } from './sources'
-
 /**
- * Complementary error function erfc(x), by the Chebyshev fit of Numerical
- * Recipes (erfcc): fractional error below 1.2·10⁻⁷ everywhere, so even the
+ * Complementary error function erfc(x), by the Chebyshev fit erfcc of
+ * Press et al., Numerical Recipes in C (2nd ed. 1992) §6.2: fractional error below 1.2·10⁻⁷ everywhere, so even the
  * far tails (parts per billion) are accurate to 7 digits.
  */
 export function erfc(x: number): number {
@@ -19,4 +17,3 @@ export function normalUpperTail(z: number): number {
   return 0.5 * erfc(z / Math.SQRT2)
 }
 
-export const NORMAL_TAIL_SOURCE = SOURCE.numericalRecipes

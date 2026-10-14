@@ -51,6 +51,8 @@ export const MAX_CONTRIBUTORS = 200
  * - fail:   mean ± 2σ outside.
  *
  * twoSigma is the ±2σ range checked against the same requirement.
+ * governing: the limit with the smaller margin by the chosen method; 'both'
+ * when the margins are equal (a centred result between two limits).
  */
 export function verdictOf(method: StackMethod, worstCase: MethodRange, rss: MethodRange, twoSigma: MethodRange): Verdict | null {
   if (worstCase.withinRequirement === null) return null
@@ -60,5 +62,6 @@ export function verdictOf(method: StackMethod, worstCase: MethodRange, rss: Meth
   const range = method === 'worst-case' ? worstCase : rss
   const lower = range.lowerMargin ?? Number.POSITIVE_INFINITY
   const upper = range.upperMargin ?? Number.POSITIVE_INFINITY
-  return { method, status, basis, governing: lower < upper ? 'lower' : 'upper' }
+  const governing = Math.abs(lower - upper) <= LIMIT_TOLERANCE_MM ? 'both' : lower < upper ? 'lower' : 'upper'
+  return { method, status, basis, governing }
 }

@@ -15,8 +15,14 @@ export const SOURCE = {
   /** Concentricity and symmetry were removed from ASME Y14.5 in 2018; the 2009 edition still defines them. */
   asme2009: 'ASME Y14.5-2009',
   iso1101: 'ISO 1101:2017',
+  /** Maximum and least material requirements (Ⓜ, Ⓛ), also on datum features. */
+  iso2692: 'ISO 2692:2021',
+  /** Non-rigid parts: free state and restrained condition. */
+  iso10579: 'ISO 10579:2010',
   /** Independency principle: in ISO drawings form is not limited by size unless Ⓔ (envelope) is given. */
   iso8015: 'ISO 8015:2011',
+  /** ⟨ST⟩ statistical tolerance: the hybrid worst-case stack (RSS of the ⟨ST⟩ rows, added arithmetically to the rest). */
+  statisticalTolerance: 'ASME Y14.5-2018 (statistical tolerancing, ⟨ST⟩); Drake, Dimensioning and Tolerancing Handbook (McGraw-Hill 1999), ch. 9',
   /** Cp = (USL − LSL)/6σ, Cpk = min(USL − µ, µ − LSL)/3σ. */
   montgomery: 'Montgomery, Introduction to Statistical Quality Control (7th ed., Wiley 2013), §8.3',
   /** erfc by a Chebyshev fit, fractional error below 1.2·10⁻⁷ everywhere. */
