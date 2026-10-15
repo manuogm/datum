@@ -114,7 +114,7 @@ export function resultsHint(inputs: StackInputs, analysis: StackAnalysis): strin
   const rows = analysis.contributors.length
   if (inputs.mode === 'assembly') {
     const linked = inputs.rows.filter((row) => row.kind === 'linked').length
-    const of = linked === 0 ? '' : linked === 1 ? ', 1 a linked part stack' : `, ${linked} linked part stacks`
+    const of = linked === 0 ? '' : linked === 1 ? ', 1 of them a linked part stack' : `, ${linked} of them linked part stacks`
     return `${upperName(inputs.resultName)} through ${rows} ${rows === 1 ? 'row' : 'rows'}${of}, by worst case and RSS.`
   }
   const part = inputs.partName.trim()
