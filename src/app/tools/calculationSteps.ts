@@ -4,17 +4,19 @@
 //   - what the screen remembers while the page is open (the step it was on,
 //     which result depths are open), all under one key per calculation, so
 //     deleting the calculation forgets it all at once.
-import type { Calculation } from '../../core/library'
+import { isSeededExample, type Calculation } from '../../core/library'
 import { forget, useStepFlow, type StepDef, type StepFlow, type StepFlowState } from '../ui'
 
-type Dates = Pick<Calculation, 'inputs' | 'createdAt' | 'updatedAt'>
+type Dates = Pick<Calculation, 'inputs' | 'createdAt' | 'updatedAt'> & { id?: string }
 
 /**
- * Never saved since it was created. A seeded worked example (inputs null)
- * is a finished calculation to read, so it is not new.
+ * Never saved since it was created. A seeded worked example (inputs null,
+ * or an "example-…" id such as the stack-up Assembly, whose inputs are
+ * stored) is a finished calculation to read, so it is not new.
  */
 export function isNewCalculation(calculation: Dates): boolean {
-  return calculation.inputs !== null && calculation.createdAt === calculation.updatedAt
+  if (calculation.inputs === null || (calculation.id !== undefined && isSeededExample(calculation.id))) return false
+  return calculation.createdAt === calculation.updatedAt
 }
 
 /** Where a calculation's steps open when this page has not shown it yet. */

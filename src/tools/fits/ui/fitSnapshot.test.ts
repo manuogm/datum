@@ -31,10 +31,10 @@ describe('fitSnapshot', () => {
     expect(expectError(fitSnapshot(inputs))).toMatch(/3150 mm/)
   })
 
-  it('passes a new calculation without a window: nothing is judged, nothing moves with temperature', () => {
+  it("does not judge a new calculation without a window (status 'none'), and nothing moves with temperature", () => {
     const inputs: FitInputs = { ...NEW_FIT_INPUTS, mode: 'calculator', hole: { kind: 'hole', letter: 'h', grade: '9' }, shaft: { kind: 'shaft', letter: 'd', grade: '9' } }
     const snapshot = expectOk(fitSnapshot(inputs))
-    expect(snapshot).toMatchObject({ title: 'Ø25 H9/d9', status: 'pass' })
+    expect(snapshot).toMatchObject({ title: 'Ø25 H9/d9', status: 'none' })
     expect(snapshot.figures).toEqual([{ label: 'C at 20 °C', value: '65 … 169', unit: 'µm' }])
   })
 

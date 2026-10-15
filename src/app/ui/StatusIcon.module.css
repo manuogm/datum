@@ -39,3 +39,8 @@
 .bad {
   background: var(--bad);
 }
+
+.neutral {
+  background: var(--stroke-faint);
+  color: var(--surface);
+}

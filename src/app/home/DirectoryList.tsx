@@ -6,15 +6,16 @@ import { countOf } from '../format/count'
 import { formatActivityTime } from '../format/formatActivityTime'
 import { calcHref, folderHref } from '../router/routes'
 import { TOOL_ICONS } from '../shell/toolIcons'
-import { cx, Icon, Marker, type Tone } from '../ui'
+import { cx, Icon, Marker, type MarkerColor } from '../ui'
 import styles from './DirectoryList.module.css'
 import type { Entry } from './entry'
 import { RowMenu, type RowMenuItem } from './RowMenu'
 
-const STATUS: Record<CalculationStatus, { tone: Tone; label: string }> = {
+const STATUS: Record<CalculationStatus, { tone: MarkerColor; label: string }> = {
   pass: { tone: 'ok', label: 'Pass' },
   review: { tone: 'warn', label: 'Review' },
   fail: { tone: 'bad', label: 'Fail' },
+  none: { tone: 'faint', label: 'No requirement' },
 }
 
 interface DirectoryListProps {

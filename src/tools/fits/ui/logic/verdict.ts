@@ -2,7 +2,7 @@
 // clearance that governs (calculator with a required window), the fit in
 // service without a verdict (calculator without one), and the best match's
 // status and the advisor's verdict in words (advisor).
-import type { CalculationStatus } from '../../../../core/library'
+import type { CalculationStatus, JudgedStatus } from '../../../../core/library'
 import { formatQuantity, formatQuantityRange, type UnitSystem } from '../../../../core/units'
 import { REFERENCE_TEMP_C, type ClearanceRangeUm, type FitCandidate } from '../../advisor'
 import type { FitAnalysis } from '../../calc'
@@ -48,6 +48,8 @@ export function calculatorSentence(status: CalculationStatus, edge: GoverningEdg
       return `The clearance in service is partly outside the required window; ${governs}.`
     case 'fail':
       return `The clearance in service is outside the required window; ${governs}.`
+    case 'none':
+      return 'The clearance in service is not judged: no required window is set.'
   }
 }
 
@@ -71,7 +73,7 @@ export function unjudgedSentence(fitTypeLabel: string, fit: FitAnalysis, service
  * The status the library summary and the report give the fit on screen: in
  * advisor mode, the best match's checks (assembly and application included);
  * in calculator mode, the clearance in service against the required window
- * (pass when none is set).
+ * ('none', not judged, when none is set).
  */
 export function presentedStatus(inputs: FitInputs, results: FitResults, fit: FitAnalysis, service: ServiceClearance): CalculationStatus {
   const candidate = inputs.mode === 'advisor' ? candidateFor(results, fit.designation) : undefined
@@ -95,7 +97,7 @@ export function advisorVerdict(best: FitCandidate, why: string): { sentence: str
 }
 
 /** An advisor candidate as a status: every check passes, some only warn, or one fails. */
-export function candidateStatus(candidate: Pick<FitCandidate, 'checks'>): CalculationStatus {
+export function candidateStatus(candidate: Pick<FitCandidate, 'checks'>): JudgedStatus {
   const statuses = candidate.checks.map((check) => check.status)
   if (statuses.includes('fail')) return 'fail'
   return statuses.includes('warn') ? 'review' : 'pass'

@@ -2,7 +2,8 @@
 // FAIL) with one sentence saying why, one big number (the governing value)
 // set against its target, and the 2–4 key figures the engineer puts on the
 // drawing. Optional actions under it (a mode action such as "Optimise
-// layup", or "Apply to calculator").
+// layup", or "Apply to calculator"). A result with no requirement to judge
+// it against is NO REQUIREMENT: a neutral card with a "–" icon.
 import { useId, type ReactNode } from 'react'
 import { Badge } from './Badge'
 import { cx } from './cx'
@@ -10,11 +11,11 @@ import { MonoLabel } from './MonoLabel'
 import { StatusIcon, type Status } from './StatusIcon'
 import styles from './VerdictCard.module.css'
 
-/** A calculation's verdict, as the library summary stores it. */
-export type Verdict = 'pass' | 'review' | 'fail'
+/** A calculation's verdict, as the library summary stores it ('none': no requirement, not judged). */
+export type Verdict = 'pass' | 'review' | 'fail' | 'none'
 
-const STATUS: Record<Verdict, Status> = { pass: 'ok', review: 'warn', fail: 'bad' }
-const WORD: Record<Verdict, string> = { pass: 'Pass', review: 'Review', fail: 'Fail' }
+const STATUS: Record<Verdict, Status | 'neutral'> = { pass: 'ok', review: 'warn', fail: 'bad', none: 'neutral' }
+const WORD: Record<Verdict, string> = { pass: 'Pass', review: 'Review', fail: 'Fail', none: 'No requirement' }
 
 export interface VerdictFigure {
   /** Mono uppercase label, e.g. "Preload". */

@@ -45,6 +45,24 @@ function forgetDeleted(ids: readonly string[]): void {
   forgetCalculations(ids)
 }
 
+/** Calculations whose result changed: saved from their tool, or deleted. */
+type ChangeListener = (ids: readonly string[]) => void
+const changeListeners = new Set<ChangeListener>()
+
+/**
+ * Be told each time calculations are saved from their tool or deleted, e.g.
+ * so that a Tolerance Stack-up Assembly that links a part stack gets its
+ * summary worked out again (app/tools/dependents). Returns the function that stops it.
+ */
+export function onCalculationsChanged(listener: ChangeListener): () => void {
+  changeListeners.add(listener)
+  return () => changeListeners.delete(listener)
+}
+
+function changed(ids: readonly string[]): void {
+  if (ids.length > 0) for (const listener of changeListeners) listener(ids)
+}
+
 /** Runs a command that creates something under a fresh id; returns that id. */
 function create(command: (id: string) => Parameters<typeof applyChange>[0]): Result<string> {
   const id = newId(getSnapshot().state)
@@ -68,7 +86,10 @@ export const libraryActions = {
     const doomed = folderAndBelow(library, id)
     const calculations = library.calculations.filter((c) => c.folderId !== null && doomed.has(c.folderId)).map((c) => c.id)
     const result = done(applyChange((current) => deleteFolder(current, id)))
-    if (result.ok) forgetDeleted(calculations)
+    if (result.ok) {
+      forgetDeleted(calculations)
+      changed(calculations)
+    }
     return result
   },
 
@@ -90,13 +111,18 @@ export const libraryActions = {
   /** Deletes the calculation, with its unsaved draft, its tab and what its screen remembered. */
   deleteCalculation(id: string): Done {
     const result = done(applyChange((library) => deleteCalculation(library, id)))
-    if (result.ok) forgetDeleted([id])
+    if (result.ok) {
+      forgetDeleted([id])
+      changed([id])
+    }
     return result
   },
 
   /** Save from a tool screen: the inputs on screen and the result they give. */
   saveCalculation(id: string, inputs: unknown, summary: CalculationSummary | null): Done {
-    return done(applyChange((library) => updateCalculation(library, id, { inputs, summary }, localTimestamp())))
+    const result = done(applyChange((library) => updateCalculation(library, id, { inputs, summary }, localTimestamp())))
+    if (result.ok) changed([id])
+    return result
   },
   /** A tool's fresh summary for unchanged inputs; not an edit. */
   refreshSummary(id: string, summary: CalculationSummary | null): Done {

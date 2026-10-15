@@ -42,6 +42,18 @@
   fill: var(--surface);
 }
 
+.fillText {
+  fill: var(--text);
+}
+
+.fillOk {
+  fill: var(--ok);
+}
+
+.fillOkWash {
+  fill: var(--ok-wash);
+}
+
 .fillHoleSoft {
   fill: var(--hole-soft);
 }

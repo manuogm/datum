@@ -1,7 +1,7 @@
 // Verdicts for a joint or a pattern: the tone a utilisation is shown in, the
 // load case that governs a pattern, and the verdict in words for the results:
 // always naming the check(s) behind the status, not only the most utilised.
-import type { CalculationStatus } from '../../../../core/library'
+import type { JudgedStatus } from '../../../../core/library'
 import type { Result } from '../../../../core/result'
 import { formatDecimal } from '../../../../core/units'
 import type { BoltedJointAnalysis, CalculationStep, StepStatus } from '../../calc'
@@ -32,7 +32,7 @@ export function utilisationTone(utilisation: number, status: CheckStatus): Utili
 }
 
 /** A check status as a calculation status. */
-export const CALCULATION_STATUS: Record<CheckStatus, CalculationStatus> = { pass: 'pass', warn: 'review', fail: 'fail' }
+export const CALCULATION_STATUS: Record<CheckStatus, JudgedStatus> = { pass: 'pass', warn: 'review', fail: 'fail' }
 
 const SEVERITY: Record<CheckStatus, number> = { pass: 0, warn: 1, fail: 2 }
 
@@ -199,7 +199,7 @@ function passingSentence(bolt: PatternBoltResult, everyBolt: string, where: stri
  * (J4) fails R12 safety against slipping in LC3 Braking.' and '6 of 8 bolts
  * pass'.
  */
-export function loadCaseVerdict(analysis: BoltPatternAnalysis, loadCase: Pick<LoadCaseSpec, 'id' | 'name'>): VerdictText & { status: CalculationStatus } {
+export function loadCaseVerdict(analysis: BoltPatternAnalysis, loadCase: Pick<LoadCaseSpec, 'id' | 'name'>): VerdictText & { status: JudgedStatus } {
   const bolt = decidingBolt(analysis)
   const where = `${loadCase.id} ${loadCase.name}`
   const passing = analysis.bolts.filter((b) => b.status === 'pass').length
@@ -211,7 +211,7 @@ export function loadCaseVerdict(analysis: BoltPatternAnalysis, loadCase: Pick<Lo
  * The whole pattern's verdict, over every load case, from the governing
  * case's deciding bolt: the status the report and the library show.
  */
-export function patternVerdict(loadCases: readonly LoadCaseResult[]): Result<VerdictText & { status: CalculationStatus; governing: GoverningCase }> {
+export function patternVerdict(loadCases: readonly LoadCaseResult[]): Result<VerdictText & { status: JudgedStatus; governing: GoverningCase }> {
   const governing = governingCase(loadCases)
   if (!governing.ok) return governing
   const { loadCase, analysis, bolt } = governing.value

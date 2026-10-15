@@ -46,24 +46,27 @@ export function ReportTitleBlock({ title, subtitle, calculation, meta }: ReportT
 }
 
 interface ReportSummaryProps {
-  status: ReportStatus
+  /** 'none': not judged, no requirement set. */
+  status: ReportStatus | 'none'
   headline: string
   /** How many warnings §`warningsSection` lists. */
   warnings: number
   warningsSection: number
+  /** Under the status instead of the warnings count, e.g. why it is what it is. */
+  note?: ReactNode
   /** Further cells: ReportSummaryCell or ReportFigure. */
   children: ReactNode
 }
 
 /** The verdict strip under the title: status first, then the headline numbers. */
-export function ReportSummary({ status, headline, warnings, warningsSection, children }: ReportSummaryProps) {
+export function ReportSummary({ status, headline, warnings, warningsSection, note, children }: ReportSummaryProps) {
   return (
     <section className={styles.summary} aria-label="Summary">
       <div className={styles[status]}>
         <span className={styles.summaryLabel}>STATUS</span>
         <span className={styles.status}>{headline}</span>
         <span className={styles.summaryNote}>
-          {warnings === 0 ? 'No warnings' : `${countOf(warnings, 'warning')}, see §${warningsSection}`}
+          {note ?? (warnings === 0 ? 'No warnings' : `${countOf(warnings, 'warning')}, see §${warningsSection}`)}
         </span>
       </div>
       {children}

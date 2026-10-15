@@ -19,6 +19,11 @@ describe('openingStep', () => {
     expect(isNewCalculation({ inputs: null, createdAt: at, updatedAt: at })).toBe(false)
     expect(openingStep({ inputs: null, createdAt: at, updatedAt: at }, 3)).toEqual({ current: 2, reached: 2 })
   })
+
+  it('opens a seeded example with stored inputs (the stack-up Assembly) on Results too', () => {
+    expect(isNewCalculation({ id: 'example-stack-assembly', inputs: {}, createdAt: at, updatedAt: at })).toBe(false)
+    expect(isNewCalculation({ id: 'k3x9a0b2', inputs: {}, createdAt: at, updatedAt: at })).toBe(true)
+  })
 })
 
 describe('forgetCalculations', () => {

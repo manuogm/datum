@@ -1,0 +1,98 @@
+/* Feature control frames and their drawn modifiers (design §4.2). */
+.frame {
+  display: inline-flex;
+  align-items: stretch;
+  height: 26px;
+  border: var(--border-width) solid var(--text-secondary);
+  border-radius: 1px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-13);
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.cell {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 0 var(--space-6);
+}
+
+.cell + .cell {
+  border-left: var(--border-width) solid var(--text-secondary);
+}
+
+.symbolCell {
+  justify-content: center;
+  min-width: 28px;
+  padding: 0 var(--space-5);
+}
+
+.toleranceCell {
+  gap: var(--space-4);
+}
+
+/* The row's tolerance cell: no outer frame, a divider between symbol and value. */
+.compact {
+  height: auto;
+  border: 0;
+  font-size: var(--fs-12-5);
+}
+
+.compact .cell {
+  padding: 0 var(--space-4);
+}
+
+.compact .symbolCell {
+  min-width: 0;
+  padding-left: 0;
+}
+
+.compact .cell + .cell {
+  border-left-color: var(--border-strong);
+}
+
+/* Ⓜ Ⓛ Ⓟ Ⓤ Ⓕ Ⓣ: a mono letter in a 1 px circle. */
+.circled {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 1.15em;
+  height: 1.15em;
+  border: var(--border-width) solid currentColor;
+  border-radius: 50%;
+  font-family: var(--font-mono);
+  font-size: 0.78em;
+  line-height: 1;
+}
+
+.circled > span {
+  transform: translateY(0.02em);
+}
+
+.plainModifier {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+}
+
+/* ⟨ST⟩: "ST" in an elongated hexagon. */
+.statistical {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 2em;
+  height: 1.1em;
+  font-family: var(--font-mono);
+  font-size: 0.72em;
+  line-height: 1;
+}
+
+.statistical svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}

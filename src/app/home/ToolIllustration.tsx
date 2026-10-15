@@ -1,5 +1,5 @@
 // Small schematic of each tool, drawn on its card in the New calculation
-// dialog: tolerance zones, a bolt pattern and a ply stack.
+// dialog: tolerance zones, a bolt pattern, a ply stack and a stack-up loop.
 import type { ComponentType } from 'react'
 import styles from './ToolIllustration.module.css'
 import { cx } from '../ui'
@@ -54,10 +54,37 @@ function LaminateDiagram() {
   )
 }
 
+/** Three chained dimensions (+, −, +) from a start line, and the result they add up to inside its required window. */
+function StackDiagram() {
+  const arrow = (y: number, from: number, to: number) => {
+    const dir = Math.sign(to - from)
+    return (
+      <g key={y}>
+        <line x1={from} x2={to - dir * 8} y1={y} y2={y} className={styles.strokeText} strokeWidth="1.5" />
+        <line x1={from} x2={from} y1={y - 6} y2={y + 6} className={styles.strokeText} strokeWidth="1.5" />
+        <polygon points={`${to},${y} ${to - dir * 10},${y - 5} ${to - dir * 10},${y + 5}`} className={styles.fillText} />
+      </g>
+    )
+  }
+  return (
+    <>
+      <line x1="40" x2="40" y1="14" y2="150" className={styles.strokeFaint} strokeWidth="1.2" strokeDasharray="4 4" />
+      <line x1="170" x2="170" y1="84" y2="150" className={styles.strokeFaint} strokeWidth="1.2" strokeDasharray="4 4" />
+      {arrow(30, 40, 240)}
+      {arrow(58, 240, 110)}
+      {arrow(86, 110, 170)}
+      <rect x="62" y="110" width="186" height="40" className={cx(styles.fillOkWash, styles.strokeOk)} strokeWidth="1.2" strokeDasharray="5 4" />
+      <rect x="92" y="120" width="128" height="20" className={cx(styles.fillSurface, styles.strokeText)} strokeWidth="1.5" />
+      <rect x="128" y="126" width="56" height="8" className={styles.fillOk} />
+    </>
+  )
+}
+
 const DIAGRAMS: Record<ToolId, ComponentType> = {
   fit: FitDiagram,
   bolt: BoltDiagram,
   lam: LaminateDiagram,
+  stack: StackDiagram,
 }
 
 export function ToolIllustration({ tool, width = 240 }: { tool: ToolId; width?: number }) {

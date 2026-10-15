@@ -4,10 +4,17 @@
 // save overwrites).
 
 /** The calculation tools. Extend as new tools ship. */
-export type ToolId = 'fit' | 'bolt' | 'lam'
+export type ToolId = 'fit' | 'bolt' | 'lam' | 'stack'
 
-/** Overall verdict of a calculation, shown as a status dot. */
-export type CalculationStatus = 'pass' | 'review' | 'fail'
+/** A result judged against its requirement. */
+export type JudgedStatus = 'pass' | 'review' | 'fail'
+
+/**
+ * Overall verdict of a calculation, shown as a status dot. 'none': the
+ * result is not judged because no requirement is set (a grey dot, "No
+ * requirement"), e.g. a stack-up without limits or a fit without a window.
+ */
+export type CalculationStatus = JudgedStatus | 'none'
 
 /** One headline result (e.g. "u max" → "0.82"). */
 export interface SnapshotFigure {

@@ -104,7 +104,7 @@ interface CalculatorVerdictProps {
 /**
  * In-service verdict: the governing edge of the clearance against its window
  * limit, then the fit at 20 °C. Without a required window: the fit type and
- * its clearance in service, with no target (status pass).
+ * its clearance in service, not judged (status 'none', "No requirement").
  */
 function CalculatorVerdict({ fit, service, inputs, system }: CalculatorVerdictProps) {
   const deviation = (um: number) => formatQuantity('deviation', system, um)
@@ -132,7 +132,7 @@ function CalculatorVerdict({ fit, service, inputs, system }: CalculatorVerdictPr
           label: 'Clearance in service',
           value: formatQuantityRange('deviation', system, service.inServiceUm.minUm, service.inServiceUm.maxUm, false),
           unit: deviationUnit,
-          target: 'no required window',
+          target: 'none set',
         }}
         figures={figures}
       />

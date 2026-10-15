@@ -11,6 +11,12 @@ export interface ToolDefinition<Inputs> {
   inputsFrom: (stored: unknown) => Inputs
   /** What the tool reports about the inputs, or why it cannot analyse them. */
   snapshot: (inputs: Inputs) => Result<ToolSnapshot<Inputs>>
+  /**
+   * What Save writes, when it is more than the inputs on screen: a Tolerance
+   * Stack-up Assembly also records the linked part results it used. Returns
+   * the same inputs when there is nothing to add. Omitted: the inputs as they are.
+   */
+  toSave?: (inputs: Inputs) => Inputs
 }
 
 /** The summary the library lists for these inputs; null when the tool cannot analyse them. */

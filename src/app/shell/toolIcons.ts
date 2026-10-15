@@ -6,4 +6,5 @@ export const TOOL_ICONS: Record<ToolId, IconName> = {
   fit: 'tool-fit',
   bolt: 'tool-bolt',
   lam: 'tool-lam',
+  stack: 'tool-stack',
 }

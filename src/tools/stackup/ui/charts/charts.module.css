@@ -1,0 +1,561 @@
+/* The stack chart, the result strip and the contribution chart (design §5). */
+.chart {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  min-width: 0;
+}
+
+.captions {
+  display: grid;
+  align-items: baseline;
+}
+
+.effectCaption {
+  overflow: hidden;
+  padding-left: var(--space-12);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.canvas {
+  position: relative;
+  min-width: 0;
+}
+
+.canvas svg {
+  display: block;
+  overflow: visible;
+}
+
+.stale svg {
+  opacity: 0.4;
+}
+
+.staleNote {
+  position: absolute;
+  top: var(--space-24);
+  left: 50%;
+  margin: 0;
+  padding: var(--space-4) var(--space-10);
+  border: var(--border-width) solid var(--bad-border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--bad-text);
+  font-size: var(--fs-12);
+  white-space: nowrap;
+  transform: translateX(-50%);
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-6) var(--space-16);
+}
+
+/* SVG text */
+.chart text {
+  font-family: var(--font-sans);
+}
+
+.laneNumber,
+.tickText,
+.laneValue,
+.windowText,
+.rangeText,
+.endText {
+  font-family: var(--font-mono) !important;
+}
+
+.laneNumber {
+  fill: var(--text-faint);
+  font-size: 11px;
+}
+
+.laneLabel {
+  fill: var(--text);
+  font-size: 12px;
+}
+
+.laneIcon {
+  color: var(--text-secondary);
+}
+
+.laneValue {
+  fill: var(--text-secondary);
+  font-size: 11px;
+  text-anchor: end;
+}
+
+.tickText {
+  fill: var(--text-faint);
+  font-size: 10px;
+  text-anchor: middle;
+}
+
+.endText {
+  fill: var(--text-faint);
+  font-size: 10px;
+  letter-spacing: 0.04em;
+}
+
+.emptyNote {
+  fill: var(--text-muted);
+  font-size: 12px;
+  text-anchor: middle;
+}
+
+.end {
+  text-anchor: end;
+}
+
+/* Lanes */
+.clickable {
+  cursor: pointer;
+}
+
+.laneBand {
+  fill: transparent;
+}
+
+.laneRule,
+.resultRule {
+  stroke: var(--border-faint);
+  stroke-width: 1;
+}
+
+.resultRule {
+  stroke: var(--border);
+}
+
+.divider,
+.axisLine {
+  stroke: var(--border);
+  stroke-width: 1;
+}
+
+.guide {
+  stroke: var(--text-faint);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+}
+
+.zeroLine {
+  stroke: var(--text-faint);
+  stroke-width: 1;
+  stroke-dasharray: 1 3;
+}
+
+.shaft {
+  stroke: var(--text-secondary);
+  stroke-width: 1.5;
+}
+
+.linkedShaft {
+  stroke: var(--text-secondary);
+  stroke-width: 1.2;
+}
+
+.head {
+  fill: var(--text-secondary);
+}
+
+.marker {
+  fill: none;
+  stroke: var(--text-secondary);
+  stroke-width: 1.5;
+}
+
+.rowBand {
+  fill: var(--surface-muted);
+  stroke: var(--text-secondary);
+  stroke-width: 1.2;
+}
+
+.linkedBand {
+  fill: none;
+  stroke: var(--text-secondary);
+  stroke-width: 1.2;
+}
+
+.linkedSigma {
+  fill: var(--surface-muted);
+  stroke: var(--text-secondary);
+  stroke-width: 1;
+}
+
+.meanTick {
+  stroke: var(--text);
+  stroke-width: 1.2;
+}
+
+/* Hover: both panels' marks in full text colour. */
+.lane:hover .shaft,
+.lane:hover .linkedShaft,
+.lane:hover .marker,
+.lane:hover .rowBand,
+.lane:hover .linkedBand,
+.lane:hover .linkedSigma {
+  stroke: var(--text);
+}
+
+.lane:hover .head {
+  fill: var(--text);
+}
+
+/* The selected row */
+.selected .laneBand {
+  fill: var(--accent-soft);
+}
+
+.selected .laneLabel,
+.selected .laneNumber,
+.selected .laneValue {
+  fill: var(--accent-text);
+}
+
+.selected .laneIcon {
+  color: var(--accent-text);
+}
+
+.selected .shaft,
+.selected .linkedShaft,
+.selected .marker,
+.selected .rowBand,
+.selected .linkedBand {
+  stroke: var(--accent-text);
+}
+
+.selected .head {
+  fill: var(--accent-text);
+}
+
+/* The result lane: the verdict method in its status colour, the other neutral. */
+.resultShaft {
+  stroke: var(--text);
+  stroke-width: 1.5;
+}
+
+.resultHead {
+  fill: var(--text);
+}
+
+.resultLabel {
+  fill: var(--text);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.window {
+  fill: var(--ok-wash);
+}
+
+.windowEdge {
+  stroke: var(--ok);
+  stroke-width: 1;
+  stroke-dasharray: var(--chart-dash-guide);
+}
+
+.windowText {
+  fill: var(--ok-text);
+  font-size: 10px;
+}
+
+.wcBand {
+  fill: none;
+  stroke: var(--text-secondary);
+  stroke-width: 1.5;
+}
+
+.rssBand {
+  fill: var(--surface-muted);
+  stroke: var(--text-secondary);
+  stroke-width: 1.2;
+}
+
+.overshoot {
+  fill: var(--bad-wash);
+  stroke: var(--bad);
+  stroke-width: 1.5;
+}
+
+.rangeText {
+  fill: var(--text-secondary);
+  font-size: 11px;
+}
+
+.resultLoop.ok .resultShaft,
+.wcBand.ok {
+  stroke: var(--ok);
+}
+
+.resultLoop.ok .resultHead {
+  fill: var(--ok);
+}
+
+.resultLoop.ok .resultLabel,
+.rangeText.ok {
+  fill: var(--ok-text);
+}
+
+.rssBand.ok {
+  fill: var(--ok-soft);
+  stroke: var(--ok);
+}
+
+.resultLoop.warn .resultShaft,
+.wcBand.warn {
+  stroke: var(--warn);
+}
+
+.resultLoop.warn .resultHead {
+  fill: var(--warn);
+}
+
+.resultLoop.warn .resultLabel,
+.rangeText.warn {
+  fill: var(--warn-text);
+}
+
+.rssBand.warn {
+  fill: var(--warn-soft);
+  stroke: var(--warn);
+}
+
+.resultLoop.bad .resultShaft,
+.wcBand.bad {
+  stroke: var(--bad);
+}
+
+.resultLoop.bad .resultHead {
+  fill: var(--bad);
+}
+
+.resultLoop.bad .resultLabel,
+.rangeText.bad {
+  fill: var(--bad-text);
+}
+
+.rssBand.bad {
+  fill: var(--bad-soft);
+  stroke: var(--bad);
+}
+
+/* No requirement: neutral text colour. */
+.wcBand.neutral {
+  stroke: var(--text);
+}
+
+.rssBand.neutral {
+  stroke: var(--text);
+}
+
+/* Legend swatches */
+.swatch {
+  display: inline-block;
+  width: 18px;
+  height: 10px;
+  border-radius: 1px;
+}
+
+.swatchWorstCase {
+  border: 1.5px solid var(--text-secondary);
+}
+
+.swatchRss {
+  height: 6px;
+  border: 1px solid var(--text-secondary);
+  background: var(--surface-muted);
+}
+
+.swatchRequired {
+  border-right: 1px dashed var(--ok);
+  border-left: 1px dashed var(--ok);
+  background: var(--ok-wash);
+}
+
+.swatchRow {
+  height: 8px;
+  border: 1.2px solid var(--text-secondary);
+  background: var(--surface-muted);
+}
+
+.swatchLinked {
+  border: 1.2px solid var(--text-secondary);
+  background: linear-gradient(var(--surface-muted), var(--surface-muted)) center / 70% 40% no-repeat;
+}
+
+/* Result strip (Method aside) */
+.strip {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  min-width: 0;
+}
+
+.stripRanges {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--space-4) var(--space-12);
+  font-family: var(--font-mono);
+  font-size: var(--fs-12);
+  color: var(--text-secondary);
+}
+
+.stripRanges .ok {
+  color: var(--ok-text);
+}
+
+.stripRanges .warn {
+  color: var(--warn-text);
+}
+
+.stripRanges .bad {
+  color: var(--bad-text);
+}
+
+/* Contribution chart (Show details) */
+.contributions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+
+.contributionsHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-8);
+}
+
+.shareList {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.shareRow {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) minmax(60px, 160px) 64px 52px;
+  align-items: center;
+  gap: var(--space-8);
+  min-height: 30px;
+  font-size: var(--fs-12-5);
+}
+
+.shareSub {
+  min-height: 24px;
+  font-size: var(--fs-12);
+  color: var(--text-secondary);
+}
+
+.shareNumber {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-mono);
+  font-size: var(--fs-11-5);
+  color: var(--text-faint);
+}
+
+.shareName {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-6);
+  overflow: hidden;
+  min-width: 0;
+  color: var(--text);
+}
+
+.shareName > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.shareSub .shareName {
+  padding-left: var(--space-16);
+  color: var(--text-secondary);
+}
+
+.shareIcon {
+  flex: none;
+  color: var(--text-secondary);
+}
+
+.track {
+  position: relative;
+  height: 6px;
+  border-radius: 1px;
+  background: var(--surface-hover);
+}
+
+.fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: 1px;
+  background: var(--text-secondary);
+}
+
+.shareSub .track {
+  height: 4px;
+}
+
+.shareSub .fill {
+  background: var(--stroke-faint);
+}
+
+.shareBand {
+  font-family: var(--font-mono);
+  font-size: var(--fs-11-5);
+  color: var(--text-muted);
+  text-align: right;
+}
+
+.sharePercent {
+  font-family: var(--font-mono);
+  font-size: var(--fs-12);
+  text-align: right;
+}
+
+.drill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-xs);
+  background: none;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.drill svg {
+  transition: transform 120ms ease;
+}
+
+.drill[aria-expanded='true'] svg {
+  transform: rotate(90deg);
+}
+
+.drill:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+@media (width < 640px) {
+  .shareRow {
+    grid-template-columns: 34px minmax(0, 1fr) 56px 48px;
+  }
+
+  .shareRow .track {
+    grid-column: 2 / -1;
+    grid-row: 2;
+  }
+}

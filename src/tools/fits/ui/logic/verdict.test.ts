@@ -56,6 +56,7 @@ describe('calculatorSentence', () => {
     expect(calculatorSentence('review', 'max')).toBe('The clearance in service is partly outside the required window; the maximum clearance governs.')
     expect(calculatorSentence('fail', 'min')).toBe('The clearance in service is outside the required window; the minimum clearance governs.')
     expect(calculatorSentence('pass', 'min')).toMatch(/^The clearance in service stays inside the required window; .*\.$/)
+    expect(calculatorSentence('none', 'min')).toBe('The clearance in service is not judged: no required window is set.')
   })
 })
 
@@ -98,11 +99,11 @@ describe('presentedStatus', () => {
     expect(presentedStatus(pressInputs, results, best.fit, service)).toBe('fail')
   })
 
-  it('takes the clearance in service in calculator mode, pass without a window', () => {
+  it("takes the clearance in service in calculator mode, 'none' (not judged) without a window", () => {
     const inputs: FitInputs = { ...NEW_FIT_INPUTS, mode: 'calculator' }
     const results = fitResults(inputs, 'si')
     const fit = expectOk(results.calculation)
-    expect(presentedStatus(inputs, results, fit, serviceClearance(fit, inputs, results.housing, results.shaft))).toBe('pass')
+    expect(presentedStatus(inputs, results, fit, serviceClearance(fit, inputs, results.housing, results.shaft))).toBe('none')
   })
 })
 
