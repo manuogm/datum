@@ -10,7 +10,7 @@ import { FeatureControlFrame } from '../gdt/FeatureControlFrame'
 import { ASSUMPTIONS, stackFormulas, stackSources } from '../logic/calculation'
 import { lengthUnit } from '../logic/format'
 import { rowTable, type RowTableRow } from '../logic/rowTable'
-import type { StackResults } from '../logic/stackResults'
+import { linkedParts, type StackResults } from '../logic/stackResults'
 import type { StackInputs } from '../state/stackInputs'
 import styles from './results.module.css'
 
@@ -44,7 +44,7 @@ export function ResultsCalculation({ inputs, results, analysis, system }: Result
       <section className={styles.block} aria-label="Sources">
         <MonoLabel>Sources</MonoLabel>
         <ul className={styles.list}>
-          {stackSources(analysis).map((source) => (
+          {stackSources(analysis, linkedParts(results).flatMap((link) => link.part ?? [])).map((source) => (
             <li key={source}>{source}</li>
           ))}
         </ul>

@@ -62,7 +62,8 @@ describe('stackInputsFrom', () => {
     if (tolerance?.kind !== 'geometric') return
     expect(tolerance.characteristic).toBe('profile-surface')
     expect(tolerance.datums.map((d) => d.letter)).toEqual(['A', '', ''])
-    expect(tolerance.unequal).toEqual({ on: false, value: 0.1, materialSide: 'larger' })
+    // Saved before typedAs: the number is the ASME Ⓤ value (an ISO offset was saved as zone/2 + offset).
+    expect(tolerance.unequal).toEqual({ on: false, value: 0.1, typedAs: 'asme-value', materialSide: 'larger' })
   })
 
   it('reads an unknown characteristic as position', () => {

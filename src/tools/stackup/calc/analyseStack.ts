@@ -1,9 +1,9 @@
 import { fail, ok, type Result } from '../../../core/result'
 import { centredContributor, type CentredContributor } from './contributor'
 import { normalUpperTail } from './normal'
-import { DEFAULT_METHOD, LIMIT_TOLERANCE_MM, REVIEW_SIGMA_MULTIPLE, SIGMAS_PER_HALF_BAND, verdictOf } from './rules'
+import { DEFAULT_METHOD, LIMIT_TOLERANCE_MM, SIGMAS_PER_HALF_BAND, verdictOf } from './rules'
 import type { Capability, ContributorResult, FractionOutOfSpec, LinkedStackContributor, MethodRange, Requirement, StackAnalysis, StackInput, StackResult } from './types'
-import { inputError } from './validate'
+import { inputError, inputWarnings } from './validate'
 
 const sum = (values: readonly number[]) => values.reduce((total, value) => total + value, 0)
 
@@ -72,6 +72,14 @@ function dominantIndex(shares: readonly number[]): number | null {
  *   WC = mean ± (Σ_others |a_i|·t_i + √Σ_ST (a_i·t_i)²)
  * (ASME Y14.5-2018 statistical tolerancing; Drake ch. 9). Their share of the
  * WC band is that RSS part split by variance.
+ * Each row splits its half band t_i into an arithmetic part and an ⟨ST⟩
+ * part s_i (ContributorResult.statisticalHalfBand): s_i = t_i for an ⟨ST⟩
+ * row, 0 for another dimension, and the part's own ⟨ST⟩ part for a linked
+ * stack. So
+ *   WC = mean ± (Σ |a_i|·(t_i − s_i) + √Σ (a_i·s_i)²)
+ * and the StackResult keeps both parts. A linked part's ⟨ST⟩ part is
+ * √Σ over its ⟨ST⟩ rows, so squaring it again in the assembly gives the
+ * same sum as entering those rows directly.
  *
  * Linked part stacks (Assembly mode) enter with their WC band and their σ:
  * the part's σ already combines its own rows, so the assembly's σ is the
@@ -92,9 +100,11 @@ export function analyseStack(input: StackInput): Result<StackAnalysis> {
   const nominal = sum(rows.map((row) => row.sensitivity * row.nominal))
   const mean = sum(rows.map((row) => row.sensitivity * row.mean))
 
-  const bands = rows.map((row) => Math.abs(row.sensitivity) * row.halfBand)
-  const arithmeticPart = sum(bands.filter((_, i) => !rows[i].statistical))
-  const statisticalVariance = sum(bands.filter((_, i) => rows[i].statistical).map((band) => band ** 2))
+  // |a_i|·(t_i − s_i) added arithmetically, |a_i|·s_i combined by RSS.
+  const arithmeticBands = rows.map((row) => Math.abs(row.sensitivity) * Math.max(row.halfBand - row.statisticalHalfBand, 0))
+  const statisticalBands = rows.map((row) => Math.abs(row.sensitivity) * row.statisticalHalfBand)
+  const arithmeticPart = sum(arithmeticBands)
+  const statisticalVariance = sum(statisticalBands.map((band) => band ** 2))
   const statisticalPart = Math.sqrt(statisticalVariance)
   const worstCaseHalfBand = arithmeticPart + statisticalPart
 
@@ -105,15 +115,16 @@ export function analyseStack(input: StackInput): Result<StackAnalysis> {
   const percent = (part: number, whole: number) => (whole > 0 ? (100 * part) / whole : 0)
   const contributors: readonly ContributorResult[] = rows.map((row, i) => ({
     ...row,
-    worstCasePercent: row.statistical
-      ? percent(statisticalVariance > 0 ? (statisticalPart * bands[i] ** 2) / statisticalVariance : 0, worstCaseHalfBand)
-      : percent(bands[i], worstCaseHalfBand),
+    // The arithmetic part as it is, the ⟨ST⟩ part's share of √Σs² by variance.
+    worstCasePercent: percent(
+      arithmeticBands[i] + (statisticalVariance > 0 ? (statisticalPart * statisticalBands[i] ** 2) / statisticalVariance : 0),
+      worstCaseHalfBand,
+    ),
     rssPercent: percent(variances[i], variance),
   }))
 
   const worstCase = methodRange(mean, worstCaseHalfBand, requirement)
   const rss = methodRange(mean, SIGMAS_PER_HALF_BAND * sigma, requirement)
-  const twoSigma = methodRange(mean, REVIEW_SIGMA_MULTIPLE * sigma, requirement)
   const stackResult: StackResult = {
     name: input.name,
     nominal,
@@ -121,6 +132,8 @@ export function analyseStack(input: StackInput): Result<StackAnalysis> {
     upperDeviation: worstCase.max - nominal,
     lowerDeviation: worstCase.min - nominal,
     sigma,
+    arithmeticHalfBand: arithmeticPart,
+    statisticalHalfBand: statisticalPart,
   }
   return ok({
     name: input.name,
@@ -132,7 +145,7 @@ export function analyseStack(input: StackInput): Result<StackAnalysis> {
     rss,
     requirement,
     method,
-    verdict: verdictOf(method, worstCase, rss, twoSigma),
+    verdict: verdictOf(method, worstCase, rss),
     fractionOutOfSpec: requirement ? fractionOutOfSpec(mean, sigma, requirement) : null,
     capability: capability(mean, sigma, requirement),
     dominant: {
@@ -140,6 +153,7 @@ export function analyseStack(input: StackInput): Result<StackAnalysis> {
       rss: dominantIndex(contributors.map((row) => row.rssPercent)),
     },
     stackResult,
+    warnings: inputWarnings(input),
   })
 }
 

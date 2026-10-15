@@ -3,8 +3,10 @@
 // covers the whole row; the row menu sits above it.
 import { TOOLS, folderContents, type Calculation, type CalculationStatus, type Folder, type Library } from '../../core/library'
 import { countOf } from '../format/count'
+import { figureText } from '../format/figure'
 import { formatActivityTime } from '../format/formatActivityTime'
 import { calcHref, folderHref } from '../router/routes'
+import { useSettings } from '../settings/settings'
 import { TOOL_ICONS } from '../shell/toolIcons'
 import { cx, Icon, Marker, type MarkerColor } from '../ui'
 import styles from './DirectoryList.module.css'
@@ -29,6 +31,7 @@ interface DirectoryListProps {
 }
 
 export function DirectoryList({ library, folders, calculations, onRename, onDuplicate, onMove, onDelete }: DirectoryListProps) {
+  const { unitSystem } = useSettings()
   const menu = (entry: Entry): RowMenuItem[] => [
     { label: 'Rename…', onSelect: () => onRename(entry) },
     ...(entry.kind === 'calculation' ? [{ label: 'Duplicate', onSelect: () => onDuplicate(entry) }] : []),
@@ -95,10 +98,7 @@ export function DirectoryList({ library, folders, calculations, onRename, onDupl
                   <Marker shape="dot" color={status.tone} label={status.label} />
                   <span className={styles.title}>{summary.title}</span>
                   {headline && (
-                    <span className={styles.figure}>
-                      {headline.label} {headline.value}
-                      {headline.unit && ` ${headline.unit}`}
-                    </span>
+                    <span className={styles.figure}>{figureText(headline, unitSystem)}</span>
                   )}
                 </>
               ) : (

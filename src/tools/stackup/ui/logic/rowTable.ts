@@ -5,7 +5,7 @@
 import type { UnitSystem } from '../../../../core/units'
 import type { ContributorResult, StackAnalysis } from '../../calc'
 import type { GeometricEntry, StackInputs } from '../state/stackInputs'
-import { rowLabel } from './engineInput'
+import { rowLabel, stackName } from './engineInput'
 import { coefficientText, deviations, len, percent, plusMinus, sigma, toleranceText } from './format'
 import { isBroken, linkStateText, type ResolvedLink } from './links'
 import { savedText } from './savedText'
@@ -42,11 +42,11 @@ export function rowTable(inputs: StackInputs, analysis: StackAnalysis, links: Re
     return {
       id: input?.id ?? String(i),
       number: i + 1,
-      label: dimension ? rowLabel(dimension, i) : link ? `${link.partName}: ${link.resultName}` : row.label,
+      label: dimension ? rowLabel(dimension, i) : link ? stackName({ mode: 'part', partName: link.partName, resultName: link.resultName }) : row.label,
       source: dimension ? dimension.source.trim() : link ? `${link.calculationName} (${link.folderName})` : '',
       coefficient: coefficientText(row.sensitivity),
       nominal: len(system, row.nominal),
-      tolerance: dimension ? toleranceText(system, dimension.tolerance, dimension.statistical) : link ? deviations(system, link.stack.upperDeviation, link.stack.lowerDeviation) : '',
+      tolerance: dimension ? toleranceText(system, dimension.tolerance, inputs.standard, dimension.statistical) : link ? deviations(system, link.stack.upperDeviation, link.stack.lowerDeviation) : '',
       geometric: dimension?.tolerance.kind === 'geometric' ? dimension.tolerance : null,
       statistical: row.statistical,
       mean: len(system, row.mean),

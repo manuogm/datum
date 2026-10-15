@@ -1,6 +1,8 @@
 // How the Tolerance Stack-up inputs change. Every edit on the screen is one
 // of these actions; the reducer is pure so it can be tested on its own.
-import { MAX_CONTRIBUTORS } from '../../calc'
+import { MAX_CONTRIBUTORS, type DrawingStandard } from '../../calc'
+import { stackName } from '../logic/engineInput'
+import { unequalInStandard } from '../logic/unequal'
 import {
   newDimension, newGeometric,
   type DimensionRow, type GeometricEntry, type LinkSnapshot, type LinkedRow, type StackInputs, type StackMode, type StackRow,
@@ -50,8 +52,10 @@ export function stackReducer(inputs: StackInputs, action: StackAction): StackInp
   const dimension = (id: string, change: (row: DimensionRow) => DimensionRow) =>
     withRows(rows.map((row) => (row.id === id && row.kind === 'dimension' ? change(row) : row)))
   switch (action.type) {
-    case 'change':
-      return { ...inputs, ...action.changes }
+    case 'change': {
+      const changed = { ...inputs, ...action.changes }
+      return changed.standard === inputs.standard ? changed : inStandard(changed, changed.standard)
+    }
     case 'mode':
       return { ...inputs, mode: action.mode, rows: action.mode === 'part' ? rows.filter((row) => row.kind === 'dimension') : rows }
     case 'addDimension': {
@@ -88,6 +92,21 @@ export function stackReducer(inputs: StackInputs, action: StackAction): StackInp
       return withRows(moved(rows, action.from, action.to))
     case 'clearRows':
       return withRows([])
+  }
+}
+
+/**
+ * The inputs on a drawing of another standard: each Ⓤ / UZ number is
+ * re-expressed in that standard's form (an ISO UZ offset ↔ an ASME Ⓤ
+ * value) with its row's zone, so the field shows the drawing's own number
+ * and later zone edits keep it (logic/unequal.ts).
+ */
+function inStandard(inputs: StackInputs, standard: DrawingStandard): StackInputs {
+  return {
+    ...inputs,
+    rows: inputs.rows.map((row) =>
+      row.kind === 'dimension' && row.tolerance.kind === 'geometric' ? { ...row, tolerance: unequalInStandard(row.tolerance, standard) } : row,
+    ),
   }
 }
 
@@ -134,7 +153,8 @@ function dimensionFromLink(row: LinkedRow): DimensionRow {
   const { stack, partName, resultName } = row.last
   return {
     ...newDimension(row.id, { kind: 'deviations', upper: stack.upperDeviation, lower: stack.lowerDeviation }),
-    label: [partName, resultName].filter(Boolean).join(': ') || stack.name,
+    // Named as the part names its result: "Housing: shoulder to circlip groove".
+    label: partName ? stackName({ mode: 'part', partName, resultName }) : resultName || stack.name,
     sensitivity: row.sensitivity,
     nominal: stack.nominal,
   }

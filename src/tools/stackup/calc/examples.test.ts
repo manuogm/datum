@@ -148,10 +148,10 @@ describe('Assembly linking two part stacks: gap = bracket slot depth − block h
     expect(assembly.rss.min).toBeCloseTo(-0.03379088, 8)
   })
 
-  it('min 0: WC and RSS both below → fail; by RSS, ±2σ (0.0108 ≥ 0) inside → review, 1.25 % out of spec, Cpk 0.747', () => {
+  it('min 0: WC and RSS both below → fail; by RSS, Cpk 0.747 < 1.00 → fail, 1.25 % out of spec', () => {
     expect(assembly.verdict?.status).toBe('fail')
     const rss = expectOk(analyseStack({ name: 'Gap', contributors, requirement: { min: 0 }, method: 'rss' }))
-    expect(rss.verdict).toEqual({ method: 'rss', status: 'review', basis: 'only-two-sigma-within', governing: 'lower' })
+    expect(rss.verdict).toEqual({ method: 'rss', status: 'fail', basis: 'rss-not-capable', governing: 'lower' })
     expect(relativeDifference(rss.fractionOutOfSpec?.below ?? 0, 0.012470824429579053)).toBeLessThan(1e-6)
     expect(rss.capability.cpk).toBeCloseTo(0.747435, 6)
   })

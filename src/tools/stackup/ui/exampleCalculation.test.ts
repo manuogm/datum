@@ -20,8 +20,27 @@ describe('the Tolerance Stack-up examples in the seeded library', () => {
     expect(summaryOf(expectOk(stackSnapshot(inputs, library)))).toEqual(STACK_ASSEMBLY_EXAMPLE.summary)
   })
 
-  it('opens the housing example on the engine notes example (HOUSING_PART_STACK)', () => {
-    expect(stackResults(stackInputsFrom(null), library).input).toEqual(HOUSING_PART_STACK)
+  it('opens the housing example on the engine notes example (HOUSING_PART_STACK), the groove width entered as drawn ×½', () => {
+    const input = stackResults(stackInputsFrom(null), library).input
+    const [shoulder, groove, width] = HOUSING_PART_STACK.contributors
+    // 1.85 +0.14/0 counted half is the engine notes' 0.925 +0.07/0.
+    expect(input).toEqual({
+      ...HOUSING_PART_STACK,
+      contributors: [shoulder, groove, { ...width, label: 'Groove width, half of it', sensitivity: 0.5, nominal: 1.85, tolerance: { kind: 'deviations', upper: 0.14, lower: 0 } }],
+    })
+    // The results are those of the engine notes, row by row.
+    const seeded = expectOk(analyseStack(input))
+    const notes = expectOk(analyseStack(HOUSING_PART_STACK))
+    for (const key of ['nominal', 'mean', 'sigma'] as const) expect(seeded[key]).toBeCloseTo(notes[key], 12)
+    for (const key of ['min', 'max'] as const) {
+      expect(seeded.worstCase[key]).toBeCloseTo(notes.worstCase[key], 12)
+      expect(seeded.rss[key]).toBeCloseTo(notes.rss[key], 12)
+    }
+    seeded.contributors.forEach((row, i) => {
+      expect(row.worstCasePercent).toBeCloseTo(notes.contributors[i].worstCasePercent, 9)
+      expect(row.rssPercent).toBeCloseTo(notes.contributors[i].rssPercent, 9)
+    })
+    expect(seeded.verdict).toEqual(notes.verdict)
   })
 
   it('works the assembly out as the engine notes do (endPlayAssembly of the housing result)', () => {

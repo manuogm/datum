@@ -80,7 +80,7 @@ describe('stackReducer', () => {
     const inputs = withRows({ kind: 'linked', id: 'r1', sensitivity: -1, calcId: 'c1', last })
     expect(stackReducer(inputs, { type: 'toDimension', id: 'r1' }).rows[0]).toEqual({
       ...newDimension('r1', { kind: 'deviations', upper: 0.17, lower: -0.1 }),
-      label: 'Housing: Shoulder to circlip groove', sensitivity: -1, nominal: 20.925,
+      label: 'Housing: shoulder to circlip groove', sensitivity: -1, nominal: 20.925,
     })
   })
 

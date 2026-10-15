@@ -2,8 +2,9 @@
 // and the like. Lengths are stored in mm and shown in the viewer's length
 // unit (mm with 3 decimals, or inches).
 import { formatDecimal, formatQuantity, toDisplay, unitOf, type UnitSystem } from '../../../../core/units'
-import { GEOMETRIC_RULES, type StackMethod } from '../../calc'
+import { GEOMETRIC_RULES, isProfile, type DrawingStandard, type StackMethod } from '../../calc'
 import type { GeometricEntry, StackInputs, ToleranceEntry } from '../state/stackInputs'
+import { unequalShown } from './unequal'
 
 export const lengthUnit = (system: UnitSystem): string => unitOf('length', system)
 
@@ -19,8 +20,16 @@ export function signed(system: UnitSystem, mm: number): string {
 /** "20.825 … 21.095". */
 export const range = (system: UnitSystem, min: number, max: number): string => `${len(system, min)} … ${len(system, max)}`
 
-/** "±0.050". */
-export const plusMinus = (system: UnitSystem, halfBand: number): string => `±${len(system, halfBand)}`
+/**
+ * A tolerance band (a ± or a term of a band sum): mm to 3 decimals like any
+ * length, inches to 5. At 4 decimals an inch value is up to ±1.27 µm off, so
+ * "±0.0020 + 0.0020 + 0.0014" would not add up to the ±0.0053 beside it.
+ */
+export const bandLen = (system: UnitSystem, mm: number): string =>
+  system === 'imperial' ? formatDecimal(toDisplay('length', system, mm), 5, true) : len(system, mm)
+
+/** "±0.050" (inches "±0.00197"). */
+export const plusMinus = (system: UnitSystem, halfBand: number): string => `±${bandLen(system, halfBand)}`
 
 /** Deviations from nominal, e.g. "+0.170/−0.100", "0/−0.120". */
 export const deviations = (system: UnitSystem, upper: number, lower: number): string => `${signed(system, upper)}/${signed(system, lower)}`
@@ -74,13 +83,19 @@ export function coefficientText(sensitivity: number): string {
 /** The ⌀ sign before a cylindrical zone. */
 export const DIAMETER = 'Ø'
 
-/** The frame's tolerance cell as text, e.g. "Ø0.100 Ⓜ"; for plain-text uses (the drawn frame is FeatureControlFrame). */
-export function frameToleranceText(system: UnitSystem, entry: GeometricEntry, statistical = false): string {
+/**
+ * The frame's tolerance cell as text, e.g. "Ø0.100 Ⓜ"; for plain-text uses
+ * (the drawn frame is FeatureControlFrame). An unequal profile is written
+ * as its standard writes it: ISO "UZ+0.050" (the signed offset, ISO 1101:2017),
+ * ASME "Ⓤ 0.200" (the value, ASME Y14.5-2018 §11).
+ */
+export function frameToleranceText(system: UnitSystem, entry: GeometricEntry, standard: DrawingStandard, statistical = false): string {
   const parts = [`${entry.diameterZone && GEOMETRIC_RULES[entry.characteristic].diameterZone ? DIAMETER : ''}${entry.zone === null ? '—' : len(system, entry.zone)}`]
   if (entry.materialCondition === 'mmc') parts.push('Ⓜ')
   if (entry.materialCondition === 'lmc') parts.push('Ⓛ')
   if (entry.projected.on && entry.projected.height !== null) parts.push(`Ⓟ ${len(system, entry.projected.height)}`)
-  if (entry.unequal.on && entry.unequal.value !== null) parts.push(`Ⓤ ${len(system, entry.unequal.value)}`)
+  const unequal = entry.unequal.on && isProfile(entry.characteristic) ? unequalShown(entry, standard) : null
+  if (unequal !== null) parts.push(standard === 'iso' ? `UZ${signed(system, unequal)}` : `Ⓤ ${len(system, unequal)}`)
   if (entry.freeState) parts.push('Ⓕ')
   if (entry.tangentPlane) parts.push('Ⓣ')
   if (entry.commonZone) parts.push('CZ')
@@ -89,7 +104,7 @@ export function frameToleranceText(system: UnitSystem, entry: GeometricEntry, st
 }
 
 /** A tolerance as entered, in plain text: "±0.050", "+0.070/0", "20.900 … 21.000", "⌖ 0.100 | A". */
-export function toleranceText(system: UnitSystem, tolerance: ToleranceEntry, statistical = false): string {
+export function toleranceText(system: UnitSystem, tolerance: ToleranceEntry, standard: DrawingStandard, statistical = false): string {
   const dash = (value: number | null) => (value === null ? '—' : len(system, value))
   const st = statistical ? ' ⟨ST⟩' : ''
   switch (tolerance.kind) {
@@ -101,7 +116,7 @@ export function toleranceText(system: UnitSystem, tolerance: ToleranceEntry, sta
       return `${dash(tolerance.min)} … ${dash(tolerance.max)}${st}`
     case 'geometric': {
       const datums = tolerance.datums.filter((d) => d.letter.trim()).map((d) => `${d.letter.trim()}${d.modifier === 'mmb' ? ' Ⓜ' : d.modifier === 'lmb' ? ' Ⓛ' : ''}`)
-      return [GEOMETRIC_RULES[tolerance.characteristic].symbol, frameToleranceText(system, tolerance, statistical), ...datums].join(' | ')
+      return [GEOMETRIC_RULES[tolerance.characteristic].symbol, frameToleranceText(system, tolerance, standard, statistical), ...datums].join(' | ')
     }
   }
 }

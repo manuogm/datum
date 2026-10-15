@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { expectError, expectOk } from '../testing'
 import {
   createCalculation, createFolder, deleteCalculation, deleteFolder, duplicateCalculation, moveCalculation, moveFolder,
-  refreshSummary, renameCalculation, renameFolder, updateCalculation,
+  refreshInputs, refreshSummary, renameCalculation, renameFolder, updateCalculation,
 } from './commands'
 import type { CalculationSummary } from './model'
 import { findCalculation, findFolder } from './queries'
@@ -96,5 +96,12 @@ describe('calculations', () => {
     const library = expectOk(refreshSummary(LIBRARY, 'c-top', SUMMARY))
     expect(findCalculation(library, 'c-top')).toMatchObject({ summary: SUMMARY, updatedAt: T0 })
     expect(expectOk(refreshSummary(library, 'c-top', SUMMARY))).toBe(library)
+  })
+
+  it('writes inputs the app worked out without counting it as an edit', () => {
+    const library = expectOk(refreshInputs(LIBRARY, 'c-top', { inputs: { n: 2 }, summary: SUMMARY }))
+    expect(findCalculation(library, 'c-top')).toMatchObject({ inputs: { n: 2 }, summary: SUMMARY, updatedAt: T0 })
+    expect(expectOk(refreshInputs(library, 'c-top', { inputs: { n: 2 }, summary: SUMMARY }))).toBe(library)
+    expect(refreshInputs(LIBRARY, 'gone', { inputs: {}, summary: null }).ok).toBe(false)
   })
 })

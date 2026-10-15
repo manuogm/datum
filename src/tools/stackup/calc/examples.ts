@@ -24,9 +24,11 @@ export const HOUSING_PART_STACK: StackInput = {
       kind: 'dimension', label: 'Groove centre from face A (position 0.1 to A)', sensitivity: -1, nominal: 22,
       tolerance: { kind: 'geometric', characteristic: 'position', zone: 0.1, datums: [{ letter: 'A', modifier: 'rmb' }] },
     },
+    // The drawing value 1.85 +0.14/0 with a coefficient of ½ (the flank is half the width from the centre):
+    // the same row as 0.925 +0.07/0 at +1, entered as on the drawing.
     {
-      kind: 'dimension', label: 'Half groove width (1.85 +0.14/0)', sensitivity: 1, nominal: 0.925,
-      tolerance: { kind: 'deviations', upper: 0.07, lower: 0 },
+      kind: 'dimension', label: 'Groove width, half of it', sensitivity: 0.5, nominal: 1.85,
+      tolerance: { kind: 'deviations', upper: 0.14, lower: 0 },
     },
   ],
 }

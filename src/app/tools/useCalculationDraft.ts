@@ -13,11 +13,16 @@
 // is then offered even without an edit, and once it is written the screen
 // takes the stored inputs, so they do not count as unsaved.
 //
+// The app may also write the stored inputs while the screen is open (a
+// stack-up Assembly records the last values of a part that was just deleted,
+// app/tools/dependents). The screen then takes them: as they are when it
+// has no unsaved edits, merged with its edits otherwise (ToolDefinition.rebase).
+//
 // The screen must be keyed by the calculation id, so that another calculation
 // gets a fresh screen (and this hook a fresh start).
-import { useEffect, useMemo, useReducer, useRef, type Dispatch } from 'react'
+import { useEffect, useMemo, useReducer, useRef, useState, type Dispatch } from 'react'
 import type { Calculation } from '../../core/library'
-import { discardDraft, draftOf, saveDraft, setDraft } from '../library/drafts'
+import { discardDraft, draftOf, saveDraft, setDraft, type Draft } from '../library/drafts'
 import { libraryActions } from '../library/useLibrary'
 import { summaryFor, type ToolDefinition } from './toolDefinition'
 
@@ -44,6 +49,13 @@ const json = (value: unknown) => JSON.stringify(value)
 /** What Save writes for these inputs: the inputs, plus what the tool records with them (ToolDefinition.toSave). */
 const writesOf = <Inputs,>(tool: ToolDefinition<Inputs>, inputs: Inputs): Inputs => tool.toSave?.(inputs) ?? inputs
 
+/** The draft of these inputs: what they are, what Save writes and its summary. */
+export const draftFor = <Inputs,>(tool: ToolDefinition<Inputs>, inputs: Inputs): Draft => ({
+  inputs,
+  summarize: () => summaryFor(tool, writesOf(tool, inputs)),
+  toSave: () => writesOf(tool, inputs),
+})
+
 export function useCalculationDraft<Inputs, Action>(
   calculation: Calculation,
   tool: ToolDefinition<Inputs>,
@@ -58,6 +70,17 @@ export function useCalculationDraft<Inputs, Action>(
   )
   const dispatch: Dispatch<Action> = dispatchAny
 
+  // The stored inputs changed while the screen is open. Without unsaved edits
+  // the screen takes them; with edits, the tool merges what the app recorded
+  // into them. (Adjusted while rendering, so no draft flickers in between.)
+  // After Save, the inputs written are the stored ones: nothing to merge.
+  const [seenStored, setSeenStored] = useState(stored)
+  if (seenStored !== stored) {
+    setSeenStored(stored)
+    if (json(inputs) === json(seenStored)) dispatchAny({ replaceWith: stored })
+    else if (tool.rebase && json(writesOf(tool, inputs)) !== json(stored)) dispatchAny({ replaceWith: tool.rebase(inputs, stored) })
+  }
+
   // On opening: the summary the tool now gives for the stored inputs.
   useEffect(() => {
     libraryActions.refreshSummary(id, summaryFor(tool, stored))
@@ -69,7 +92,7 @@ export function useCalculationDraft<Inputs, Action>(
   // Inputs that differ from the stored ones are the draft; going back to them drops it.
   const unsaved = useMemo(() => json(inputs) !== json(stored), [inputs, stored])
   useEffect(() => {
-    if (unsaved) setDraft(id, { inputs, summarize: () => summaryFor(tool, writesOf(tool, inputs)), toSave: () => writesOf(tool, inputs) })
+    if (unsaved) setDraft(id, draftFor(tool, inputs))
     else discardDraft(id)
   }, [id, tool, inputs, unsaved])
 

@@ -150,6 +150,51 @@ export function withLinkSnapshots(inputs: StackInputs, links: ReadonlyMap<string
   return changed ? { ...inputs, rows } : inputs
 }
 
+/**
+ * The inputs once linked part stacks were saved or deleted (the library
+ * before → after the change): each link that breaks with this change (the
+ * part deleted, switched to Assembly, or saved with a chain that fails)
+ * records the part's last saved result, as it stood before the change. A
+ * broken link falls back on that, so the assembly keeps the part's last
+ * saved values, as the delete dialog says, not the older values the
+ * assembly itself was last saved with (mechanical review S2).
+ *
+ * A link that still resolves is left as it is: it uses the part's saved
+ * result anyway, and its snapshot stays what the assembly was saved with,
+ * so the row can still say what changed (UPDATED, design §6.3). The same
+ * object when nothing changes.
+ */
+export function withPartsLastSaved(inputs: StackInputs, before: Library, after: Library): StackInputs {
+  let changed = false
+  const rows = inputs.rows.map((row) => {
+    if (row.kind !== 'linked' || !isBroken(resolveLink(row, after).state)) return row
+    const previous = resolveLink(row, before)
+    if (isBroken(previous.state)) return row
+    const last = snapshotOf(previous)
+    if (JSON.stringify(last) === JSON.stringify(row.last)) return row
+    changed = true
+    return { ...row, last }
+  })
+  return changed ? { ...inputs, rows } : inputs
+}
+
+/**
+ * Inputs with unsaved edits, given stored inputs in which the app has since
+ * recorded a part's last saved values (withPartsLastSaved): a linked row
+ * still linking the same part takes the recorded snapshot; every edit stays.
+ */
+export function rebaseLinks(edited: StackInputs, stored: StackInputs): StackInputs {
+  const recorded = new Map(stored.rows.flatMap((row) => (row.kind === 'linked' ? [[row.id, row] as const] : [])))
+  let changed = false
+  const rows = edited.rows.map((row) => {
+    const saved = row.kind === 'linked' ? recorded.get(row.id) : undefined
+    if (row.kind !== 'linked' || !saved || saved.calcId !== row.calcId || JSON.stringify(saved.last) === JSON.stringify(row.last)) return row
+    changed = true
+    return { ...row, last: saved.last }
+  })
+  return changed ? { ...edited, rows } : edited
+}
+
 /** The badge of a link state (design §6.3): LINKED is neutral, UPDATED accent, the broken ones bad. */
 export const LINK_BADGE: Record<LinkState, { readonly text: string; readonly tone: 'neutral' | 'accent' | 'bad' }> = {
   linked: { text: 'Linked', tone: 'neutral' },

@@ -33,11 +33,27 @@ export interface DatumCell {
   readonly boundaryAllowance: number | null
 }
 
+/** How a Ⓤ / UZ number was typed: an ISO UZ offset, or an ASME Ⓤ value (logic/unequal.ts). */
+export type UnequalForm = 'iso-offset' | 'asme-value'
+
 /**
- * A feature control frame, as entered. Ⓤ: `value` is the ASME Ⓤ value,
- * the share of the zone on the side that adds material (an ISO UZ offset v
- * is entered as v and stored as zone/2 + v).
+ * Ⓤ / UZ unequally disposed profile, stored as typed. `value` is the ISO UZ
+ * offset of the zone's centre (+ towards the outside of the material;
+ * ISO 1101:2017) when typedAs is 'iso-offset', the ASME Ⓤ value (the share
+ * of the zone on the side that adds material; ASME Y14.5-2018 §11) when it
+ * is 'asme-value'. The engine's value is worked out from it with the zone
+ * only when the engine input is built, so a later change of the zone keeps
+ * what the drawing says.
  */
+export interface UnequalEntry {
+  readonly on: boolean
+  readonly value: number | null
+  readonly typedAs: UnequalForm
+  /** Whether adding material at this surface makes the stacked dimension larger or smaller. */
+  readonly materialSide: 'larger' | 'smaller'
+}
+
+/** A feature control frame, as entered. */
 export interface GeometricEntry {
   readonly kind: 'geometric'
   readonly characteristic: GeometricCharacteristic
@@ -47,7 +63,7 @@ export interface GeometricEntry {
   readonly feature: FeatureSize
   /** Always three cells: primary, secondary, tertiary. */
   readonly datums: readonly DatumCell[]
-  readonly unequal: { readonly on: boolean; readonly value: number | null; readonly materialSide: 'larger' | 'smaller' }
+  readonly unequal: UnequalEntry
   readonly projected: { readonly on: boolean; readonly height: number | null }
   readonly freeState: boolean
   readonly tangentPlane: boolean
@@ -134,7 +150,7 @@ export function newGeometric(characteristic: GeometricCharacteristic = 'position
   return {
     kind: 'geometric', characteristic, zone, diameterZone: false, materialCondition: 'rfs', feature: EMPTY_FEATURE,
     datums: [emptyDatum(), emptyDatum(), emptyDatum()],
-    unequal: { on: false, value: null, materialSide: 'larger' },
+    unequal: { on: false, value: null, typedAs: 'asme-value', materialSide: 'larger' },
     projected: { on: false, height: null },
     freeState: false, tangentPlane: false, commonZone: false,
   }
@@ -162,7 +178,9 @@ export const NEW_STACK_INPUTS: StackInputs = {
  * The seeded Part example (engine notes §8, HOUSING_PART_STACK): the bearing
  * seat of a housing, from the shoulder to the outer flank of the circlip
  * groove, dimensioned from the open end face A. It is stored without
- * inputs, so it opens on these.
+ * inputs, so it opens on these. The groove width is entered as drawn,
+ * 1.85 +0.14/0, with a coefficient of ½ (the engine notes' example enters
+ * the halved 0.925 +0.07/0; the results are the same, exampleCalculation.test.ts).
  */
 export const EXAMPLE_STACK_INPUTS: StackInputs = {
   ...NEW_STACK_INPUTS,
@@ -175,6 +193,7 @@ export const EXAMPLE_STACK_INPUTS: StackInputs = {
       ...newDimension('r2', { ...newGeometric('position', 0.1), datums: [emptyDatum('A'), emptyDatum(), emptyDatum()] }),
       label: 'Groove centre from face A (position 0.1 to A)', sensitivity: -1, nominal: 22,
     },
-    { ...newDimension('r3', { kind: 'deviations', upper: 0.07, lower: 0 }), label: 'Half groove width (1.85 +0.14/0)', nominal: 0.925 },
+    // The groove width as drawn, counted half (×½): the flank is half the width from the groove centre.
+    { ...newDimension('r3', { kind: 'deviations', upper: 0.14, lower: 0 }), label: 'Groove width, half of it', sensitivity: 0.5, nominal: 1.85 },
   ],
 }

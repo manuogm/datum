@@ -11,6 +11,7 @@ import {
 import type { DatumCell, FeatureSize, GeometricEntry, StackInputs } from '../state/stackInputs'
 import { engineInput, type LinkValues } from './engineInput'
 import { DIAMETER, len, plusMinus, signed } from './format'
+import { unequalEngineValue } from './unequal'
 
 /**
  * What one row adds to the stack, worked out by the engine on that row alone:
@@ -101,19 +102,16 @@ export function shiftReadout(system: UnitSystem, datum: DatumCell): string | nul
   return `${name[datum.modifier as 'mmb' | 'lmb']} ${DIAMETER}${len(system, boundary)} → shift up to ${len(system, shift)}`
 }
 
-/** An ISO UZ offset v as the Ⓤ value the engine takes: zone/2 + v. */
-export const unequalValueFromOffset = (zone: number, offset: number): number => zone / 2 + offset
-/** The Ⓤ value as an ISO UZ offset: value − zone/2. */
-export const offsetFromUnequalValue = (zone: number, value: number): number => value - zone / 2
-
 /**
  * "profile 0.300: +0.100 / −0.200 → mean −0.050, ±0.150": an unequally
  * disposed zone as deviations on the stacked dimension (engine plusShare).
  */
 export function unequalReadout(system: UnitSystem, entry: GeometricEntry): string | null {
   const { zone, unequal } = entry
-  if (zone === null || unequal.value === null || unequal.value < 0 || unequal.value > zone) return null
-  const plus = plusShare({ kind: 'geometric', characteristic: entry.characteristic, zone, unequal: { value: unequal.value, materialSide: unequal.materialSide } })
+  const value = unequalEngineValue(entry)
+  // Out-of-range values are the engine's to reject (ASME 0 … t, §11); ISO 1101:2017 lets a UZ zone lie wholly on one side.
+  if (zone === null || value === null) return null
+  const plus = plusShare({ kind: 'geometric', characteristic: entry.characteristic, zone, unequal: { value, materialSide: unequal.materialSide } })
   const upper = plus
   const lower = plus - zone
   return `profile ${len(system, zone)}: ${signed(system, upper)} / ${signed(system, lower)} → mean ${signed(system, (upper + lower) / 2)}, ${plusMinus(system, zone / 2)}`

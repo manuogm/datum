@@ -18,9 +18,8 @@ import { FeatureControlFrame } from '../gdt/FeatureControlFrame'
 import { GdtModifier, type ModifierSymbol } from '../gdt/GdtModifier'
 import { showsMaterialCondition } from '../logic/engineInput'
 import { len, plusMinus, sigma, signed } from '../logic/format'
-import {
-  bonusReadout, breakdownTerms, modifierHeadline, offsetFromUnequalValue, shiftReadout, unequalReadout, unequalValueFromOffset,
-} from '../logic/readouts'
+import { bonusReadout, breakdownTerms, modifierHeadline, shiftReadout, unequalReadout } from '../logic/readouts'
+import { unequalFormOf, unequalShown } from '../logic/unequal'
 import type { DatumCell, FeatureSize, GeometricEntry } from '../state/stackInputs'
 import { DetailRow, type DimensionDetailsProps } from './DimensionDetails'
 import styles from './editor.module.css'
@@ -290,7 +289,7 @@ function DatumInput({ datum, position, rowNumber, standard, boundary, invalid, o
   )
 }
 
-/** Ⓟ Projected, Ⓤ/UZ Unequal (profile), Ⓕ Free state, Ⓣ Tangent plane, CZ Common zone: each only where it is valid. */
+/** Ⓟ Projected, Ⓤ/UZ Unequal (profile), Ⓕ Free state, Ⓣ Tangent plane, CZ Combined zone (ISO 1101:2017 calls CZ a combined zone): each only where it is valid. */
 function Modifiers({ row, index, entry, inputs, system, invalidField, error, change }: GeometricFieldsProps & { change: (changes: Partial<GeometricEntry>) => void }) {
   const { standard } = inputs
   const rule = GEOMETRIC_RULES[entry.characteristic]
@@ -301,8 +300,6 @@ function Modifiers({ row, index, entry, inputs, system, invalidField, error, cha
       {text}
     </Chip>
   )
-  const zone = entry.zone ?? 0
-  const unequalShown = entry.unequal.value === null ? null : standard === 'iso' ? offsetFromUnequalValue(zone, entry.unequal.value) : entry.unequal.value
   return (
     <>
       <div className={styles.chips}>
@@ -310,7 +307,7 @@ function Modifiers({ row, index, entry, inputs, system, invalidField, error, cha
         {profile && chip(standard === 'iso' ? 'UZ' : 'U', 'Unequal', entry.unequal.on, () => change({ unequal: { ...entry.unequal, on: !entry.unequal.on } }))}
         {chip('F', 'Free state', entry.freeState, () => change({ freeState: !entry.freeState }))}
         {chip('T', 'Tangent plane', entry.tangentPlane, () => change({ tangentPlane: !entry.tangentPlane }))}
-        {chip('CZ', 'Common zone', entry.commonZone, () => change({ commonZone: !entry.commonZone }))}
+        {chip('CZ', 'Combined zone', entry.commonZone, () => change({ commonZone: !entry.commonZone }))}
       </div>
       {profile && entry.unequal.on && (
         <div className={styles.subPanel}>
@@ -318,12 +315,13 @@ function Modifiers({ row, index, entry, inputs, system, invalidField, error, cha
             <span className={styles.inlineLabel}>{standard === 'iso' ? 'UZ offset' : 'Ⓤ value'}</span>
             <LengthInput
               aria-label={`Row ${n} ${standard === 'iso' ? 'UZ offset' : 'Ⓤ value'}`}
-              value={unequalShown}
+              value={unequalShown(entry, standard)}
               system={system}
               signed={standard === 'iso'}
               showUnit
               invalid={invalidField === 'unequal'}
-              onChange={(typed) => change({ unequal: { ...entry.unequal, value: typed === null ? null : standard === 'iso' ? unequalValueFromOffset(zone, typed) : typed } })}
+              // Stored as typed, with the form it was typed in; the engine value is worked out from the zone later (B1).
+              onChange={(value) => change({ unequal: { ...entry.unequal, value, typedAs: unequalFormOf(standard) } })}
             />
           </div>
           <div className={styles.sizeLine}>

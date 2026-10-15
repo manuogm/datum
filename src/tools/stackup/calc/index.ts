@@ -15,21 +15,24 @@
  */
 export type { Result } from '../../../core/result'
 export { analyseStack, capability, fractionOutOfSpec, linkedContributor, methodRange } from './analyseStack'
-export { centredContributor, type CentredContributor } from './contributor'
+export { centredContributor, datumShiftRowsFor, linkedStatisticalPart, type CentredContributor } from './contributor'
 export {
-  GEOMETRIC_CHARACTERISTICS, GEOMETRIC_RULES, acceptsDiameterZone, acceptsMaterialCondition, bonusTolerance, datumShift,
-  geometricDeviations, geometricRule, isProfile, modifierNotes, plusShare, type GeometricRule,
+  GEOMETRIC_CHARACTERISTICS, GEOMETRIC_RULES, acceptsCombinedZone, acceptsDiameterZone, acceptsMaterialCondition, acceptsSurfaceBoundary,
+  acceptsTangentPlane, bonusTolerance, characteristicsOf, datumFrameKey, datumFrameText, datumShift, datumShiftDeviations, frameDatumShift,
+  geometricAvailability, geometricDeviations, geometricRule, hasDatumBoundary, inStandard, isProfile, isoOffsetFromUnequalValue, modifierNotes,
+  plusShare, surfaceBoundary, unequalValueFromIsoOffset, type GeometricAvailability, type GeometricRule,
 } from './geometric'
 export { HOUSING_PART_STACK, endPlayAssembly } from './examples'
 export { erfc, normalUpperTail } from './normal'
 export {
-  DEFAULT_METHOD, LIMIT_TOLERANCE_MM, MAX_CONTRIBUTORS, REVIEW_SIGMA_MULTIPLE, SIGMAS_PER_HALF_BAND, verdictOf,
+  CPK_PASS, CPK_REVIEW, DEFAULT_METHOD, LIMIT_TOLERANCE_MM, MAX_CONTRIBUTORS, REVIEW_SIGMA_MULTIPLE, SIGMAS_PER_HALF_BAND, rssCpk, verdictOf,
 } from './rules'
 export { SOURCE } from './sources'
-export { inputError as stackInputError, rowName } from './validate'
+export { inputError as stackInputError, inputWarnings as stackInputWarnings, rowName } from './validate'
 export type {
-  Capability, Contributor, ContributorResult, ContributorTolerance, Conversion, DatumReference, DimensionContributor, DrawingStandard,
-  FeatureType, FractionOutOfSpec, GeometricBreakdown, GeometricCharacteristic, GeometricTolerance, InformationalModifiers,
-  LinkedStackContributor, MaterialBoundary, MaterialCondition, MethodRange, PlainTolerance, Requirement, Sensitivity, SizeLimits,
-  StackAnalysis, StackInput, StackMethod, StackResult, UnequalDisposition, Verdict, VerdictBasis, VerdictStatus,
+  Capability, Contributor, ContributorResult, ContributorTolerance, Conversion, DatumReference, DatumShiftContributor, DimensionContributor,
+  DrawingStandard, FeatureType, FractionOutOfSpec, GeometricBreakdown, GeometricCharacteristic, GeometricTolerance, HighPointSeating,
+  InformationalModifiers, LinkedStackContributor, MaterialBoundary, MaterialCondition, MethodRange, PlainTolerance, Requirement, Sensitivity,
+  SizeLimits, StackAnalysis, StackInput, StackMethod, StackResult, StackTo, SurfaceBoundary, UnequalDisposition, Verdict, VerdictBasis,
+  VerdictStatus,
 } from './types'

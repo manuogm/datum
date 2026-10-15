@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { expectOk, relativeDifference } from '../../../core/testing'
-import { analyseStack, type Contributor, type DimensionContributor, type PlainTolerance, type StackInput } from '.'
+import { CPK_PASS, analyseStack, linkedContributor, rssCpk, type Contributor, type DimensionContributor, type PlainTolerance, type StackInput } from '.'
 
 const dim = (label: string, sensitivity: number, nominal: number, tolerance: PlainTolerance, statistical?: boolean): DimensionContributor =>
   ({ kind: 'dimension', label, sensitivity, nominal, tolerance, statistical })
@@ -44,10 +44,10 @@ describe('textbook part stack: gap = A − B − C − D', () => {
     expect(result.verdict).toEqual({ method: 'worst-case', status: 'review', basis: 'only-rss-within', governing: 'lower' })
   })
 
-  it('by RSS: pass; 1.39·10⁻⁵ out of spec (z = 0.20/0.04773 = 4.19); one-sided Cpk = 0.20/0.14318 = 1.397, no Cp', () => {
+  it('by RSS: pass (Cpk 1.397 ≥ 1.33); 1.39·10⁻⁵ out of spec (z = 0.20/0.04773 = 4.19); one-sided Cpk = 0.20/0.14318 = 1.397, no Cp', () => {
     const rss = analyse(contributors, { requirement: { min: 0 }, method: 'rss' })
     expect(rss.verdict?.status).toBe('pass')
-    expect(rss.verdict?.basis).toBe('rss-within')
+    expect(rss.verdict?.basis).toBe('rss-capable')
     expect(relativeDifference(rss.fractionOutOfSpec?.below ?? 0, 1.3912005567198542e-5)).toBeLessThan(1e-6)
     expect(rss.fractionOutOfSpec?.above).toBe(0)
     expect(rss.capability.cp).toBeNull()
@@ -58,6 +58,7 @@ describe('textbook part stack: gap = A − B − C − D', () => {
     expect(result.stackResult).toEqual({
       name: 'Gap', nominal: expect.closeTo(0.2, 12), mean: expect.closeTo(0.2, 12),
       upperDeviation: expect.closeTo(0.27, 12), lowerDeviation: expect.closeTo(-0.27, 12), sigma: expect.closeTo(0.047726, 6),
+      arithmeticHalfBand: expect.closeTo(0.27, 12), statisticalHalfBand: 0,
     })
   })
 })
@@ -125,6 +126,52 @@ describe('⟨ST⟩ statistical tolerances in a worst-case stack (hybrid)', () =>
     // B: 0.09434 × 0.0025/0.0089 / 0.23434
     expect(shares[1]).toBeCloseTo((100 * Math.sqrt(0.0089) * (0.0025 / 0.0089)) / 0.2343398, 4)
   })
+
+  it('the stack result keeps the two parts: arithmetic 0.10 + 0.04 = 0.14, ⟨ST⟩ √0.0089 = 0.09434', () => {
+    expect(result.stackResult.arithmeticHalfBand).toBeCloseTo(0.14, 12)
+    expect(result.stackResult.statisticalHalfBand).toBeCloseTo(Math.sqrt(0.0089), 12)
+  })
+})
+
+describe('⟨ST⟩ survives linking: an assembly gives the same worst case as entering the part rows directly', () => {
+  // Part: two ⟨ST⟩ ±0.1 rows → WC ±√(0.1² + 0.1²) = ±0.14142, all of it ⟨ST⟩.
+  // Assembly: the part + one more ⟨ST⟩ ±0.1 → WC ±√(0.14142² + 0.1²) = ±√0.03 = ±0.17321,
+  // the same as three ⟨ST⟩ rows entered directly (not 0.14142 + 0.1 = 0.24142).
+  const part = analyse([dim('P1', 1, 10, pm(0.1), true), dim('P2', 1, 5, pm(0.1), true)])
+  const st = dim('S', -1, 3, pm(0.1), true)
+
+  it('two ⟨ST⟩ in the part, one in the assembly: ±0.17321', () => {
+    const assembly = analyse([linkedContributor(part.stackResult, 1), st])
+    const direct = analyse([dim('P1', 1, 10, pm(0.1), true), dim('P2', 1, 5, pm(0.1), true), st])
+    expect(assembly.worstCase.halfBand).toBeCloseTo(Math.sqrt(0.03), 12)
+    expect(assembly.worstCase.halfBand).toBeCloseTo(direct.worstCase.halfBand, 12)
+    expect(assembly.contributors[0].statisticalHalfBand).toBeCloseTo(Math.sqrt(0.02), 12)
+    // Shares: the linked part holds 0.02 of the 0.03 ⟨ST⟩ variance: 2/3 of the band.
+    expect(assembly.contributors.map((row) => row.worstCasePercent)).toEqual([expect.closeTo(200 / 3, 9), expect.closeTo(100 / 3, 9)])
+  })
+
+  it('mixed part (a plain ±0.05, ⟨ST⟩ ±0.1 and ±0.2, an unequal row) linked at −1 with an assembly ⟨ST⟩ row: same as direct', () => {
+    const rows = [dim('A', 1, 40, pm(0.05)), dim('B', -1, 12, pm(0.1), true), dim('C', 1, 3, pm(0.2), true),
+      dim('D', -1, 8, { kind: 'deviations', upper: 0.1, lower: -0.02 })]
+    const mixed = analyse(rows)
+    // Arithmetic 0.05 + 0.06 = 0.11; ⟨ST⟩ √(0.01 + 0.04) = 0.22361.
+    expect(mixed.stackResult.arithmeticHalfBand).toBeCloseTo(0.11, 12)
+    expect(mixed.stackResult.statisticalHalfBand).toBeCloseTo(Math.sqrt(0.05), 12)
+    const assembly = analyse([linkedContributor(mixed.stackResult, -1), st, dim('E', 1, 30, pm(0.03))])
+    const flipped = rows.map((row) => ({ ...row, sensitivity: -row.sensitivity }))
+    const direct = analyse([...flipped, st, dim('E', 1, 30, pm(0.03))])
+    expect(assembly.worstCase.min).toBeCloseTo(direct.worstCase.min, 12)
+    expect(assembly.worstCase.max).toBeCloseTo(direct.worstCase.max, 12)
+    expect(assembly.sigma).toBeCloseTo(direct.sigma, 12)
+    expect(assembly.stackResult.statisticalHalfBand).toBeCloseTo(direct.stackResult.statisticalHalfBand ?? Number.NaN, 12)
+  })
+
+  it('a result stored before the parts were kept counts all of its band as arithmetic, as before', () => {
+    const { arithmeticHalfBand: _a, statisticalHalfBand: _s, ...old } = part.stackResult
+    expect(analyse([linkedContributor(old, 1), st]).worstCase.halfBand).toBeCloseTo(Math.sqrt(0.02) + 0.1, 12)
+    // Only the arithmetic part stored: the ⟨ST⟩ part is the rest of the band.
+    expect(analyse([linkedContributor({ ...old, arithmeticHalfBand: 0 }, 1), st]).worstCase.halfBand).toBeCloseTo(Math.sqrt(0.03), 12)
+  })
 })
 
 describe('verdicts', () => {
@@ -153,10 +200,31 @@ describe('verdicts', () => {
     expect(analyse(chain, { requirement: { max: 5.1 } }).verdict).toEqual({ method: 'worst-case', status: 'fail', basis: 'rss-outside', governing: 'upper' })
   })
 
-  it('RSS: ±3σ outside, ±2σ inside is review; ±2σ outside is a fail', () => {
-    expect(analyse(chain, { requirement: { max: 5.1 }, method: 'rss' }).verdict?.basis).toBe('only-two-sigma-within')
-    expect(analyse(chain, { requirement: { max: 5.1 }, method: 'rss' }).verdict?.status).toBe('review')
-    expect(analyse(chain, { requirement: { max: 5.09 }, method: 'rss' }).verdict?.status).toBe('fail')
+  it('RSS method graded by Cpk (3σ = 0.14142): ≥ 1.33 pass, 1.00 … 1.33 review, below 1.00 fail', () => {
+    const verdict = (max: number) => analyse(chain, { requirement: { max }, method: 'rss' }).verdict
+    // Cpu = (5.2 − 5)/0.14142 = 1.414
+    expect(verdict(5.2)).toEqual({ method: 'rss', status: 'pass', basis: 'rss-capable', governing: 'upper' })
+    // Cpu = 0.16/0.14142 = 1.131
+    expect(verdict(5.16)).toEqual({ method: 'rss', status: 'review', basis: 'rss-marginal', governing: 'upper' })
+    // Cpu exactly 1 (±3σ touches the limit): review
+    expect(verdict(5 + Math.sqrt(0.02))?.status).toBe('review')
+    // Cpu = 0.1/0.14142 = 0.707: ±3σ outside
+    expect(verdict(5.1)).toEqual({ method: 'rss', status: 'fail', basis: 'rss-not-capable', governing: 'upper' })
+    // Cpk exactly 1.33 passes
+    expect(verdict(5 + CPK_PASS * Math.sqrt(0.02))?.status).toBe('pass')
+  })
+
+  it('RSS Cpk from the range equals capability().cpk; both limits use the smaller side', () => {
+    const result = analyse(chain, { requirement: { min: 4.85, max: 5.3 }, method: 'rss' })
+    expect(rssCpk(result.rss)).toBeCloseTo(result.capability.cpk ?? Number.NaN, 12)
+    // min side (5 − 4.85)/0.14142 = 1.0607: review, governed by the lower limit
+    expect(result.verdict).toEqual({ method: 'rss', status: 'review', basis: 'rss-marginal', governing: 'lower' })
+  })
+
+  it('RSS with σ = 0: pass while the mean meets the requirement, fail when not', () => {
+    const exact = [dim('A', 1, 10, pm(0))]
+    expect(analyse(exact, { requirement: { min: 9 }, method: 'rss' }).verdict?.basis).toBe('rss-capable')
+    expect(analyse(exact, { requirement: { min: 10.5 }, method: 'rss' }).verdict?.status).toBe('fail')
   })
 
   it('Cp and Cpk with both limits: (5.3 − 4.9)/6σ and (5.3 − 5)/3σ… min side (5 − 4.9)/3σ', () => {

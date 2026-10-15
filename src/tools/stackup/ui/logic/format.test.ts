@@ -32,12 +32,19 @@ describe('format', () => {
   })
 
   it('writes each kind of tolerance as entered', () => {
-    expect(toleranceText('si', { kind: 'symmetric', plusMinus: 0.05 })).toBe('±0.050')
-    expect(toleranceText('si', { kind: 'deviations', upper: 0.07, lower: 0 })).toBe('+0.070/0')
-    expect(toleranceText('si', { kind: 'limits', min: 5.9, max: null }, true)).toBe('5.900 … — ⟨ST⟩')
+    expect(toleranceText('si', { kind: 'symmetric', plusMinus: 0.05 }, 'iso')).toBe('±0.050')
+    expect(toleranceText('si', { kind: 'deviations', upper: 0.07, lower: 0 }, 'iso')).toBe('+0.070/0')
+    expect(toleranceText('si', { kind: 'limits', min: 5.9, max: null }, 'iso', true)).toBe('5.900 … — ⟨ST⟩')
     const position = { ...newGeometric('position', 0.1), diameterZone: true, materialCondition: 'mmc' as const }
-    const frame = toleranceText('si', { ...position, datums: [{ ...position.datums[0], letter: 'A' }, { ...position.datums[1], letter: 'B', modifier: 'mmb' }, position.datums[2]] })
+    const frame = toleranceText('si', { ...position, datums: [{ ...position.datums[0], letter: 'A' }, { ...position.datums[1], letter: 'B', modifier: 'mmb' }, position.datums[2]] }, 'asme')
     expect(frame).toBe('⌖ | Ø0.100 Ⓜ | A | B Ⓜ')
+  })
+
+  it('writes an unequal profile as its standard does: ISO UZ with the signed offset, ASME Ⓤ with the value', () => {
+    const profile = { ...newGeometric('profile-surface', 0.3), unequal: { on: true, value: 0.05, typedAs: 'iso-offset' as const, materialSide: 'larger' as const } }
+    expect(toleranceText('si', profile, 'iso')).toBe('⌓ | 0.300 UZ+0.050')
+    expect(toleranceText('si', { ...profile, unequal: { ...profile.unequal, value: -0.05 } }, 'iso')).toBe('⌓ | 0.300 UZ−0.050')
+    expect(toleranceText('si', profile, 'asme')).toBe('⌓ | 0.300 Ⓤ 0.200')
   })
 })
 

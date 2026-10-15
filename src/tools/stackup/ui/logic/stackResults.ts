@@ -29,6 +29,9 @@ export function stackResults(inputs: StackInputs, library: Library, hasDraft?: (
   }
 }
 
+/** The own stacks of the linked parts that resolve (an assembly's parts), for their sources and conversions. */
+export const linkedParts = (results: Pick<StackResults, 'links'>): ResolvedLink[] => [...results.links.values()].filter((link) => link.part !== null)
+
 /**
  * The status of a stack: the engine's verdict by the chosen method, 'none'
  * without a requirement. A broken link caps a pass at review: the numbers

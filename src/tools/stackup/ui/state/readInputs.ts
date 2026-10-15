@@ -52,7 +52,13 @@ function asGeometric(tolerance: Fields): GeometricEntry {
     materialCondition: oneOf(['rfs', 'mmc', 'lmc'], tolerance.materialCondition, 'rfs'),
     feature: asFeature(tolerance.feature),
     datums: [...datums, emptyDatum(), emptyDatum(), emptyDatum()].slice(0, 3),
-    unequal: { on: asFlag(unequal.on), value: asNumber(unequal.value), materialSide: oneOf(['larger', 'smaller'], unequal.materialSide, 'larger') },
+    unequal: {
+      on: asFlag(unequal.on),
+      value: asNumber(unequal.value),
+      // Saved before typedAs was stored, the number was always the ASME Ⓤ value (an ISO offset v was saved as zone/2 + v).
+      typedAs: oneOf(['iso-offset', 'asme-value'], unequal.typedAs, 'asme-value'),
+      materialSide: oneOf(['larger', 'smaller'], unequal.materialSide, 'larger'),
+    },
     projected: { on: asFlag(projected.on), height: asNumber(projected.height) },
     freeState: asFlag(tolerance.freeState),
     tangentPlane: asFlag(tolerance.tangentPlane),

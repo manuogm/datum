@@ -49,8 +49,8 @@ export const EXAMPLE_SUMMARIES: Record<ToolId, CalculationSummary> = {
     title: 'Housing: shoulder to circlip groove',
     status: 'pass',
     figures: [
-      { label: 'WC', value: '20.825 … 21.095', unit: 'mm' },
-      { label: 'RSS', value: '20.881 … 21.039', unit: 'mm' },
+      { label: 'WC', value: '20.825 … 21.095', unit: 'mm', lengthsMm: [20.825, 21.095] },
+      { label: 'RSS', value: '20.881 … 21.039', unit: 'mm', lengthsMm: [20.8811013308, 21.0388986692] },
       { label: 'Cpk', value: '1.77' },
     ],
   },
@@ -78,8 +78,8 @@ export const STACK_ASSEMBLY_EXAMPLE = {
     title: 'Bearing end play',
     status: 'review',
     figures: [
-      { label: 'WC', value: '0.045 … 0.555', unit: 'mm' },
-      { label: 'RSS', value: '0.192 … 0.408', unit: 'mm' },
+      { label: 'WC', value: '0.045 … 0.555', unit: 'mm', lengthsMm: [0.045, 0.555] },
+      { label: 'RSS', value: '0.192 … 0.408', unit: 'mm', lengthsMm: [0.192180706736, 0.407819293264] },
       { label: 'Cpk', value: '1.85' },
     ],
   } satisfies CalculationSummary,

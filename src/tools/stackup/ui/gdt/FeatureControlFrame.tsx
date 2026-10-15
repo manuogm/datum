@@ -12,8 +12,8 @@
 import { Icon, cx } from '../../../../app/ui'
 import type { UnitSystem } from '../../../../core/units'
 import { GEOMETRIC_RULES, isProfile } from '../../calc'
-import { DIAMETER, len, toleranceText } from '../logic/format'
-import { offsetFromUnequalValue } from '../logic/readouts'
+import { DIAMETER, len, signed, toleranceText } from '../logic/format'
+import { unequalShown } from '../logic/unequal'
 import type { GeometricEntry } from '../state/stackInputs'
 import { gdtIcon } from './characteristics'
 import { GdtModifier, type ModifierSymbol } from './GdtModifier'
@@ -40,7 +40,7 @@ export function FeatureControlFrame({ entry, system, standard, statistical = fal
     <span
       className={cx(styles.frame, compact && styles.compact, className)}
       role="img"
-      aria-label={toleranceText(system, compact ? { ...entry, datums: [] } : entry, statistical)}
+      aria-label={toleranceText(system, compact ? { ...entry, datums: [] } : entry, standard, statistical)}
     >
       <span className={cx(styles.cell, styles.symbolCell)}>
         <Icon name={gdtIcon(entry.characteristic)} />
@@ -63,11 +63,11 @@ export function FeatureControlFrame({ entry, system, standard, statistical = fal
   )
 }
 
-/** The tolerance modifiers after Ⓜ/Ⓛ, in drawing order: Ⓟ height, Ⓤ value (ISO UZ offset), Ⓕ, Ⓣ, CZ. */
+/** The tolerance modifiers after Ⓜ/Ⓛ, in drawing order: Ⓟ height, Ⓤ value (ISO: UZ and the signed offset), Ⓕ, Ⓣ, CZ. */
 function FrameModifiers({ entry, system, standard }: { entry: GeometricEntry; system: UnitSystem; standard: 'iso' | 'asme' }) {
   const rule = GEOMETRIC_RULES[entry.characteristic]
   const { projected, unequal } = entry
-  const unequalNumber = unequal.value === null ? null : standard === 'iso' && entry.zone !== null ? offsetFromUnequalValue(entry.zone, unequal.value) : unequal.value
+  const unequalNumber = unequalShown(entry, standard)
   return (
     <>
       {projected.on && rule.projected && (
@@ -79,7 +79,8 @@ function FrameModifiers({ entry, system, standard }: { entry: GeometricEntry; sy
       {unequal.on && isProfile(entry.characteristic) && (
         <>
           <GdtModifier symbol={standard === 'iso' ? 'UZ' : 'U'} />
-          {unequalNumber !== null && <span>{len(system, unequalNumber)}</span>}
+          {/* ISO 1101:2017 writes the offset with its sign (UZ+0.050); ASME Y14.5-2018 §11 the value (Ⓤ 0.200). */}
+          {unequalNumber !== null && <span>{standard === 'iso' ? signed(system, unequalNumber) : len(system, unequalNumber)}</span>}
         </>
       )}
       {entry.freeState && <GdtModifier symbol="F" />}

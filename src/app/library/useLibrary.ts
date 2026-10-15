@@ -10,12 +10,14 @@ import {
   duplicateCalculation,
   moveCalculation,
   moveFolder,
+  refreshInputs,
   refreshSummary,
   renameCalculation,
   renameFolder,
   updateCalculation,
   folderAndBelow,
   type CalculationSummary,
+  type Library,
   type ToolId,
 } from '../../core/library'
 import { ok, type Result } from '../../core/result'
@@ -45,8 +47,12 @@ function forgetDeleted(ids: readonly string[]): void {
   forgetCalculations(ids)
 }
 
-/** Calculations whose result changed: saved from their tool, or deleted. */
-type ChangeListener = (ids: readonly string[]) => void
+/**
+ * Calculations whose result changed: saved from their tool, or deleted.
+ * `before` is the library as it was just before the change, so a listener
+ * can still read what was saved last (a deleted calculation is gone after).
+ */
+type ChangeListener = (ids: readonly string[], before: Library) => void
 const changeListeners = new Set<ChangeListener>()
 
 /**
@@ -59,8 +65,8 @@ export function onCalculationsChanged(listener: ChangeListener): () => void {
   return () => changeListeners.delete(listener)
 }
 
-function changed(ids: readonly string[]): void {
-  if (ids.length > 0) for (const listener of changeListeners) listener(ids)
+function changed(ids: readonly string[], before: Library): void {
+  if (ids.length > 0) for (const listener of changeListeners) listener(ids, before)
 }
 
 /** Runs a command that creates something under a fresh id; returns that id. */
@@ -88,7 +94,7 @@ export const libraryActions = {
     const result = done(applyChange((current) => deleteFolder(current, id)))
     if (result.ok) {
       forgetDeleted(calculations)
-      changed(calculations)
+      changed(calculations, library)
     }
     return result
   },
@@ -110,19 +116,25 @@ export const libraryActions = {
   },
   /** Deletes the calculation, with its unsaved draft, its tab and what its screen remembered. */
   deleteCalculation(id: string): Done {
+    const before = getSnapshot().state
     const result = done(applyChange((library) => deleteCalculation(library, id)))
     if (result.ok) {
       forgetDeleted([id])
-      changed([id])
+      changed([id], before)
     }
     return result
   },
 
   /** Save from a tool screen: the inputs on screen and the result they give. */
   saveCalculation(id: string, inputs: unknown, summary: CalculationSummary | null): Done {
+    const before = getSnapshot().state
     const result = done(applyChange((library) => updateCalculation(library, id, { inputs, summary }, localTimestamp())))
-    if (result.ok) changed([id])
+    if (result.ok) changed([id], before)
     return result
+  },
+  /** Inputs and their summary worked out by the app (see app/tools/dependents); not an edit. */
+  refreshInputs(id: string, inputs: unknown, summary: CalculationSummary | null): Done {
+    return done(applyChange((library) => refreshInputs(library, id, { inputs, summary })))
   },
   /** A tool's fresh summary for unchanged inputs; not an edit. */
   refreshSummary(id: string, summary: CalculationSummary | null): Done {

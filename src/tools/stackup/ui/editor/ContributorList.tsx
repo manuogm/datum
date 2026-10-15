@@ -322,13 +322,13 @@ function DimensionRowView(props: DimensionRowViewProps) {
             <button
               type="button"
               className={cx(styles.toleranceButton, error && field !== 'nominal' && field !== 'direction' && styles.invalidBox)}
-              aria-label={`Row ${index + 1} tolerance ${toleranceText(system, tolerance, row.statistical)}: open the details`}
+              aria-label={`Row ${index + 1} tolerance ${toleranceText(system, tolerance, inputs.standard, row.statistical)}: open the details`}
               onClick={() => selection.open(row.id)}
             >
               {geometric ? (
                 <FeatureControlFrame entry={geometric} system={system} standard={inputs.standard} compact />
               ) : (
-                <span>{toleranceText(system, tolerance)}</span>
+                <span>{toleranceText(system, tolerance, inputs.standard)}</span>
               )}
             </button>
           )}

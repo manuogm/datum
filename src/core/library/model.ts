@@ -19,8 +19,15 @@ export type CalculationStatus = JudgedStatus | 'none'
 /** One headline result (e.g. "u max" → "0.82"). */
 export interface SnapshotFigure {
   label: string
+  /** The figure as written in SI (value and unit), e.g. "20.825 … 21.095" mm. */
   value: string
   unit?: string
+  /**
+   * A length figure as numbers in mm: one value, or the min and max of a
+   * range. A list then writes it in the viewer's unit system; value and unit
+   * stay for summaries stored without it and for any other reader.
+   */
+  lengthsMm?: readonly number[]
 }
 
 /** What a tool reports about its current inputs: built by each tool's snapshot builder. */

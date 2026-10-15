@@ -22,7 +22,7 @@ import { isBroken, linkStateText } from '../logic/links'
 import { rowTable } from '../logic/rowTable'
 import { savedText } from '../logic/savedText'
 import { capabilityLine, sideBySide } from '../logic/sideBySide'
-import type { StackResults } from '../logic/stackResults'
+import { linkedParts, type StackResults } from '../logic/stackResults'
 import { basisText, byShare, lowerName, sharesByMethod } from '../logic/verdict'
 import type { StackInputs } from '../state/stackInputs'
 import report from './report.module.css'
@@ -46,7 +46,16 @@ export function StackReport({ name, inputs, results, analysis, status, system }:
   const { cpk } = analysis.capability
   const subtitle = [assembly ? 'Assembly' : 'Part', ...(assembly ? [] : [inputs.partName.trim() || 'Part']), lowerName(inputs.resultName), STANDARD_NAME[inputs.standard]].join(' · ')
   const rows = rowTable(inputs, analysis, results.links, system)
-  const geometricRows = rows.filter((row) => row.geometric !== null)
+  // The geometric rows of this stack, then those of each linked part (numbered 1.2: row 2 of the part in row 1), so an
+  // assembly's report carries its parts' GD&T conversions and sources too.
+  const geometricRows = [
+    ...rows.map((row) => ({ number: String(row.number), label: row.label, row, standard: inputs.standard })),
+    ...linkedParts(results).flatMap((link) => {
+      const at = inputs.rows.findIndex((input) => input.id === link.row.id) + 1
+      if (!link.part || !link.partInputs) return []
+      return rowTable(link.partInputs, link.part, new Map(), system).map((row) => ({ number: `${at}.${row.number}`, label: `${link.partName}: ${row.label}`, row, standard: link.partInputs?.standard ?? inputs.standard }))
+    }),
+  ].filter(({ row }) => row.geometric !== null)
   const links = [...results.links.values()]
   let section = 0
   const next = () => ++section
@@ -210,19 +219,19 @@ export function StackReport({ name, inputs, results, analysis, status, system }:
 
       {geometricRows.length > 0 && (
         <ReportSection heading={`${next()} · Geometric conversions and modifiers`} breakable>
-          {geometricRows.map((row) => {
+          {geometricRows.map(({ number, label, row, standard }) => {
             const entry = row.geometric
             if (!entry) return null
             const { conversion } = row.contributor
-            const rule = geometricRule(entry.characteristic, inputs.standard)
+            const rule = geometricRule(entry.characteristic, standard)
             return (
-              <div key={row.id} className={report.conversion}>
+              <div key={number} className={report.conversion}>
                 <div className={report.conversionHead}>
-                  <span className={styles.formula}>#{row.number}</span>
-                  <strong>{row.label}</strong>
-                  <FeatureControlFrame entry={entry} system={system} standard={inputs.standard} statistical={row.statistical} className={report.frame} />
+                  <span className={styles.formula}>#{number}</span>
+                  <strong>{label}</strong>
+                  <FeatureControlFrame entry={entry} system={system} standard={standard} statistical={row.statistical} className={report.frame} />
                   <span className={styles.formula}>
-                    {characteristicName(entry.characteristic, inputs.standard)} → {plusMinus(system, row.contributor.halfBand)}
+                    {characteristicName(entry.characteristic, standard)} → {plusMinus(system, row.contributor.halfBand)}
                   </span>
                 </div>
                 <p>{conversion.rule}</p>
@@ -246,7 +255,7 @@ export function StackReport({ name, inputs, results, analysis, status, system }:
 
       <ReportSection heading={`${next()} · Sources`}>
         <ol className={report.sources}>
-          {stackSources(analysis).map((source) => (
+          {stackSources(analysis, linkedParts(results).flatMap((link) => link.part ?? [])).map((source) => (
             <li key={source}>{source}</li>
           ))}
         </ol>

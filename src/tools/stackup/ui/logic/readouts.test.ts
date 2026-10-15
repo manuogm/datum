@@ -3,8 +3,9 @@ import { expectOk } from '../../../../core/testing'
 import { analyseStack } from '../../calc'
 import { NEW_STACK_INPUTS, emptyDatum, newDimension, newGeometric, type DatumCell, type GeometricEntry, type StackInputs } from '../state/stackInputs'
 import { engineInput } from './engineInput'
+import { offsetFromUnequalValue, unequalValueFromOffset } from './unequal'
 import {
-  bonusReadout, breakdownTerms, datumShiftOf, meanReadout, modifierHeadline, offsetFromUnequalValue, rowResult, shiftReadout, unequalReadout, unequalValueFromOffset, widened,
+  bonusReadout, breakdownTerms, datumShiftOf, meanReadout, modifierHeadline, rowResult, shiftReadout, unequalReadout, widened,
 } from './readouts'
 
 const hole = { type: 'internal' as const, min: 10, max: 10.2 }
@@ -22,9 +23,10 @@ describe('rowResult', () => {
   it('works a row out on its own, while another row is incomplete', () => {
     expect(rowResult(withPosition, new Map(), 0)).toBeNull()
     const row = rowResult(withPosition, new Map(), 1)
-    // Zone 0.1 + bonus 0.2 + datum shift 0.05, as ± half of it.
-    expect(row?.halfBand).toBeCloseTo(0.175, 12)
-    expect(row?.geometric).toMatchObject({ bonus: expect.closeTo(0.2, 12), datumShift: expect.closeTo(0.05, 12) })
+    // Zone 0.1 + bonus 0.2, as ± half of it. The datum B shift (0.05) is no longer added to the row: the engine
+    // counts it as its own row, once per datum reference frame (mechanical review, UNSURE 5); it is only recorded.
+    expect(row?.halfBand).toBeCloseTo(0.15, 12)
+    expect(row?.geometric).toMatchObject({ bonus: expect.closeTo(0.2, 12), datumShift: 0, frameDatumShift: expect.closeTo(0.05, 12) })
   })
 })
 
@@ -33,7 +35,8 @@ describe('the geometric readouts', () => {
   if (!breakdown) throw new Error('a position row has a breakdown')
 
   it('names each term of the band', () => {
-    expect(breakdownTerms('si', position, breakdown)).toBe('zone 0.100 + bonus 0.200 + datum B shift 0.050')
+    expect(breakdownTerms('si', position, breakdown)).toBe('zone 0.100 + bonus 0.200')
+    expect(breakdownTerms('si', position, { ...breakdown, datumShift: 0.05 })).toBe('zone 0.100 + bonus 0.200 + datum B shift 0.050')
     expect(widened(breakdown)).toBe(true)
     expect(widened(null)).toBe(false)
   })
@@ -53,9 +56,11 @@ describe('the geometric readouts', () => {
   })
 
   it('works out an unequally disposed profile zone', () => {
-    const profile = { ...newGeometric('profile-surface', 0.3), unequal: { on: true, value: 0.1, materialSide: 'larger' as const } }
+    const profile = { ...newGeometric('profile-surface', 0.3), unequal: { on: true, value: 0.1, typedAs: 'asme-value' as const, materialSide: 'larger' as const } }
     expect(unequalReadout('si', profile)).toMatch(/^profile 0\.300: [+−]0\.\d{3} \/ [+−]0\.\d{3} → mean [+−]0\.050, ±0\.150$/)
-    expect(unequalReadout('si', { ...profile, unequal: { ...profile.unequal, value: 0.4 } })).toBeNull()
+    expect(unequalReadout('si', { ...profile, zone: null })).toBeNull()
+    // The same zone typed as an ISO UZ offset −0.05: the same readout.
+    expect(unequalReadout('si', { ...profile, unequal: { ...profile.unequal, value: -0.05, typedAs: 'iso-offset' } })).toBe(unequalReadout('si', profile))
   })
 
   it('converts an ISO UZ offset to the Ⓤ value and back', () => {

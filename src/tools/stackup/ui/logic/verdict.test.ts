@@ -45,7 +45,10 @@ describe('the verdict of the housing Part stack', () => {
     const verdict = stackVerdict(rss.inputs, rss.results, rss.analysis, 'si')
     expect(verdict.headline.symbol).toBe('RSS')
     expect(verdict.figures[0]).toMatchObject({ label: 'Worst case', value: '20.825 … 21.095' })
-    expect(verdictSentence(rss.inputs, rss.results, rss.analysis, 'si')).toMatch(/^The RSS range of shoulder to circlip groove, 20\.881 … 21\.039 mm, stays inside 20\.800 … 21\.100 mm; about .+ falls outside\.$/)
+    // Cpk 1.77 ≥ 1.33: capable. The tail is under 0.001 %, written without "about".
+    expect(verdictSentence(rss.inputs, rss.results, rss.analysis, 'si')).toBe(
+      'The RSS range of shoulder to circlip groove, 20.881 … 21.039 mm, stays inside 20.800 … 21.100 mm; Cpk 1.77; under 0.001 % falls outside.',
+    )
   })
 
   it('says what the stack adds up to without a requirement', () => {
@@ -67,10 +70,26 @@ describe('the verdict of the housing Part stack', () => {
     )
   })
 
-  it('says by how much the worst case misses when it fails', () => {
+  it('names both margins when both limits are missed (S9)', () => {
     const tight = worked({ ...EXAMPLE_STACK_INPUTS, requirement: { min: 20.9, max: 21 } })
     expect(tight.analysis.verdict?.status).toBe('fail')
-    expect(verdictSentence(tight.inputs, tight.results, tight.analysis, 'si')).toMatch(/^Even the RSS range, 20\.881 … 21\.039 mm, misses the maximum by 0\.039 mm; row 1, Shoulder depth from face A governs\.$/)
+    expect(verdictSentence(tight.inputs, tight.results, tight.analysis, 'si')).toBe(
+      'Even the RSS range, 20.881 … 21.039 mm, misses the minimum by 0.019 mm and the maximum by 0.039 mm; row 1, Shoulder depth from face A governs.',
+    )
+    // Only the maximum missed: only the maximum named.
+    const high = worked({ ...EXAMPLE_STACK_INPUTS, requirement: { min: 20.8, max: 21.08 } })
+    expect(verdictSentence(high.inputs, high.results, high.analysis, 'si')).toBe(
+      'The worst-case shoulder to circlip groove, 20.825 … 21.095 mm, misses the maximum by 0.015 mm; the RSS range stays inside.',
+    )
+  })
+
+  it('words a marginal RSS capability (1.00 ≤ Cpk < 1.33)', () => {
+    // σ 0.0263: limits 0.1 from the mean give Cpk 1.27.
+    const marginal = worked({ ...EXAMPLE_STACK_INPUTS, method: 'rss', requirement: { min: 20.86, max: 21.06 } })
+    expect(marginal.analysis.verdict?.basis).toBe('rss-marginal')
+    expect(verdictSentence(marginal.inputs, marginal.results, marginal.analysis, 'si')).toMatch(
+      /^The RSS range of shoulder to circlip groove, 20\.881 … 21\.039 mm, stays inside 20\.860 … 21\.060 mm, but Cpk 1\.27 is under the 1\.33 of a capable process; about .+ % of builds would fall outside\.$/,
+    )
   })
 })
 
@@ -98,8 +117,8 @@ describe('the verdict of the Bearing end play assembly', () => {
 
   it('adds the broken links to the status words of a pass', () => {
     const rss = worked({ ...inputs, method: 'rss' })
-    expect(basisText(rss.analysis, 0)).toBe('RSS (±3σ) inside the requirement')
-    expect(basisText(rss.analysis, 1)).toBe('RSS (±3σ) inside the requirement; review: 1 linked part uses last known values')
+    expect(basisText(rss.analysis, 0)).toBe('RSS (±3σ) inside the requirement, Cpk ≥ 1.33')
+    expect(basisText(rss.analysis, 1)).toBe('RSS (±3σ) inside the requirement, Cpk ≥ 1.33; review: 1 linked part uses last known values')
   })
 })
 

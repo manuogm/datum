@@ -110,7 +110,7 @@ export function stackChartModel(source: ChartSource, system: UnitSystem, status:
     const half = d(Math.abs(a) * row.halfBand)
     const linked = input?.kind === 'linked' ? links.get(input.id) : undefined
     const label = linked ? `${linked.partName || linked.calculationName} · ${lowerName(linked.resultName)}` : input?.kind === 'dimension' ? rowLabel(input, i) : row.label
-    const tolerance = input?.kind === 'dimension' ? toleranceText(system, input.tolerance, input.statistical) : `${signed(system, row.max - row.nominal)}/${signed(system, row.min - row.nominal)}`
+    const tolerance = input?.kind === 'dimension' ? toleranceText(system, input.tolerance, inputs.standard, input.statistical) : `${signed(system, row.max - row.nominal)}/${signed(system, row.min - row.nominal)}`
     const icon: IconName | null = linked ? 'link' : input?.kind === 'dimension' && input.tolerance.kind === 'geometric' ? gdtIcon(input.tolerance.characteristic) : null
     const value = Math.abs(centre) > 1e-12 ? `${signed(system, a * row.meanShift)} ${plusMinus(system, Math.abs(a) * row.halfBand)}` : plusMinus(system, Math.abs(a) * row.halfBand)
     return {

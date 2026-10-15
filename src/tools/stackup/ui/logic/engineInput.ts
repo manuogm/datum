@@ -9,6 +9,7 @@ import {
   type StackInput, type StackResult,
 } from '../../calc'
 import type { DimensionRow, GeometricEntry, StackInputs, ToleranceEntry } from '../state/stackInputs'
+import { unequalEngineValue } from './unequal'
 
 /** A number, or NaN when it is not entered yet (the engine then says what is missing). */
 const entered = (value: number | null): number => value ?? Number.NaN
@@ -75,7 +76,10 @@ function geometricTolerance(entry: GeometricEntry, standard: DrawingStandard): G
         }
       : {}),
     ...(datums.length > 0 ? { datums } : {}),
-    ...(entry.unequal.on && isProfile(entry.characteristic) ? { unequal: { value: entered(entry.unequal.value), materialSide: entry.unequal.materialSide } } : {}),
+    // Ⓤ / UZ as typed becomes the engine's Ⓤ value here, with the zone as it is now (unequal.ts).
+    ...(entry.unequal.on && isProfile(entry.characteristic)
+      ? { unequal: { value: entered(unequalEngineValue(entry)), materialSide: entry.unequal.materialSide } }
+      : {}),
     ...(entry.projected.on && rule.projected ? { projected: { height: entered(entry.projected.height) } } : {}),
     ...(entry.freeState ? { freeState: true } : {}),
     ...(entry.tangentPlane ? { tangentPlane: true } : {}),
