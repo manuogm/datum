@@ -13,6 +13,19 @@
   display: none;
 }
 
+/* Tabs run on past an edge: that edge fades out. */
+.bar[data-cut-start] {
+  mask-image: linear-gradient(90deg, transparent, #000 24px);
+}
+
+.bar[data-cut-end] {
+  mask-image: linear-gradient(90deg, #000 calc(100% - 24px), transparent);
+}
+
+.bar[data-cut-start][data-cut-end] {
+  mask-image: linear-gradient(90deg, transparent, #000 24px, #000 calc(100% - 24px), transparent);
+}
+
 .tab {
   display: flex;
   align-items: center;

@@ -190,3 +190,17 @@ function padded(axis: Axis): Axis {
 
 /** The empty chart's loop axis: a short span from START. */
 export const EMPTY_LOOP_AXIS: Axis = niceAxis([0, 10], 5)
+
+/** Rough width of a 10 px mono character, for tick labels. */
+export const MONO_CHAR = 6.2
+
+/**
+ * Where a centred tick label goes so that it stays inside [min, max]: at the
+ * tick, or pulled in and anchored to the edge it would cross.
+ */
+export function edgeLabel(x: number, text: string, min: number, max: number): { x: number; anchor: 'middle' | 'start' | 'end' } {
+  const half = (text.length * MONO_CHAR) / 2
+  if (x + half > max) return { x: max, anchor: 'end' }
+  if (x - half < min) return { x: min, anchor: 'start' }
+  return { x, anchor: 'middle' }
+}

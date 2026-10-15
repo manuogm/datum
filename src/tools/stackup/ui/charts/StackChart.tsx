@@ -8,7 +8,7 @@ import { scaleLinear } from '../../../../app/charts'
 import { Icon, LegendItem, MonoLabel, cx } from '../../../../app/ui'
 import { formatDecimal } from '../../../../core/units'
 import { upperName } from '../logic/verdict'
-import { EMPTY_LOOP_AXIS, type ChartLane, type ChartResult, type StackChartModel } from './stackChart'
+import { EMPTY_LOOP_AXIS, MONO_CHAR, edgeLabel, type ChartLane, type ChartResult, type StackChartModel } from './stackChart'
 import styles from './charts.module.css'
 import { useWidth } from './useWidth'
 
@@ -35,9 +35,11 @@ export function StackChart({ model, resultName, unit, start, end, selectedRow = 
   const [ref, width] = useWidth<HTMLDivElement>(560)
   const narrow = width < 480
   const loopWidth = Math.round(width * (narrow ? 0.55 : 0.6))
-  const valueColumn = narrow ? 76 : 92
+  // On a phone each lane's value goes on its label line, above the band, so
+  // the bands get the whole panel; else it has a column at the right edge.
+  const valueColumn = narrow ? 10 : 92
   const loop = { left: 22, right: loopWidth - 14 }
-  const band = { left: loopWidth + 12, right: width - valueColumn }
+  const band = { left: loopWidth + (narrow ? 10 : 12), right: width - valueColumn }
   const lanes = model?.lanes ?? []
   const resultTop = TOP + lanes.length * LANE
   // On a phone the two range texts under the result bands go on two lines.
@@ -59,7 +61,8 @@ export function StackChart({ model, resultName, unit, start, end, selectedRow = 
       </div>
       <div ref={ref} className={cx(styles.canvas, staleNote && styles.stale)}>
         <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} role="img" aria-label={model?.ariaLabel ?? 'Stack chart: no contributors yet.'}>
-          <line className={styles.divider} x1={loopWidth} x2={loopWidth} y1={0} y2={resultTop + RESULT} />
+          {/* An empty chart's note runs across both panels. */}
+          {model && <line className={styles.divider} x1={loopWidth} x2={loopWidth} y1={0} y2={resultTop + RESULT} />}
           {lanes.map((lane, i) => (
             <Lane
               key={lane.rowId}
@@ -99,8 +102,8 @@ export function StackChart({ model, resultName, unit, start, end, selectedRow = 
               {narrow ? 'The loop draws here as you add dimensions.' : 'The loop draws here as you add dimensions, from the start feature to the end.'}
             </text>
           )}
-          <Axis ticks={loopAxis.ticks} at={x} y={resultTop + RESULT + 6} decimals={axisDecimals(loopAxis.step)} />
-          {model && e && <Axis ticks={model.effectAxis.ticks} at={e} y={resultTop + RESULT + 6} decimals={axisDecimals(model.effectAxis.step) + 1} signed clearStart={narrow ? 24 : 0} />}
+          <Axis ticks={loopAxis.ticks} at={x} y={resultTop + RESULT + 6} decimals={axisDecimals(loopAxis.step)} max={loopWidth - 2} />
+          {model && e && <Axis ticks={model.effectAxis.ticks} at={e} y={resultTop + RESULT + 6} decimals={axisDecimals(model.effectAxis.step) + 1} signed min={loopWidth + 4} max={width - 1} />}
         </svg>
         {staleNote && <p className={styles.staleNote}>{staleNote}</p>}
       </div>
@@ -115,37 +118,38 @@ export function StackChart({ model, resultName, unit, start, end, selectedRow = 
   )
 }
 
-/** Rough width of a 10 px mono character, for tick labels. */
-const MONO_CHAR = 6.2
 
 const axisDecimals = (step: number) => Math.max(0, Math.min(4, -Math.floor(Math.log10(step) + 1e-9)))
 
 /**
  * An axis with its tick labels. Where the ticks are too close for their
  * labels (a narrow panel), only every second or third is written, counted
- * from 0 so the nominal keeps its label; `clearStart` leaves room at the
- * left end for the neighbouring panel's last label.
+ * from 0 so the nominal keeps its label. A label at the panel's edge is
+ * pulled in rather than cut or run into the neighbouring panel.
  */
-function Axis({ ticks, at, y, decimals, signed = false, clearStart = 0 }: { ticks: readonly number[]; at: (v: number) => number; y: number; decimals: number; signed?: boolean; clearStart?: number }) {
+function Axis({ ticks, at, y, decimals, signed = false, min = 0, max }: { ticks: readonly number[]; at: (v: number) => number; y: number; decimals: number; signed?: boolean; min?: number; max: number }) {
   const text = (tick: number) => (tick === 0 ? '0' : formatDecimal(tick, decimals, true, signed))
   const spacing = ticks.length > 1 ? Math.abs(at(ticks[1]) - at(ticks[0])) : Number.POSITIVE_INFINITY
   const widest = Math.max(...ticks.map((tick) => text(tick).length)) * MONO_CHAR + 8
   const every = Math.max(1, Math.ceil(widest / spacing))
   const zero = Math.max(0, ticks.indexOf(0))
-  const labelled = (tick: number, i: number) => (i - zero) % every === 0 && at(tick) - at(ticks[0]) >= clearStart
+  const labelled = (i: number) => (i - zero) % every === 0
   return (
     <g>
       <line className={styles.axisLine} x1={at(ticks[0])} x2={at(ticks[ticks.length - 1])} y1={y} y2={y} />
-      {ticks.map((tick, i) => (
-        <g key={tick}>
-          <line className={styles.axisLine} x1={at(tick)} x2={at(tick)} y1={y} y2={y + 4} />
-          {labelled(tick, i) && (
-            <text className={styles.tickText} x={at(tick)} y={y + 16}>
-              {text(tick)}
-            </text>
-          )}
-        </g>
-      ))}
+      {ticks.map((tick, i) => {
+        const label = edgeLabel(at(tick), text(tick), min, max)
+        return (
+          <g key={tick}>
+            <line className={styles.axisLine} x1={at(tick)} x2={at(tick)} y1={y} y2={y + 4} />
+            {labelled(i) && (
+              <text className={styles.tickText} x={label.x} y={y + 16} style={{ textAnchor: label.anchor }}>
+                {text(tick)}
+              </text>
+            )}
+          </g>
+        )
+      })}
     </g>
   )
 }
@@ -198,8 +202,8 @@ function Lane({ lane, top, width, x, e, loop, valueX, narrow, selected, onSelect
         {shown}
       </text>
       <LoopMark lane={lane} from={from} to={to} y={y} />
-      {e && <EffectMark lane={lane} e={e} y={top + LANE / 2} />}
-      <text className={styles.laneValue} x={valueX} y={top + LANE / 2 + 4}>
+      {e && <EffectMark lane={lane} e={e} y={narrow ? y : top + LANE / 2} />}
+      <text className={styles.laneValue} x={valueX} y={narrow ? top + 13 : top + LANE / 2 + 4}>
         {lane.value}
       </text>
     </g>
@@ -293,6 +297,9 @@ interface ResultBandsProps {
   narrow: boolean
 }
 
+/** Width of a requirement limit's label (mono 10 px). */
+const labelRoom = (text: string | null) => (text ?? '').length * MONO_CHAR
+
 function ResultBands({ result, top, e, band, width, narrow }: ResultBandsProps) {
   const y = top + 30
   const tone = styles[result.tone]
@@ -303,13 +310,19 @@ function ResultBands({ result, top, e, band, width, narrow }: ResultBandsProps) 
     const lo = window.min === null ? band.left : e(window.min)
     const hi = window.max === null ? band.right : e(window.max)
     parts.push(<rect key="wash" className={styles.window} x={lo} y={top + 4} width={Math.max(0, hi - lo)} height={44} />)
-    // The limits are written inside the window, or outside its edges when it is too narrow for both.
-    const labelWidth = textWidth(`${result.windowText.min ?? ''}${result.windowText.max ?? ''}`) + 12
-    const inside = window.min === null || window.max === null || hi - lo >= labelWidth
+    // The limits are written inside the window, or outside its edges when it
+    // is too narrow for both; a limit with no room outside (at the chart's
+    // edge) stays inside, so no label is cut or crossed by a window edge.
+    const minRoom = labelRoom(result.windowText.min)
+    const maxRoom = labelRoom(result.windowText.max)
+    const both = window.min !== null && window.max !== null
+    const fits = !both || hi - lo >= minRoom + maxRoom + 12
+    const minInside = fits || lo - 3 - minRoom < band.left - 8
+    const maxInside = fits || hi + 3 + maxRoom > width - 2
     if (window.min !== null) {
       parts.push(<line key="min" className={styles.windowEdge} x1={lo} x2={lo} y1={top + 2} y2={top + 50} />)
       parts.push(
-        <text key="minText" className={cx(styles.windowText, !inside && styles.end)} x={inside ? lo + 3 : lo - 3} y={top + 14}>
+        <text key="minText" className={cx(styles.windowText, !minInside && styles.end)} x={minInside ? lo + 3 : lo - 3} y={top + 14}>
           {result.windowText.min}
         </text>,
       )
@@ -317,7 +330,7 @@ function ResultBands({ result, top, e, band, width, narrow }: ResultBandsProps) 
     if (window.max !== null) {
       parts.push(<line key="max" className={styles.windowEdge} x1={hi} x2={hi} y1={top + 2} y2={top + 50} />)
       parts.push(
-        <text key="maxText" className={cx(styles.windowText, inside && styles.end)} x={inside ? hi - 3 : hi + 3} y={top + 14}>
+        <text key="maxText" className={cx(styles.windowText, maxInside && styles.end)} x={maxInside ? hi - 3 : hi + 3} y={top + 14}>
           {result.windowText.max}
         </text>,
       )

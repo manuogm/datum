@@ -34,6 +34,13 @@ interface StepPageProps {
    * list on the left) rather than a drawing: flush and top-aligned.
    */
   asideInputs?: boolean
+  /**
+   * Where the side visual sits in its column: centred (a drawing of fixed
+   * size beside a few inputs), or at the top (a chart that grows with the
+   * inputs, e.g. one lane per row of a list). Below 900px it is always at
+   * the top, right under the inputs.
+   */
+  asideAlign?: 'center' | 'start'
   /** 1-based position, for the eyebrow. */
   stepNumber?: number
   stepCount?: number
@@ -68,6 +75,7 @@ export function StepPage({
   asideLabel,
   asideMeta,
   asideInputs = false,
+  asideAlign = 'center',
   stepNumber,
   stepCount,
   onBack,
@@ -132,7 +140,7 @@ export function StepPage({
               {asideMeta && <span className={styles.asideMeta}>{asideMeta}</span>}
             </div>
           )}
-          <div className={asideInputs ? styles.asideInputs : styles.visual}>{aside}</div>
+          <div className={asideInputs ? styles.asideInputs : cx(styles.visual, asideAlign === 'start' && styles.visualTop)}>{aside}</div>
         </aside>
       )}
 

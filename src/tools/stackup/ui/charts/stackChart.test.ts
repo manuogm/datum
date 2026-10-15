@@ -4,7 +4,7 @@ import { expectOk } from '../../../../core/testing'
 import { stackResults } from '../logic/stackResults'
 import { stackInputsFrom } from '../state/readInputs'
 import { EXAMPLE_STACK_INPUTS, newDimension, newGeometric, type StackInputs } from '../state/stackInputs'
-import { chartTone, stackChartModel } from './stackChart'
+import { chartTone, edgeLabel, stackChartModel } from './stackChart'
 
 const SEEDED = '2026-10-14T14:02:00'
 const library = seedLibrary(SEEDED)
@@ -72,5 +72,13 @@ describe('stackChartModel', () => {
 describe('chartTone', () => {
   it('colours the verdict method by the status', () => {
     expect(['pass', 'review', 'fail', 'none'].map(chartTone)).toEqual(['ok', 'warn', 'bad', 'neutral'])
+  })
+})
+
+describe('edgeLabel', () => {
+  it('centres a tick label with room, and pulls one at an edge inside the chart', () => {
+    expect(edgeLabel(100, '0', 0, 200)).toEqual({ x: 100, anchor: 'middle' })
+    expect(edgeLabel(198, '+0.40', 0, 200)).toEqual({ x: 200, anchor: 'end' })
+    expect(edgeLabel(4, '−0.40', 0, 200)).toEqual({ x: 0, anchor: 'start' })
   })
 })

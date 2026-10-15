@@ -147,7 +147,7 @@ export function StackReport({ name, inputs, results, analysis, status, system }:
                     <td>
                       {link.calculationName} ({link.folderName})
                     </td>
-                    <td className={styles.formula}>{savedText(link.updatedAt)}</td>
+                    <td className={cx(styles.formula, report.nowrap)}>{savedText(link.updatedAt)}</td>
                     <td className={styles.number}>{len(system, link.stack.nominal)}</td>
                     <td className={styles.number}>{signed(system, link.stack.upperDeviation)}</td>
                     <td className={styles.number}>{signed(system, link.stack.lowerDeviation)}</td>

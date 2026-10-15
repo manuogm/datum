@@ -118,3 +118,22 @@ export function unequalReadout(system: UnitSystem, entry: GeometricEntry): strin
   const lower = plus - zone
   return `profile ${len(system, zone)}: ${signed(system, upper)} / ${signed(system, lower)} → mean ${signed(system, (upper + lower) / 2)}, ${plusMinus(system, zone / 2)}`
 }
+
+/**
+ * A modifier line of the engine as ON THE STACK shows it: its first sentence,
+ * without the closing citation ("Ⓕ free state: recorded; a rigid 1D stack is
+ * unchanged"). The whole line, citation included, stays under the block's
+ * "Sources and when to include it" and in the report.
+ */
+export function modifierHeadline(line: string): string {
+  const first = line.split(/(?<=\.)\s+(?=\p{Lu})/u)[0].trim()
+  const body = first.replace(/\.$/, '')
+  if (!body.endsWith(')')) return body
+  // Drop the closing parenthetical, nested parentheses and all.
+  let depth = 0
+  for (let i = body.length - 1; i >= 0; i--) {
+    if (body[i] === ')') depth++
+    else if (body[i] === '(' && --depth === 0) return body.slice(0, i).trimEnd() || body
+  }
+  return body
+}

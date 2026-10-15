@@ -40,6 +40,7 @@ export function MethodStep({ inputs, dispatch, results, system, flow, status }: 
       title="Method"
       hint="How the tolerances add up. Both methods are always worked out; this picks the one the verdict uses."
       nextLabel="See results"
+      asideAlign="start"
       aside={model ? <ResultStrip result={model.result} /> : undefined}
       asideLabel="Result"
       asideMeta={meta}

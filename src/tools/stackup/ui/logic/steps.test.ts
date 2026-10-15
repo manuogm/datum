@@ -54,6 +54,15 @@ describe('shownFault (the draft rule)', () => {
     const empty = { step: 'chain' as const, error: 'empty', row: null }
     expect(shownFault(empty, inputs, new Set(['r1', 'r2']))).toBe(empty)
   })
+
+  it('treats an empty chain as a step to do until the user has gone past it', () => {
+    const empty = { step: 'chain' as const, error: 'Add at least one dimension to the chain.', row: null }
+    expect(shownFault(empty, { rows: [] }, new Set(), false)).toBeNull()
+    expect(shownFault(empty, { rows: [] }, new Set(), true)).toBe(empty)
+    // A requirement fault shows at once.
+    const requirement = { step: 'requirement' as const, error: 'The smallest allowed result is above the largest.', row: null }
+    expect(shownFault(requirement, { rows: [] }, new Set(), false)).toBe(requirement)
+  })
 })
 
 describe('faultField', () => {

@@ -46,6 +46,7 @@ export function ContributorList(props: ContributorListProps) {
   const [dragged, setDragged] = useState<number | null>(null)
   const [target, setTarget] = useState<number | null>(null)
   const analysis = results.analysis.ok ? results.analysis.value : null
+  const afterPointer = useAfterPointer()
   const linkValues = new Map<string, LinkValues>([...results.links].map(([id, link]) => [id, { label: link.partName, stack: link.stack }]))
 
   useEffect(() => {
@@ -146,7 +147,7 @@ export function ContributorList(props: ContributorListProps) {
                   contributor={contributorOf(i)}
                   handle={<RowHandle {...handle} />}
                   error={rowFault}
-                  onTouch={() => fresh.touch(row.id)}
+                  onTouch={() => afterPointer(() => fresh.touch(row.id))}
                 />
               )}
             </li>
@@ -157,6 +158,42 @@ export function ContributorList(props: ContributorListProps) {
       {inputs.rows.length > 0 && <SumRow {...props} />}
     </div>
   )
+}
+
+/**
+ * Runs `reveal` now, or, while a mouse button or finger is down, once it is
+ * released and its click has landed. Leaving a number field with a click
+ * shows the row's error line, which pushes what is under the row down: done
+ * on the press, the release lands elsewhere and the click is lost (e.g. on
+ * "+ Add dimension" just under a fresh row).
+ */
+function useAfterPointer() {
+  const down = useRef(false)
+  const waiting = useRef<(() => void)[]>([])
+  useEffect(() => {
+    const press = () => {
+      down.current = true
+    }
+    const release = () => {
+      down.current = false
+      const queued = waiting.current
+      waiting.current = []
+      // After the click this release makes (it is dispatched in the same task).
+      if (queued.length > 0) setTimeout(() => queued.forEach((reveal) => reveal()), 0)
+    }
+    window.addEventListener('pointerdown', press, true)
+    window.addEventListener('pointerup', release, true)
+    window.addEventListener('pointercancel', release, true)
+    return () => {
+      window.removeEventListener('pointerdown', press, true)
+      window.removeEventListener('pointerup', release, true)
+      window.removeEventListener('pointercancel', release, true)
+    }
+  }, [])
+  return (reveal: () => void) => {
+    if (down.current) waiting.current.push(reveal)
+    else reveal()
+  }
 }
 
 /** "+ Link part stack" (Assembly), "+ Add dimension", "+ Add geometric tolerance". */

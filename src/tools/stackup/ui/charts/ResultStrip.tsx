@@ -6,7 +6,7 @@
 import { niceAxis, scaleLinear } from '../../../../app/charts'
 import { cx } from '../../../../app/ui'
 import { formatDecimal } from '../../../../core/units'
-import type { ChartResult } from './stackChart'
+import { edgeLabel, type ChartResult } from './stackChart'
 import styles from './charts.module.css'
 import { useWidth } from './useWidth'
 
@@ -60,11 +60,15 @@ export function ResultStrip({ result }: { result: ChartResult }) {
           <rect className={cx(styles.wcBand, wcChosen && tone)} x={wcLo} y={y - 14} width={Math.max(1, wcHi - wcLo)} height={28} />
           <rect className={cx(styles.rssBand, !wcChosen && tone)} x={rssLo} y={y - 6} width={Math.max(1, rssHi - rssLo)} height={12} />
           <line className={styles.axisLine} x1={left} x2={right} y1={HEIGHT + 4} y2={HEIGHT + 4} />
-          {axis.ticks.map((tick) => (
-            <text key={tick} className={styles.tickText} x={e(tick)} y={HEIGHT + 18}>
-              {tick === 0 ? '0' : formatDecimal(tick, decimals, true, true)}
-            </text>
-          ))}
+          {axis.ticks.map((tick) => {
+            const text = tick === 0 ? '0' : formatDecimal(tick, decimals, true, true)
+            const label = edgeLabel(e(tick), text, 0, width)
+            return (
+              <text key={tick} className={styles.tickText} x={label.x} y={HEIGHT + 18} style={{ textAnchor: label.anchor }}>
+                {text}
+              </text>
+            )
+          })}
         </svg>
       </div>
       <div className={styles.stripRanges}>

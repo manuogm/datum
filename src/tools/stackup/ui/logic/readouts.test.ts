@@ -4,7 +4,7 @@ import { analyseStack } from '../../calc'
 import { NEW_STACK_INPUTS, emptyDatum, newDimension, newGeometric, type DatumCell, type GeometricEntry, type StackInputs } from '../state/stackInputs'
 import { engineInput } from './engineInput'
 import {
-  bonusReadout, breakdownTerms, datumShiftOf, meanReadout, offsetFromUnequalValue, rowResult, shiftReadout, unequalReadout, unequalValueFromOffset, widened,
+  bonusReadout, breakdownTerms, datumShiftOf, meanReadout, modifierHeadline, offsetFromUnequalValue, rowResult, shiftReadout, unequalReadout, unequalValueFromOffset, widened,
 } from './readouts'
 
 const hole = { type: 'internal' as const, min: 10, max: 10.2 }
@@ -65,5 +65,32 @@ describe('the geometric readouts', () => {
 
   it('writes a row centred', () => {
     expect(meanReadout('si', { mean: 0.96, halfBand: 0.035 })).toBe('mean 0.960 · ±0.035')
+  })
+})
+
+describe('modifierHeadline', () => {
+  it('keeps the first sentence and drops its closing citation, nested parentheses and all', () => {
+    expect(modifierHeadline('Ⓜ MMC: the zone grows; the largest bonus is added to the zone (ASME Y14.5-2018 §10; Drake, Handbook (McGraw-Hill 1999), ch. 9).'))
+      .toBe('Ⓜ MMC: the zone grows; the largest bonus is added to the zone')
+    expect(modifierHeadline('Ⓕ free state: recorded; a rigid 1D stack is unchanged. The tolerance applies with the part unrestrained (ASME Y14.5-2018).'))
+      .toBe('Ⓕ free state: recorded; a rigid 1D stack is unchanged')
+    expect(modifierHeadline('Datum B at Ⓜ (MMR): the part may shift (ISO 2692:2021).')).toBe('Datum B at Ⓜ (MMR): the part may shift')
+  })
+
+  it('leaves a line without a citation as it is, but for its full stop', () => {
+    expect(modifierHeadline('CZ combined zone: recorded.')).toBe('CZ combined zone: recorded')
+  })
+
+  it('shortens every line the engine writes', () => {
+    const all: GeometricEntry = { ...position, freeState: true, tangentPlane: true, commonZone: true }
+    const analysis = expectOk(analyseStack(engineInput({ ...NEW_STACK_INPUTS, rows: [{ ...newDimension('r1', all), nominal: 25, statistical: true }] }, new Map())))
+    const lines = analysis.contributors[0].conversion.modifiers
+    expect(lines.length).toBeGreaterThanOrEqual(5)
+    for (const line of lines) {
+      const headline = modifierHeadline(line)
+      expect(headline.length).toBeLessThan(line.length)
+      expect(headline).not.toMatch(/[()]$/)
+      expect(headline).not.toMatch(/ASME|ISO \d|Drake/)
+    }
   })
 })

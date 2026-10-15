@@ -19,7 +19,7 @@ import { GdtModifier, type ModifierSymbol } from '../gdt/GdtModifier'
 import { showsMaterialCondition } from '../logic/engineInput'
 import { len, plusMinus, sigma, signed } from '../logic/format'
 import {
-  bonusReadout, breakdownTerms, offsetFromUnequalValue, shiftReadout, unequalReadout, unequalValueFromOffset,
+  bonusReadout, breakdownTerms, modifierHeadline, offsetFromUnequalValue, shiftReadout, unequalReadout, unequalValueFromOffset,
 } from '../logic/readouts'
 import type { DatumCell, FeatureSize, GeometricEntry } from '../state/stackInputs'
 import { DetailRow, type DimensionDetailsProps } from './DimensionDetails'
@@ -235,7 +235,7 @@ function SizePanel({ title, feature, system, label, invalid, onChange, readout, 
   return (
     <div className={styles.subPanel}>
       <MonoLabel size="xs">{title}</MonoLabel>
-      <div className={styles.sizeLine}>
+      <div className={styles.sizeGrid}>
         <SegmentedControl label={`${label} type`} size="sm" options={FEATURE_TYPES} value={feature.type} onChange={(type) => onChange({ ...feature, type })} />
         <LengthInput prefix="min" aria-label={`${label}, smallest size`} value={feature.min} system={system} invalid={invalid && feature.min === null} onChange={(min) => onChange({ ...feature, min })} />
         <LengthInput prefix="max" aria-label={`${label}, largest size`} value={feature.max} system={system} invalid={invalid && feature.max === null} onChange={(max) => onChange({ ...feature, max })} />
@@ -395,12 +395,11 @@ function OnTheStack({ entry, contributor, inputs, system }: GeometricFieldsProps
       {Math.abs(contributor.meanShift) > 1e-12 && <p className={styles.mono}>mean shift {signed(system, contributor.meanShift)}</p>}
       {conversion.modifiers.map((line) => (
         <p key={line} className={styles.modifierLine}>
-          {line}
+          {modifierHeadline(line)}
         </p>
       ))}
-      <p className={styles.source}>{conversion.source}</p>
       <button type="button" className={styles.disclosure} aria-expanded={open} onClick={() => setOpen(!open)}>
-        When to include it ›
+        Sources and when to include it {open ? '‹' : '›'}
       </button>
       {open && (
         <div className={styles.includeWhen}>
@@ -410,6 +409,10 @@ function OnTheStack({ entry, contributor, inputs, system }: GeometricFieldsProps
               <strong>Judgement call.</strong> {conversion.unsure}
             </p>
           )}
+          {conversion.modifiers.map((line) => (
+            <p key={line}>{line}</p>
+          ))}
+          <p className={styles.source}>{conversion.source}</p>
         </div>
       )}
     </section>

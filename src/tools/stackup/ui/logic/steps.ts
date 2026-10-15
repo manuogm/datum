@@ -46,13 +46,20 @@ export function stepFault(analysis: Result<StackAnalysis>): StepFault | null {
 /**
  * The fault as the screen shows it. A row just added is not flagged while it
  * is being typed (design §9.2, draft rule): its fault is held back until a
- * number field of the row has been left once. Next stays disabled meanwhile.
+ * number field of the row has been left once. An empty chain is a step still
+ * to do, not an error, until the user has gone past the chain step (design
+ * §9.1): a new calculation does not open with a red step. Next stays
+ * disabled meanwhile, with its note.
  */
-export function shownFault(fault: StepFault | null, inputs: Pick<StackInputs, 'rows'>, fresh: ReadonlySet<string>): StepFault | null {
-  if (fault?.row === null || fault?.row === undefined) return fault
+export function shownFault(fault: StepFault | null, inputs: Pick<StackInputs, 'rows'>, fresh: ReadonlySet<string>, pastChain = true): StepFault | null {
+  if (fault === null) return null
+  if (fault.row === null) return fault.step === 'chain' && inputs.rows.length === 0 && !pastChain ? null : fault
   const row = inputs.rows[fault.row]
   return row && fresh.has(row.id) ? null : fault
 }
+
+/** Index of the chain step in both modes' step lists. */
+export const CHAIN_STEP = ORDER.indexOf('chain')
 
 /** The title of the engine's explanation on the step at fault, and of Results when it cannot run. */
 export const FAULT_TITLE = 'This stack cannot be analysed'

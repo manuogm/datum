@@ -3,8 +3,8 @@
 // edit. Next waits for a chain the engine accepts: every later step needs a
 // result. A broken link does not block it (the engine takes the part's last
 // known values) but is noted above the list.
-import { useState } from 'react'
-import { Button, Callout, Dialog, EmptyState, StepPage } from '../../../../app/ui'
+import { useEffect, useRef, useState } from 'react'
+import { Button, Callout, Dialog, EmptyState, StepPage, cx } from '../../../../app/ui'
 import { StackChart } from '../charts/StackChart'
 import { stackChartModel } from '../charts/stackChart'
 import { AddButtons, ContributorList } from '../editor/ContributorList'
@@ -28,6 +28,7 @@ export function ChainStep(props: StackStepProps) {
   const { calculation, inputs, dispatch, results, library, system, flow, engineFault, fault, status, lastValid, selection, fresh } = props
   const [picker, setPicker] = useState<{ relink: string | null } | null>(null)
   const [confirm, setConfirm] = useState<Confirm | null>(null)
+  const [chartRef, chartFits] = useFitsInView<HTMLDivElement>()
   const chainFault = engineFault?.step === 'chain' ? engineFault : null
   const assembly = inputs.mode === 'assembly'
   const broken = brokenLinksNote(results.brokenLinks)
@@ -56,8 +57,9 @@ export function ChainStep(props: StackStepProps) {
           </Button>
         )
       }
+      asideAlign="start"
       aside={
-        <div className={styles.chartAside}>
+        <div ref={chartRef} className={cx(styles.chartAside, !chartFits && styles.chartAsideTall)}>
           <StackChart
             model={model}
             resultName={inputs.resultName}
@@ -131,6 +133,33 @@ export function ChainStep(props: StackStepProps) {
       )}
     </StepPage>
   )
+}
+
+/** Room the app header, the step bar and the margins take above and below the sticky chart. */
+const CHROME = 150
+
+/**
+ * Whether the element fits the window under the bars: only then does the
+ * chart stick while the chain scrolls. A chart taller than that (a very long
+ * chain) scrolls with the page, so its result lane is never hidden.
+ */
+function useFitsInView<T extends HTMLElement>() {
+  const ref = useRef<T>(null)
+  const [fits, setFits] = useState(true)
+  useEffect(() => {
+    const element = ref.current
+    if (!element) return
+    const measure = () => setFits(element.offsetHeight <= window.innerHeight - CHROME)
+    measure()
+    window.addEventListener('resize', measure)
+    const observer = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(measure)
+    observer?.observe(element)
+    return () => {
+      window.removeEventListener('resize', measure)
+      observer?.disconnect()
+    }
+  }, [])
+  return [ref, fits] as const
 }
 
 function ConfirmDialog({ confirm, onCancel, onConfirm }: { confirm: Confirm; onCancel: () => void; onConfirm: () => void }) {

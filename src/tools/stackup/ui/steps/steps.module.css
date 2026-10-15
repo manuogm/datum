@@ -83,6 +83,11 @@
   bottom: var(--space-20);
 }
 
+/* Taller than the window: it scrolls with the chain. */
+.chartAside.chartAsideTall {
+  position: static;
+}
+
 @media (width <= 900px) {
   .chartAside {
     position: static;

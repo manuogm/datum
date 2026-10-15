@@ -4,7 +4,7 @@
 // Save, Exit without saving, or Cancel. Closing the tab being shown moves to
 // its neighbour, or back to Home when it was the last one. A tab whose
 // calculation no longer exists is dropped, with its unsaved changes.
-import { useEffect, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { findCalculation, type Calculation } from '../../core/library'
 import { discardDraft, saveDraft, useDrafts } from '../library/drafts'
 import { useLibrary } from '../library/useLibrary'
@@ -23,6 +23,7 @@ export function DocumentTabs({ current }: { current: CurrentTab }) {
   const ids = useOpenTabs()
   const drafts = useDrafts()
   const [asking, setAsking] = useState<Calculation | null>(null)
+  const barRef = useRef<HTMLElement>(null)
   const calculations = ids.flatMap((id) => findCalculation(library, id) ?? [])
 
   // Forget tabs of calculations deleted here or in another browser tab.
@@ -35,6 +36,21 @@ export function DocumentTabs({ current }: { current: CurrentTab }) {
   }, [ids, library])
 
   const currentId = current?.tab === 'calc' ? current.id : null
+  const tabCount = calculations.length
+
+  // On a narrow bar the tabs scroll sideways: keep the one on screen in view
+  // (else a phone shows the first open tab while another calculation is open).
+  useLayoutEffect(() => {
+    const bar = barRef.current
+    const active = bar?.querySelector<HTMLElement>('[aria-current="page"]')?.closest<HTMLElement>(`.${styles.tab}`)
+    if (!bar || !active) return
+    const box = active.getBoundingClientRect()
+    const left = box.left - bar.getBoundingClientRect().left + bar.scrollLeft
+    const right = left + box.width
+    // Scrolled to its start (as far as the bar goes), just clear of the faded edge.
+    if (left < bar.scrollLeft || right > bar.scrollLeft + bar.clientWidth) bar.scrollLeft = Math.max(0, left - EDGE_FADE)
+    markCutEdges(bar)
+  }, [currentId, current?.tab, tabCount])
   const close = (id: string) => {
     if (id === currentId) {
       const next = tabAfterClosing(calculations.map((c) => c.id), id)
@@ -48,7 +64,7 @@ export function DocumentTabs({ current }: { current: CurrentTab }) {
   }
 
   return (
-    <nav className={styles.bar} aria-label="Open documents">
+    <nav className={styles.bar} aria-label="Open documents" ref={barRef} onScroll={(event) => markCutEdges(event.currentTarget)}>
       <a
         className={cx(styles.tab, styles.home, current?.tab === 'home' && styles.active)}
         href={folderHref(lastHomeFolder())}
@@ -82,6 +98,15 @@ export function DocumentTabs({ current }: { current: CurrentTab }) {
       )}
     </nav>
   )
+}
+
+/** Width of the faded edge where the tabs run on out of sight (DocumentTabs.module.css). */
+const EDGE_FADE = 24
+
+/** Fades the edge where tabs run on out of sight, so a tab cut there reads as scrolled, not broken. */
+function markCutEdges(bar: HTMLElement) {
+  bar.toggleAttribute('data-cut-start', bar.scrollLeft > 1)
+  bar.toggleAttribute('data-cut-end', bar.scrollLeft + bar.clientWidth < bar.scrollWidth - 1)
 }
 
 interface CalculationTabProps {

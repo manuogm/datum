@@ -16,7 +16,7 @@ import { useCalculationSteps } from '../../../app/tools/calculationSteps'
 import { StepBar, useSessionState } from '../../../app/ui'
 import type { Calculation } from '../../../core/library'
 import type { ChartSource } from './charts/stackChart'
-import { shownFault, stackSteps, stepFault, type StackStepId } from './logic/steps'
+import { CHAIN_STEP, shownFault, stackSteps, stepFault, type StackStepId } from './logic/steps'
 import { stackStatus } from './logic/stackResults'
 import { useStackTool } from './state/useStackTool'
 import { ChainStep } from './steps/ChainStep'
@@ -31,9 +31,10 @@ export function StackPage({ calculation }: { calculation: Calculation }) {
   const selection = useRowSelection(calculation.id)
   const fresh = useFreshRows()
   const engineFault = stepFault(results.analysis)
-  const fault = shownFault(engineFault, inputs, fresh.ids)
+  // The flow needs only the steps' ids; their marks depend on how far the user has gone.
+  const flow = useCalculationSteps(calculation, stackSteps(inputs.mode, null))
+  const fault = shownFault(engineFault, inputs, fresh.ids, flow.reached > CHAIN_STEP)
   const steps = stackSteps(inputs.mode, fault)
-  const flow = useCalculationSteps(calculation, steps)
   const status = results.analysis.ok ? stackStatus(results.analysis.value, results.brokenLinks.length) : null
   const valid = useMemo(() => (results.analysis.ok ? { inputs, analysis: results.analysis.value, links: results.links } : null), [inputs, results])
   const lastValid = useLastValid(valid)

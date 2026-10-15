@@ -135,6 +135,11 @@
   padding: var(--space-20);
 }
 
+/* A chart that grows with the inputs starts at the top of its column. */
+.visualTop {
+  justify-content: flex-start;
+}
+
 /* Inputs in the side column: PanelSections bring their own padding. */
 .asideInputs {
   display: flex;
@@ -187,7 +192,10 @@
     border-top: var(--border-width) solid var(--border);
   }
 
+  /* Under the inputs, the visual follows them directly rather than
+     floating in the middle of the space left above the footer. */
   .visual {
+    justify-content: flex-start;
     min-height: 260px;
   }
 

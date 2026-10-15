@@ -44,6 +44,11 @@
   white-space: nowrap;
 }
 
+/* A saved time, "15 Oct, 14:02", kept on one line. */
+.nowrap {
+  white-space: nowrap;
+}
+
 /* The frame at print size. */
 .frame {
   height: 20px;
