@@ -32,6 +32,7 @@ export type IconName =
   | 'gdt-profile-line'
   | 'gdt-circular-runout'
   | 'gdt-total-runout'
+  | 'datum-shift'
 
 interface IconProps {
   name: IconName
@@ -94,6 +95,8 @@ const ICONS: Record<IconName, { box: number; body: ReactElement }> = {
   'gdt-profile-line': gdt('M2 11.5A6 6 0 0 1 14 11.5'),
   'gdt-circular-runout': gdt('M3 13L12.5 3.5M7.5 3.5H12.5V8.5'),
   'gdt-total-runout': gdt('M2 14H7M2 14L9 7M7 14L14 7M6 7H9V10M11 7H14V10'),
+  // A datum feature triangle on its surface, with the shift as a double arrow above it.
+  'datum-shift': gdt('M2 14H14M5 14L8 10L11 14M2.5 5H13.5M4.5 3L2.5 5L4.5 7M11.5 3L13.5 5L11.5 7'),
 }
 
 /** A GD&T characteristic symbol: 16px box, 1.5px stroke, round ends. */

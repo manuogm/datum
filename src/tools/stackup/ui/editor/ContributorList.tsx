@@ -7,14 +7,18 @@
 // and everything else is in the row's details, opened with the chevron. A
 // row is dragged by its number (or moved with the arrow keys on it), as the
 // plies of a laminate are. An assembly's linked part stacks are rows too,
-// read from the library (LinkedRowView). Under the list: the add buttons and
-// the sum row, the result as it stands while typing.
+// read from the library (LinkedRowView), and so is a datum shift
+// (DatumShiftRowView). The engine's things to check sit under the row they
+// name; a geometric row whose frame has MMB/LMB datums and no datum-shift
+// row offers one in one click, never adds it on its own. Under the list: the
+// add buttons and the sum row, the result as it stands while typing.
 import { useEffect, useId, useRef, useState, type DragEvent, type ReactNode } from 'react'
 import { Button, Icon, cx } from '../../../../app/ui'
 import { fromDisplay, parseDecimal, type UnitSystem } from '../../../../core/units'
-import type { ContributorResult } from '../../calc'
+import { GEOMETRIC_RULES, stackInputWarnings, type ContributorResult } from '../../calc'
 import { FeatureControlFrame } from '../gdt/FeatureControlFrame'
 import { GdtModifier } from '../gdt/GdtModifier'
+import { shiftSuggestions, warningsByRow, type ShiftSuggestion } from '../logic/datumShifts'
 import type { LinkValues } from '../logic/engineInput'
 import { coefficientText, len, plusMinus, range, toleranceText } from '../logic/format'
 import { breakdownTerms, rowResult, widened } from '../logic/readouts'
@@ -23,6 +27,7 @@ import { upperName } from '../logic/verdict'
 import { nextRowId } from '../state/stackReducer'
 import type { DimensionRow } from '../state/stackInputs'
 import type { StackStepProps } from '../steps/stepProps'
+import { DatumShiftRowView } from './DatumShiftRowView'
 import { DimensionDetails } from './DimensionDetails'
 import styles from './editor.module.css'
 import { LinkedRowView } from './LinkedRowView'
@@ -48,6 +53,9 @@ export function ContributorList(props: ContributorListProps) {
   const analysis = results.analysis.ok ? results.analysis.value : null
   const afterPointer = useAfterPointer()
   const linkValues = new Map<string, LinkValues>([...results.links].map(([id, link]) => [id, { label: link.partName, stack: link.stack }]))
+  // The engine's things to check, by row; read from the input too while the chain is not complete.
+  const warnings = warningsByRow(analysis ? analysis.warnings : stackInputWarnings(results.input))
+  const suggestions = shiftSuggestions(inputs, results.input)
 
   useEffect(() => {
     const wanted = focusRow.current
@@ -57,6 +65,13 @@ export function ContributorList(props: ContributorListProps) {
     document.querySelector<HTMLElement>(`#${CSS.escape(listId)} ${selector}`)?.focus()
   })
 
+  const addShift = (suggestion?: ShiftSuggestion & { after: string }) => {
+    const id = nextRowId(inputs.rows)
+    dispatch({ type: 'addDatumShift', datums: suggestion?.datums, after: suggestion?.after })
+    fresh.add(id)
+    selection.open(id)
+    focusRow.current = { id, picker: false }
+  }
   const add = (geometric: boolean) => {
     const id = nextRowId(inputs.rows)
     dispatch({ type: 'addDimension', geometric })
@@ -89,6 +104,15 @@ export function ContributorList(props: ContributorListProps) {
       <ol className={styles.rows} aria-label="Chain, in loop order">
         {inputs.rows.map((row, i) => {
           const rowFault = fault?.row === i ? fault.error : null
+          // Under the row's line, above its details: what to check on it, and the datum-shift offer.
+          const notes = (
+            <RowWarnings
+              warnings={warnings.rows.get(i) ?? []}
+              suggestion={suggestions.get(row.id) ?? null}
+              system={system}
+              onAdd={(suggestion) => addShift({ ...suggestion, after: row.id })}
+            />
+          )
           const handle: HandleProps = {
             index: i,
             count: inputs.rows.length,
@@ -138,6 +162,20 @@ export function ContributorList(props: ContributorListProps) {
                   onMakeDimension={() => props.onMakeDimension(row.id)}
                   onRemove={() => dispatch({ type: 'remove', id: row.id })}
                   error={rowFault}
+                  notes={notes}
+                />
+              ) : row.kind === 'datum-shift' ? (
+                <DatumShiftRowView
+                  row={row}
+                  index={i}
+                  inputs={inputs}
+                  dispatch={dispatch}
+                  system={system}
+                  selection={selection}
+                  contributor={contributorOf(i)}
+                  handle={<RowHandle {...handle} />}
+                  error={rowFault}
+                  notes={notes}
                 />
               ) : (
                 <DimensionRowView
@@ -147,6 +185,7 @@ export function ContributorList(props: ContributorListProps) {
                   contributor={contributorOf(i)}
                   handle={<RowHandle {...handle} />}
                   error={rowFault}
+                  notes={notes}
                   onTouch={() => afterPointer(() => fresh.touch(row.id))}
                 />
               )}
@@ -154,7 +193,8 @@ export function ContributorList(props: ContributorListProps) {
           )
         })}
       </ol>
-      <AddButtons assembly={assembly} onAdd={add} onLink={props.onLinkPart} />
+      {/* A datum shift only exists where a frame has a datum at MMB/LMB: offered once the chain has one. */}
+      <AddButtons assembly={assembly} onAdd={add} onLink={props.onLinkPart} onShift={hasShiftFrame(inputs) ? () => addShift() : undefined} />
       {inputs.rows.length > 0 && <SumRow {...props} />}
     </div>
   )
@@ -196,8 +236,42 @@ function useAfterPointer() {
   }
 }
 
-/** "+ Link part stack" (Assembly), "+ Add dimension", "+ Add geometric tolerance". */
-export function AddButtons({ assembly, onAdd, onLink }: { assembly: boolean; onAdd: (geometric: boolean) => void; onLink: () => void }) {
+/** Whether the chain has a frame with a datum at MMB/LMB (on a geometric row that takes it), or a datum-shift row already. */
+function hasShiftFrame(inputs: ContributorListProps['inputs']): boolean {
+  return inputs.rows.some((row) =>
+    row.kind === 'datum-shift'
+    || (row.kind === 'dimension' && row.tolerance.kind === 'geometric' && GEOMETRIC_RULES[row.tolerance.characteristic].datumBoundary
+      && row.tolerance.datums.some((datum) => datum.letter.trim() && datum.modifier !== 'rmb')))
+}
+
+/**
+ * Things to check on one row (engine warnings), calm, under it; and when its
+ * frame has MMB/LMB datums and no datum-shift row yet, the one-click offer of
+ * that row (engine datumShiftRowsFor), with the shift it would add.
+ */
+function RowWarnings({ warnings, suggestion, system, onAdd }: {
+  warnings: readonly string[]; suggestion: ShiftSuggestion | null; system: UnitSystem; onAdd: (suggestion: ShiftSuggestion) => void
+}) {
+  if (warnings.length === 0 && !suggestion) return null
+  return (
+    <ul className={styles.rowWarnings} aria-label="To check on this row">
+      {warnings.map((warning) => (
+        <li key={warning}>{warning.replace(/^Row \d+( "[^"]*")?:\s*/, '')}</li>
+      ))}
+      {suggestion && (
+        <li className={styles.suggestion}>
+          <Button variant="link" size="sm" onClick={() => onAdd(suggestion)}>
+            + Add datum shift row for {suggestion.frame}
+          </Button>
+          <span>{suggestion.shift === null ? 'its datum sizes go in that row' : `adds ${plusMinus(system, suggestion.shift / 2)}`}</span>
+        </li>
+      )}
+    </ul>
+  )
+}
+
+/** "+ Link part stack" (Assembly), "+ Add dimension", "+ Add geometric tolerance", "+ Add datum shift". */
+export function AddButtons({ assembly, onAdd, onLink, onShift }: { assembly: boolean; onAdd: (geometric: boolean) => void; onLink: () => void; onShift?: () => void }) {
   return (
     <div className={styles.addButtons}>
       {assembly && (
@@ -211,6 +285,11 @@ export function AddButtons({ assembly, onAdd, onLink }: { assembly: boolean; onA
       <Button variant="link" size="sm" onClick={() => onAdd(true)}>
         + Add geometric tolerance
       </Button>
+      {onShift && (
+        <Button variant="link" size="sm" onClick={onShift} title="Once per datum reference frame with MMB/LMB datums, where the chain crosses the datum feature's interface">
+          + Add datum shift
+        </Button>
+      )}
     </div>
   )
 }
@@ -280,11 +359,13 @@ interface DimensionRowViewProps extends ContributorListProps {
   contributor: ContributorResult | null
   handle: ReactNode
   error: string | null
+  /** What to check on the row, under its line. */
+  notes: ReactNode
   onTouch: () => void
 }
 
 function DimensionRowView(props: DimensionRowViewProps) {
-  const { row, index, contributor, handle, error, inputs, dispatch, system, selection, onTouch } = props
+  const { row, index, contributor, handle, error, notes, inputs, dispatch, system, selection, onTouch } = props
   const detailsId = useId()
   const expanded = selection.expanded.includes(row.id)
   const field: RowField | null = error ? faultField(error) : null
@@ -359,6 +440,7 @@ function DimensionRowView(props: DimensionRowViewProps) {
         </button>
       </div>
       {error && <p className={styles.rowError}>{error}</p>}
+      {notes}
       <div id={detailsId} hidden={!expanded} className={styles.details}>
         {expanded && <DimensionDetails {...props} invalidField={field} onTouch={onTouch} />}
       </div>

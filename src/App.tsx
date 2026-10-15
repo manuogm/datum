@@ -11,7 +11,7 @@ import type { Route } from './app/router/routes'
 import { useRoute } from './app/router/useRoute'
 import { SettingsProvider } from './app/settings/SettingsProvider'
 import { openTab } from './app/shell/openTabs'
-import { keepDependentsCurrent } from './app/tools/dependents'
+import { keepDependentsCurrent, refreshStoredSummaries } from './app/tools/dependents'
 import { loadBolt, loadFit, loadLaminate, loadStack } from './app/tools/toolModules'
 import { LoadingState } from './app/ui'
 
@@ -97,6 +97,8 @@ function Routed() {
 export default function App() {
   // An assembly stack's summary follows the part stacks it links.
   useEffect(() => keepDependentsCurrent(), [])
+  // Summaries saved by an older engine are worked out again (stale RSS verdicts, engine notes §7).
+  useEffect(() => void refreshStoredSummaries(), [])
   return (
     <SettingsProvider>
       <Routed />

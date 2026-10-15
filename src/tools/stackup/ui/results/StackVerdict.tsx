@@ -2,9 +2,11 @@
 // one sentence on what governs, the result range against the requirement,
 // the other method's range, the capability and the largest contributor.
 // In an assembly whose largest share is a linked part, "Open <part>" opens
-// that part stack: the first place to tighten.
+// that part stack: the first place to tighten. Under it, the engine's
+// things to check (StackAnalysis.warnings, engine notes §6), each naming
+// its row; none stops the result.
 import { calcHref } from '../../../../app/router/routes'
-import { Button, VerdictCard } from '../../../../app/ui'
+import { Button, Callout, VerdictCard } from '../../../../app/ui'
 import type { UnitSystem } from '../../../../core/units'
 import type { StackAnalysis } from '../../calc'
 import type { StackResults } from '../logic/stackResults'
@@ -33,22 +35,35 @@ function RangeValue({ text }: { text: string }) {
 export function StackVerdict({ inputs, results, analysis, system }: StackVerdictProps) {
   const verdict = stackVerdict(inputs, results, analysis, system)
   const { dominant } = verdict
+  const { warnings } = analysis
   return (
-    <VerdictCard
-      className={styles.verdict}
-      status={verdict.status}
-      sentence={verdict.sentence}
-      detail={verdict.detail}
-      headline={{ ...verdict.headline, value: <RangeValue text={verdict.headline.value} /> }}
-      figures={verdict.figures}
-      reference={verdict.reference}
-      actions={
-        dominant && dominant.state !== 'missing' ? (
-          <Button variant="secondary" size="md" icon="open" href={calcHref(dominant.row.calcId)}>
-            Open {dominant.partName}
-          </Button>
-        ) : undefined
-      }
-    />
+    <div className={styles.verdictStack}>
+      <VerdictCard
+        className={styles.verdict}
+        status={verdict.status}
+        sentence={verdict.sentence}
+        detail={verdict.detail}
+        headline={{ ...verdict.headline, value: <RangeValue text={verdict.headline.value} /> }}
+        figures={verdict.figures}
+        reference={verdict.reference}
+        actions={
+          dominant && dominant.state !== 'missing' ? (
+            <Button variant="secondary" size="md" icon="open" href={calcHref(dominant.row.calcId)}>
+              Open {dominant.partName}
+            </Button>
+          ) : undefined
+        }
+      />
+      {warnings.length > 0 && (
+        <Callout status="warn" title={warnings.length === 1 ? '1 thing to check' : `${warnings.length} things to check`}>
+          {/* The Callout's detail is a span: one block span per warning. */}
+          {warnings.map((warning) => (
+            <span key={warning} className={styles.warning}>
+              {warning}
+            </span>
+          ))}
+        </Callout>
+      )}
+    </div>
   )
 }

@@ -32,6 +32,19 @@
   color: var(--bad-text);
 }
 
+/* The verdict, then the engine's things to check under it. */
+.verdictStack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-12);
+  min-width: 0;
+}
+
+.warning {
+  display: block;
+  margin-top: var(--space-4);
+}
+
 /* Verdict: on a phone the range headline breaks after the ellipsis (the unit stays with the upper value), and figure 1 takes a row of its own. */
 .rangeBreak {
   display: none;

@@ -70,7 +70,9 @@ describe('stackFormulas', () => {
     const wc = stackFormulas(analysisOf({ ...EXAMPLE_STACK_INPUTS, rows }), 'si').find((f) => f.symbol === 'WC')
     expect(wc?.substitution).toBe('20.960 ± (0.050 + ½·0.070) + √(0.050²)')
     expect(methodAssumptions(true)).toContain('⟨ST⟩ rows: worst case adds them by RSS (hybrid)')
-    expect(methodAssumptions(false)).toHaveLength(3)
+    expect(methodAssumptions(false)).toHaveLength(4)
+    // RSS is graded by Cpk (engine notes §5).
+    expect(methodAssumptions(false)).toContain('RSS verdict by Cpk: pass at 1.33 or more, review from 1.00, fail under 1.00')
   })
 })
 

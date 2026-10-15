@@ -123,3 +123,24 @@ describe('an assembly that links a part stack', () => {
     expect(recordedHousing(once).stack.upperDeviation).toBeCloseTo(0.17, 9)
   })
 })
+
+describe('refreshStoredSummaries', () => {
+  it('works out a summary saved by an older engine again, keeping the inputs and the time', async () => {
+    const seeded = assembly()
+    // As an older engine would have stored it: a stale status.
+    store.applyChange((state) =>
+      ok({ ...state, calculations: state.calculations.map((c) => (c.id === STACK_ASSEMBLY_EXAMPLE.id && c.summary ? { ...c, summary: { ...c.summary, status: 'fail' as const } } : c)) }),
+    )
+    expect(assembly()?.summary?.status).toBe('fail')
+    await dependents.refreshStoredSummaries()
+    expect(assembly()?.summary).toEqual(seeded?.summary)
+    expect(assembly()?.updatedAt).toBe(seeded?.updatedAt)
+    expect(assembly()?.inputs).toEqual(seeded?.inputs)
+  })
+
+  it('leaves the library as it is when every summary is current', async () => {
+    const before = library()
+    await dependents.refreshStoredSummaries()
+    expect(library()).toBe(before)
+  })
+})

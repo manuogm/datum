@@ -97,7 +97,10 @@ export const STACK_ASSEMBLY_EXAMPLE = {
       {
         kind: 'linked', id: 'r1', sensitivity: 1, calcId: exampleId('stack'),
         last: {
-          stack: { name: 'Housing: shoulder to circlip groove', nominal: 20.925, mean: 20.96, upperDeviation: 0.17, lowerDeviation: -0.1, sigma: 0.0262995563968 },
+          stack: {
+            name: 'Housing: shoulder to circlip groove', nominal: 20.925, mean: 20.96, upperDeviation: 0.17, lowerDeviation: -0.1, sigma: 0.0262995563968,
+            arithmeticHalfBand: 0.135, statisticalHalfBand: 0,
+          },
           partName: 'Housing', resultName: 'Shoulder to circlip groove', calculationName: EXAMPLE_NAMES.stack,
           folderName: 'Examples', updatedAt: partSavedAt,
         },

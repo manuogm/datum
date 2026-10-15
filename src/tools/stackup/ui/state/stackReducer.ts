@@ -4,8 +4,8 @@ import { MAX_CONTRIBUTORS, type DrawingStandard } from '../../calc'
 import { stackName } from '../logic/engineInput'
 import { unequalInStandard } from '../logic/unequal'
 import {
-  newDimension, newGeometric,
-  type DimensionRow, type GeometricEntry, type LinkSnapshot, type LinkedRow, type StackInputs, type StackMode, type StackRow,
+  newDatumShift, newDimension, newGeometric,
+  type DatumCell, type DatumShiftRow, type DimensionRow, type GeometricEntry, type LinkSnapshot, type LinkedRow, type StackInputs, type StackMode, type StackRow,
   type ToleranceEntry, type ToleranceKind,
 } from './stackInputs'
 
@@ -16,6 +16,12 @@ export type StackAction =
   | { type: 'mode'; mode: StackMode }
   /** Appends a dimension with a ± tolerance, or with a geometric tolerance. */
   | { type: 'addDimension'; geometric?: boolean }
+  /**
+   * A datum-shift row for one datum reference frame: empty, or with the
+   * frame of a geometric row (its suggestion), placed right after that row.
+   */
+  | { type: 'addDatumShift'; datums?: readonly DatumCell[]; after?: string }
+  | { type: 'datumShift'; id: string; changes: Partial<Pick<DatumShiftRow, 'label' | 'datums' | 'frame' | 'source'>> }
   /** Appends a linked part stack, adding (+). */
   | { type: 'addLink'; calcId: string; last: LinkSnapshot }
   | { type: 'row'; id: string; changes: Partial<Pick<DimensionRow, 'label' | 'nominal' | 'statistical' | 'source'>> }
@@ -57,11 +63,19 @@ export function stackReducer(inputs: StackInputs, action: StackAction): StackInp
       return changed.standard === inputs.standard ? changed : inStandard(changed, changed.standard)
     }
     case 'mode':
-      return { ...inputs, mode: action.mode, rows: action.mode === 'part' ? rows.filter((row) => row.kind === 'dimension') : rows }
+      return { ...inputs, mode: action.mode, rows: action.mode === 'part' ? rows.filter((row) => row.kind !== 'linked') : rows }
     case 'addDimension': {
       const id = nextRowId(rows)
       return append(action.geometric ? { ...newDimension(id, newGeometric()), nominal: null } : newDimension(id))
     }
+    case 'addDatumShift': {
+      if (rows.length >= MAX_CONTRIBUTORS) return inputs
+      const row = newDatumShift(nextRowId(rows), action.datums?.map((cell) => ({ ...cell })))
+      const at = action.after === undefined ? -1 : rows.findIndex((r) => r.id === action.after)
+      return withRows(at < 0 ? [...rows, row] : [...rows.slice(0, at + 1), row, ...rows.slice(at + 1)])
+    }
+    case 'datumShift':
+      return withRows(rows.map((row) => (row.id === action.id && row.kind === 'datum-shift' ? { ...row, ...action.changes } : row)))
     case 'addLink':
       return append({ kind: 'linked', id: nextRowId(rows), sensitivity: 1, calcId: action.calcId, last: action.last })
     case 'row':

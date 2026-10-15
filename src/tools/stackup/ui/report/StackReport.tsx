@@ -1,10 +1,11 @@
 // The A4 report of a tolerance stack (design §8): title block, status strip,
 // then 1 requirement and method, 2 contributors (and the linked part
-// stacks of an assembly), 3 the stack chart, 4 results, 5 geometric
-// conversions and modifiers, 6 sources.
+// stacks of an assembly), 3 the stack chart, 4 results, 5 the engine's
+// warnings (when there are any), then the geometric conversions, modifiers
+// and datum shifts, and the sources.
 import { Fragment } from 'react'
 import {
-  Report, ReportFacts, ReportFigure, ReportFooter, ReportSection, ReportSummary, ReportTitleBlock,
+  Report, ReportFacts, ReportFigure, ReportFooter, ReportSection, ReportSummary, ReportTitleBlock, ReportWarnings,
   reportStyles as styles,
 } from '../../../../app/report'
 import { cx } from '../../../../app/ui'
@@ -55,7 +56,13 @@ export function StackReport({ name, inputs, results, analysis, status, system }:
       if (!link.part || !link.partInputs) return []
       return rowTable(link.partInputs, link.part, new Map(), system).map((row) => ({ number: `${at}.${row.number}`, label: `${link.partName}: ${row.label}`, row, standard: link.partInputs?.standard ?? inputs.standard }))
     }),
-  ].filter(({ row }) => row.geometric !== null)
+  ].filter(({ row }) => row.geometric !== null || row.contributor.kind === 'datum-shift')
+  // The engine's things to check (engine notes §6), the linked parts' own included, after the results (§5).
+  const warnings = [
+    ...analysis.warnings,
+    ...linkedParts(results).flatMap((link) => (link.part ? link.part.warnings.map((warning) => `${link.partName}: ${warning}`) : [])),
+  ]
+  const WARNINGS_SECTION = 5
   const links = [...results.links.values()]
   let section = 0
   const next = () => ++section
@@ -73,7 +80,13 @@ export function StackReport({ name, inputs, results, analysis, status, system }:
         ]}
       />
 
-      <ReportSummary status={status} headline={STATUS_WORD[status]} warnings={0} warningsSection={0} note={basisText(analysis, results.brokenLinks.length)}>
+      <ReportSummary
+        status={status}
+        headline={STATUS_WORD[status]}
+        warnings={warnings.length}
+        warningsSection={WARNINGS_SECTION}
+        note={`${basisText(analysis, results.brokenLinks.length)}${warnings.length === 0 ? '' : ` · ${warnings.length} ${warnings.length === 1 ? 'warning' : 'warnings'}, see §${WARNINGS_SECTION}`}`}
+      >
         <ReportFigure label={`RESULT · ${wcFirst ? 'WC' : 'RSS'}`} value={range(system, chosen.min, chosen.max)} unit={unit} />
         <ReportFigure label={wcFirst ? 'RSS ±3σ' : 'WORST CASE'} value={range(system, other.min, other.max)} unit={unit} />
         {cpk !== null ? <ReportFigure label="CAPABILITY · Cpk" value={index(cpk)} unit="" /> : <ReportFigure label="STD DEVIATION · σ" value={sigma(system, analysis.sigma)} unit={unit} />}
@@ -85,7 +98,7 @@ export function StackReport({ name, inputs, results, analysis, status, system }:
             { label: 'Result', value: analysis.name },
             { label: 'Requirement', value: `${requirementText(system, inputs.requirement)}${inputs.requirement.min === null && inputs.requirement.max === null ? '' : ` ${unit}`}`, mono: true },
             { label: 'Nominal', value: `${len(system, analysis.nominal)} ${unit}`, mono: true },
-            { label: 'Method of the verdict', value: wcFirst ? 'Worst case (both methods worked out)' : 'RSS ±3σ (both methods worked out)' },
+            { label: 'Method of the verdict', value: wcFirst ? 'Worst case (both methods worked out)' : 'RSS ±3σ, graded by Cpk (both methods worked out)' },
             { label: 'Drawing standard', value: STANDARD_NAME[inputs.standard] },
             ...(inputs.startLabel.trim() || inputs.endLabel.trim()
               ? [{ label: 'Loop', value: `${inputs.startLabel.trim() || 'start'} → ${inputs.endLabel.trim() || 'end'}` }]
@@ -217,12 +230,41 @@ export function StackReport({ name, inputs, results, analysis, status, system }:
         <Contributions inputs={inputs} results={results} analysis={analysis} />
       </ReportSection>
 
+      {/* §5 when there are any (WARNINGS_SECTION): the four sections above are always there. */}
+      {warnings.length > 0 && <ReportWarnings heading={`${next()} · Warnings`} warnings={warnings} />}
+
       {geometricRows.length > 0 && (
         <ReportSection heading={`${next()} · Geometric conversions and modifiers`} breakable>
           {geometricRows.map(({ number, label, row, standard }) => {
             const entry = row.geometric
-            if (!entry) return null
             const { conversion } = row.contributor
+            if (!entry) {
+              // A datum-shift row: its frame and ±shift/2.
+              return (
+                <div key={number} className={report.conversion}>
+                  <div className={report.conversionHead}>
+                    <span className={styles.formula}>#{number}</span>
+                    <strong>{label}</strong>
+                    <span className={styles.formula}>
+                      {row.tolerance} → {plusMinus(system, row.contributor.halfBand)}
+                    </span>
+                  </div>
+                  <p>{conversion.rule}</p>
+                  {conversion.modifiers.map((line) => (
+                    <p key={line}>{line}</p>
+                  ))}
+                  <p>
+                    <strong>Include when:</strong> {conversion.appliesWhen}
+                  </p>
+                  {conversion.unsure && (
+                    <p>
+                      <strong>Judgement call:</strong> {conversion.unsure}
+                    </p>
+                  )}
+                  <p className={styles.source}>{conversion.source}</p>
+                </div>
+              )
+            }
             const rule = geometricRule(entry.characteristic, standard)
             return (
               <div key={number} className={report.conversion}>

@@ -1,8 +1,8 @@
 // "Show calculation" and the report: the equations of the stack filled with
-// this calculation's numbers (engine notes §4), the assumptions (§6) and
+// this calculation's numbers (engine notes §4), the assumptions (§8) and
 // the sources. The numbers are the engine's; this file only writes them out.
 import type { UnitSystem } from '../../../../core/units'
-import { SOURCE, type StackAnalysis } from '../../calc'
+import { CPK_PASS, CPK_REVIEW, SOURCE, type StackAnalysis } from '../../calc'
 import { bandLen, index, len, lengthUnit, outOfSpec, percent, range, sigma, significant } from './format'
 
 export interface Formula {
@@ -140,20 +140,23 @@ export function stackFormulas(analysis: StackAnalysis, system: UnitSystem): Form
 export function methodAssumptions(hasStatistical: boolean): string[] {
   return [
     'Each contributor normal, centred on its mean, ±tolerance = ±3σ',
-    'Bonus tolerance and datum shift at their largest value',
+    // Engine notes §5: RSS graded by capability (AIAG SPC Manual 2nd ed. 2005; Montgomery §8.3).
+    `RSS verdict by Cpk: pass at ${index(CPK_PASS)} or more, review from ${index(CPK_REVIEW)}, fail under ${index(CPK_REVIEW)}`,
+    'Bonus tolerance and datum shift at their largest value; a datum shift once per frame, as its own row',
     'No modified RSS or Monte Carlo in this version',
     ...(hasStatistical ? ['⟨ST⟩ rows: worst case adds them by RSS (hybrid)'] : []),
   ]
 }
 
-/** Engine notes §6: what the stack takes as given. */
+/** Engine notes §8: what the stack takes as given (§5 for the RSS grading). */
 export const ASSUMPTIONS: readonly string[] = [
   'The stack is one-dimensional (one direction, a loop diagram) through rigid parts.',
   'Contributors are independent and normal, each centred on its mean with its band at ±3σ (RSS).',
   'No modified RSS, no Monte Carlo, no mean shift or drift factors.',
   'Bonus tolerance and datum shift are taken at their largest value, for the worst case and for RSS alike.',
-  'Correlations are not modelled: the same feature in two rows, features of one pattern under a datum shift, or a combined zone (CZ, ISO 1101:2017).',
-  'A pass by worst case is a guarantee; RSS is a statistical estimate (about 0.27 % or fewer outside at ±3σ).',
+  'A datum shift is its own row, once per datum reference frame, where the chain crosses the datum feature’s interface with its mating part or fixture.',
+  'Correlations are not modelled: the same feature in two rows, or a combined zone (CZ, ISO 1101:2017).',
+  'A pass by worst case is a guarantee. RSS is a statistical estimate, graded by Cpk: pass at 1.33 or more (about 32 ppm or fewer outside on a side), review from 1.00 to 1.33, fail under 1.00 (AIAG SPC Manual 2005; Montgomery §8.3).',
 ]
 
 /**
@@ -168,6 +171,8 @@ export function stackSources(analysis: StackAnalysis, parts: readonly StackAnaly
   for (const row of rows) for (const part of row.conversion.source.split('; ')) if (part.trim()) sources.add(part.trim())
   if (rows.some((row) => row.statistical)) for (const part of SOURCE.statisticalTolerance.split('; ')) sources.add(part)
   sources.add(SOURCE.montgomery)
+  // The RSS verdict's Cpk thresholds.
+  if (analysis.method === 'rss') sources.add(SOURCE.aiag)
   sources.add(SOURCE.numericalRecipes)
   return [...sources]
 }

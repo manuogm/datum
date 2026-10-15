@@ -17,7 +17,8 @@ const METHODS = [
 
 const METHOD_NOTE: Record<StackMethod, string> = {
   'worst-case': 'Every part at its worst limit at once. A pass is a guarantee.',
-  rss: 'Root sum of squares: each tolerance is ±3σ of a centred normal spread. A pass means about 0.27 % or fewer outside.',
+  // Graded by capability (engine notes §5; AIAG SPC Manual 2nd ed. 2005; Montgomery §8.3).
+  rss: 'Root sum of squares: each tolerance is ±3σ of a centred normal spread. Graded by Cpk: pass at 1.33 or more, review from 1.00 to 1.33, fail under 1.00.',
 }
 
 const WORD = { pass: 'pass', review: 'review', fail: 'fail' } as const

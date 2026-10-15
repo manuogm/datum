@@ -43,6 +43,26 @@ export async function refreshDependents(ids: readonly string[], before: Library)
   }
 }
 
+/**
+ * Works out every stored summary again with the tools as they are now, once
+ * when the app starts: a summary saved by an older engine (e.g. an RSS
+ * verdict from before RSS was graded by Cpk, engine notes §7) would
+ * otherwise show a stale status on Home until the calculation is opened.
+ * Not an edit: inputs and times are kept (refreshSummary), and an unchanged
+ * summary leaves the library as it is. Only the tools that have
+ * calculations are loaded.
+ */
+export async function refreshStoredSummaries(): Promise<void> {
+  const tools = new Set(getSnapshot().state.calculations.map((calculation) => calculation.tool))
+  for (const id of tools) {
+    const tool = await loadToolDefinition(id)
+    // Read again: the library may have changed while the tool loaded.
+    for (const calculation of getSnapshot().state.calculations) {
+      if (calculation.tool === id) libraryActions.refreshSummary(calculation.id, summaryFor(tool, tool.inputsFrom(calculation.inputs)))
+    }
+  }
+}
+
 /** Keeps dependents current for as long as the app runs; returns the function that stops it. */
 export function keepDependentsCurrent(): () => void {
   return onCalculationsChanged((ids, before) => void refreshDependents(ids, before))

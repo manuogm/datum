@@ -6,7 +6,7 @@
 import type { UnitSystem } from '../../../../core/units'
 import {
   analyseStack, plusShare,
-  type ContributorResult, type DrawingStandard, type GeometricBreakdown, type MaterialBoundary, type MaterialCondition,
+  type ContributorResult, type DrawingStandard, type GeometricBreakdown, type MaterialBoundary, type MaterialCondition, type SurfaceBoundary,
 } from '../../calc'
 import type { DatumCell, FeatureSize, GeometricEntry, StackInputs } from '../state/stackInputs'
 import { engineInput, type LinkValues } from './engineInput'
@@ -57,6 +57,33 @@ export function breakdownTerms(system: UnitSystem, entry: GeometricEntry, breakd
     terms.push(shifts.length === 1 ? `datum ${shifts[0].letter} shift ${len(system, breakdown.datumShift)}` : `datum shift ${len(system, breakdown.datumShift)}`)
   }
   return terms.join(' + ')
+}
+
+/**
+ * A row stacked to the feature surface (engine surfaceBoundary): the two
+ * boundaries and where they put the surface, e.g.
+ *   "VC Ø9.900 · RC Ø10.500 → surface 4.950 … 5.250 from the axis"
+ *   "near surface: basic − r, r = (VC + RC)/4 ± (t + T)/2 = 5.100 ± 0.150"
+ * (ASME Y14.5-2018 §5, virtual and resultant condition; Fischer 2011).
+ */
+export function surfaceReadout(system: UnitSystem, surface: SurfaceBoundary): readonly [string, string] {
+  const { side, virtualCondition, resultantCondition, innerRadius, outerRadius } = surface
+  const r = (innerRadius + outerRadius) / 2
+  return [
+    `VC ${DIAMETER}${len(system, virtualCondition)} · RC ${DIAMETER}${len(system, resultantCondition)} → surface ${len(system, innerRadius)} … ${len(system, outerRadius)} from the axis`,
+    `${side < 0 ? 'near surface: basic − r' : 'far surface: basic + r'}, r = (VC + RC)/4 ± (t + T)/2 = ${len(system, r)} ${plusMinus(system, (outerRadius - innerRadius) / 2)}`,
+  ]
+}
+
+/**
+ * Seated on its high points: the stack point lies between the high points
+ * and t into the material (Fischer 2011; Drake ch. 9), so the row is
+ * one-sided: "0 / −0.050 into the material".
+ */
+export function highPointsReadout(system: UnitSystem, entry: Pick<GeometricEntry, 'zone' | 'highPoints'>): string | null {
+  if (entry.zone === null) return null
+  const [upper, lower] = entry.highPoints.materialSide === 'larger' ? [0, -entry.zone] : [entry.zone, 0]
+  return `${signed(system, upper)} / ${signed(system, lower)} into the material`
 }
 
 /** The bonus or a datum shift widens the band: the "= ±" cell is underlined and explains why. */

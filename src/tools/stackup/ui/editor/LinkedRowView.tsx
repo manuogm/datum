@@ -30,10 +30,12 @@ interface LinkedRowViewProps {
   onMakeDimension: () => void
   onRemove: () => void
   error: string | null
+  /** What to check on the row, under its line. */
+  notes?: ReactNode
 }
 
 export function LinkedRowView(props: LinkedRowViewProps) {
-  const { row, link, index, system, handle, expanded, onToggle, onFlip, error } = props
+  const { row, link, index, system, handle, expanded, onToggle, onFlip, error, notes } = props
   const detailsId = useId()
   const stack = link?.stack ?? row.last.stack
   const partName = link?.partName || row.last.partName || row.last.calculationName
@@ -88,6 +90,7 @@ export function LinkedRowView(props: LinkedRowViewProps) {
         </div>
       )}
       {error && <p className={styles.rowError}>{error}</p>}
+      {notes}
       <div id={detailsId} hidden={!expanded} className={styles.details}>
         {expanded && <LinkedDetails {...props} partName={partName} />}
       </div>

@@ -579,6 +579,11 @@ export function geometricDeviations(tolerance: GeometricTolerance, standard: Dra
   }
 }
 
+/** A value for note text, without floating-point noise (0.1 rather than 0.10000000000000142). */
+function noteNumber(value: number): string {
+  return String(Number(value.toPrecision(10)))
+}
+
 /**
  * The datum shift of one frame as its own row: ±shift/2 about 0, where shift
  * is the largest movement of the part on its MMB/LMB datum simulators
@@ -596,8 +601,8 @@ export function datumShiftDeviations(datums: readonly DatumReference[], standard
   const modifiers = datums.filter((datum) => datum.modifier !== 'rmb' && datum.size).map((datum) => {
     const name = iso ? (datum.modifier === 'mmb' ? 'Ⓜ (MMR)' : 'Ⓛ (LMR)') : datum.modifier.toUpperCase()
     const tolerance = (datum.size?.max ?? 0) - (datum.size?.min ?? 0)
-    return `Datum ${datum.letter} at ${name}: shift up to its size tolerance ${tolerance}`
-      + `${datum.boundaryAllowance ? ` plus its own geometric tolerance ${datum.boundaryAllowance} (boundary at virtual condition)` : ''}.`
+    return `Datum ${datum.letter} at ${name}: shift up to its size tolerance ${noteNumber(tolerance)}`
+      + `${datum.boundaryAllowance ? ` plus its own geometric tolerance ${noteNumber(datum.boundaryAllowance)} (boundary at virtual condition)` : ''}.`
   })
   // Precedence is the order in the frame: index 2 is the tertiary datum.
   const tertiary = datums[2]

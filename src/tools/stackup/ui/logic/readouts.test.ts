@@ -3,7 +3,6 @@ import { expectOk } from '../../../../core/testing'
 import { analyseStack } from '../../calc'
 import { NEW_STACK_INPUTS, emptyDatum, newDimension, newGeometric, type DatumCell, type GeometricEntry, type StackInputs } from '../state/stackInputs'
 import { engineInput } from './engineInput'
-import { offsetFromUnequalValue, unequalValueFromOffset } from './unequal'
 import {
   bonusReadout, breakdownTerms, datumShiftOf, meanReadout, modifierHeadline, rowResult, shiftReadout, unequalReadout, widened,
 } from './readouts'
@@ -61,11 +60,6 @@ describe('the geometric readouts', () => {
     expect(unequalReadout('si', { ...profile, zone: null })).toBeNull()
     // The same zone typed as an ISO UZ offset −0.05: the same readout.
     expect(unequalReadout('si', { ...profile, unequal: { ...profile.unequal, value: -0.05, typedAs: 'iso-offset' } })).toBe(unequalReadout('si', profile))
-  })
-
-  it('converts an ISO UZ offset to the Ⓤ value and back', () => {
-    expect(unequalValueFromOffset(0.3, -0.05)).toBeCloseTo(0.1, 12)
-    expect(offsetFromUnequalValue(0.3, 0.1)).toBeCloseTo(-0.05, 12)
   })
 
   it('writes a row centred', () => {

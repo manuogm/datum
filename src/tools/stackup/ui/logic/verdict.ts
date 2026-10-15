@@ -3,7 +3,7 @@
 // the big range by the verdict method against its target, and three figures.
 import type { CalculationStatus } from '../../../../core/library'
 import type { UnitSystem } from '../../../../core/units'
-import { REVIEW_SIGMA_MULTIPLE, methodRange, verdictOf, type MethodRange, type StackAnalysis, type StackMethod, type Verdict, type VerdictBasis } from '../../calc'
+import { CPK_PASS, CPK_REVIEW, verdictOf, type MethodRange, type StackAnalysis, type StackMethod, type Verdict, type VerdictBasis } from '../../calc'
 import type { StackInputs } from '../state/stackInputs'
 import { rowLabel } from './engineInput'
 import { index, len, lengthUnit, outOfSpec, percent, range, requirementText, sigma } from './format'
@@ -17,8 +17,8 @@ import { stackStatus } from './stackResults'
  * Uses the engine's own rule and ranges; null without a requirement.
  */
 export function methodVerdict(analysis: StackAnalysis, method: StackMethod): Verdict | null {
-  const twoSigma = methodRange(analysis.mean, REVIEW_SIGMA_MULTIPLE * analysis.sigma, analysis.requirement)
-  return verdictOf(method, analysis.worstCase, analysis.rss, twoSigma)
+  // RSS is graded by Cpk from its own range (rules.ts rssCpk), so the two ranges are all it takes.
+  return verdictOf(method, analysis.worstCase, analysis.rss)
 }
 
 /** The share of each row by the verdict method, in %. */
@@ -91,13 +91,6 @@ function aboutOutOfSpec(fraction: number): string {
   return text.startsWith('under') ? text : `about ${text}`
 }
 
-/**
- * The Cpk a capable process needs: the engine grades the RSS method pass at
- * Cpk ≥ 1.33 (calc/rules.ts, CPK_PASS; AIAG SPC Manual 2nd ed. 2005;
- * Montgomery §8.3). Only used for the words.
- */
-const CAPABLE_CPK = 1.33
-
 /** One sentence: what governs and how the result stands against the requirement (design §7.1). */
 export function verdictSentence(inputs: StackInputs, results: Pick<StackResults, 'links'>, analysis: StackAnalysis, system: UnitSystem): string {
   const result = lowerName(inputs.resultName)
@@ -125,13 +118,13 @@ export function verdictSentence(inputs: StackInputs, results: Pick<StackResults,
     case 'rss-outside':
       sentence = `Even the RSS range, ${range(system, rss.min, rss.max)} ${unit}, ${misses(system, inputs.requirement, rss)}; ${governs} governs`
       break
-    // RSS graded by capability (calc/rules.ts).
+    // RSS graded by capability (calc/rules.ts: pass at Cpk ≥ CPK_PASS 1.33, review from CPK_REVIEW 1.00; AIAG SPC Manual 2nd ed. 2005; Montgomery §8.3).
     case 'rss-capable':
     case 'rss-within':
       sentence = `${rssRange} ${staysInside(system, inputs.requirement)}${cpk === null ? '' : `; Cpk ${index(cpk)}`}; ${oos} falls outside`
       break
     case 'rss-marginal':
-      sentence = `${rssRange} ${staysInside(system, inputs.requirement)}, but Cpk ${cpk === null ? '—' : index(cpk)} is under the ${index(CAPABLE_CPK)} of a capable process; ${oos} of builds would fall outside`
+      sentence = `${rssRange} ${staysInside(system, inputs.requirement)}, but Cpk ${cpk === null ? '—' : index(cpk)} is under the ${index(CPK_PASS)} of a capable process; ${oos} of builds would fall outside`
       break
     case 'rss-not-capable':
       sentence = `${rssRange} ${misses(system, inputs.requirement, rss)}; ${oos} of builds would fall outside, and ${governs} governs`
@@ -230,9 +223,9 @@ const BASIS_WORDS: Record<VerdictBasis, string> = {
   'only-rss-within': 'Worst case outside; RSS (±3σ) inside',
   'rss-outside': 'RSS (±3σ) outside as well',
   'rss-within': 'RSS (±3σ) inside the requirement',
-  'rss-capable': 'RSS (±3σ) inside the requirement, Cpk ≥ 1.33',
-  'rss-marginal': 'RSS (±3σ) inside the requirement, 1.00 ≤ Cpk < 1.33',
-  'rss-not-capable': 'RSS: Cpk under 1.00, ±3σ outside the requirement',
+  'rss-capable': `RSS (±3σ) inside the requirement, Cpk ≥ ${CPK_PASS.toFixed(2)}`,
+  'rss-marginal': `RSS (±3σ) inside the requirement, ${CPK_REVIEW.toFixed(2)} ≤ Cpk < ${CPK_PASS.toFixed(2)}`,
+  'rss-not-capable': `RSS: Cpk under ${CPK_REVIEW.toFixed(2)}, ±3σ outside the requirement`,
   'only-two-sigma-within': '±3σ outside; ±2σ inside',
   'two-sigma-outside': '±2σ outside the requirement',
 }

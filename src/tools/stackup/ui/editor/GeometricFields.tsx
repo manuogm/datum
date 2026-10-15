@@ -4,21 +4,29 @@
 // apply is not shown). A modifier's own inputs appear in a sub-panel only
 // while it is on. At the foot, ON THE STACK: the ± the row adds and how it
 // was reached, with the engine's sources and when to include it.
+//
+// What a characteristic offers under the standard comes from the engine's
+// geometricAvailability: a characteristic or modifier that is not in the
+// drawing standard (ASME Y14.5-2018 has no concentricity, symmetry or CZ;
+// Ⓣ only on planar features) is flagged where it is still set, and offered
+// nowhere else.
 import { useState, type KeyboardEvent } from 'react'
-import { Chip, Icon, MonoLabel, SegmentedControl, Select, cx } from '../../../../app/ui'
+import { Chip, Icon, MonoLabel, SegmentedControl, Select, Switch, cx } from '../../../../app/ui'
 import type { UnitSystem } from '../../../../core/units'
 import {
-  GEOMETRIC_RULES, acceptsDiameterZone, geometricRule, isProfile,
-  type GeometricCharacteristic, type MaterialBoundary, type MaterialCondition,
+  GEOMETRIC_RULES, acceptsDiameterZone, geometricAvailability, geometricRule, inStandard, isProfile,
+  type GeometricCharacteristic, type MaterialBoundary, type MaterialCondition, type StackTo,
 } from '../../calc'
 import {
   BOUNDARY_LABELS, CHARACTERISTIC_GROUPS, MATERIAL_LABELS, STANDARD_NAME, characteristicName, gdtIcon,
 } from '../gdt/characteristics'
 import { FeatureControlFrame } from '../gdt/FeatureControlFrame'
 import { GdtModifier, type ModifierSymbol } from '../gdt/GdtModifier'
-import { showsMaterialCondition } from '../logic/engineInput'
+import { offersHighPoints, offersSurface, showsMaterialCondition } from '../logic/engineInput'
 import { len, plusMinus, sigma, signed } from '../logic/format'
-import { bonusReadout, breakdownTerms, modifierHeadline, shiftReadout, unequalReadout } from '../logic/readouts'
+import {
+  bonusReadout, breakdownTerms, highPointsReadout, modifierHeadline, shiftReadout, surfaceReadout, unequalReadout,
+} from '../logic/readouts'
 import { unequalFormOf, unequalShown } from '../logic/unequal'
 import type { DatumCell, FeatureSize, GeometricEntry } from '../state/stackInputs'
 import { DetailRow, type DimensionDetailsProps } from './DimensionDetails'
@@ -117,6 +125,7 @@ export function GeometricFields(props: GeometricFieldsProps) {
               readout={bonusReadout(system, entry, standard)}
             />
           )}
+          {offersSurface(entry, standard) && <StackToPanel entry={entry} n={n} onChange={(stackTo) => change({ stackTo })} />}
         </DetailRow>
       )}
 
@@ -160,11 +169,91 @@ export function GeometricFields(props: GeometricFieldsProps) {
         </DetailRow>
       )}
 
+      {(offersHighPoints(entry, standard) || (standard === 'asme' && isForm(entry.characteristic))) && (
+        <DetailRow label="Seating">
+          <Seating entry={entry} n={n} standard={standard} system={system} offered={offersHighPoints(entry, standard)} change={change} />
+        </DetailRow>
+      )}
+
       <DetailRow label="Modifiers">
         <Modifiers {...props} change={change} />
       </DetailRow>
 
       <OnTheStack {...props} />
+    </>
+  )
+}
+
+/** Why a characteristic is flagged under ASME: Y14.5-2018 removed concentricity and symmetry (the 2009 edition has them). */
+const NOT_IN_STANDARD = 'not in ASME Y14.5-2018, only in Y14.5-2009'
+
+const isForm = (characteristic: GeometricCharacteristic) => characteristic === 'flatness' || characteristic === 'straightness'
+
+const STACK_TO: readonly { value: StackTo; label: string }[] = [
+  { value: 'axis', label: 'Axis' },
+  { value: 'near-surface', label: 'Near surface' },
+  { value: 'far-surface', label: 'Far surface' },
+]
+
+/**
+ * Ⓜ/Ⓛ on a location tolerance: where the row takes the stack. To a surface
+ * it runs between the virtual and resultant condition boundaries, which
+ * hold the size and the bonus in one row (ASME Y14.5-2018 §5; ISO
+ * 2692:2021; Fischer 2011). The hole or pin choice above it decides which
+ * boundary is inner.
+ */
+function StackToPanel({ entry, n, onChange }: { entry: GeometricEntry; n: number; onChange: (stackTo: StackTo) => void }) {
+  return (
+    <div className={styles.subPanel}>
+      <MonoLabel size="xs">Stack to</MonoLabel>
+      <SegmentedControl label={`Row ${n} stack to`} size="sm" options={STACK_TO} value={entry.stackTo} onChange={onChange} />
+      <span className={styles.muted}>
+        {entry.stackTo === 'axis'
+          ? 'The axis or centre plane. To reach a surface, pick it here rather than adding a radius row.'
+          : `The ${entry.stackTo === 'near-surface' ? 'near' : 'far'} surface, size included: don’t add a separate radius row for this feature.`}
+      </span>
+    </div>
+  )
+}
+
+/**
+ * Flatness or straightness of a surface a mating part rests on: one-sided,
+ * from the high points t into the material (Fischer 2011; Drake ch. 9).
+ * Under ASME, Rule #1 puts form inside size (Y14.5-2018 §5): the note says
+ * when to leave the row out.
+ */
+function Seating({ entry, n, standard, system, offered, change }: {
+  entry: GeometricEntry; n: number; standard: 'iso' | 'asme'; system: UnitSystem; offered: boolean; change: (changes: Partial<GeometricEntry>) => void
+}) {
+  const readout = entry.highPoints.on ? highPointsReadout(system, entry) : null
+  return (
+    <>
+      {offered && (
+        <Switch checked={entry.highPoints.on} onChange={(on) => change({ highPoints: { ...entry.highPoints, on } })}>
+          <span className={styles.switchText}>Seats on its high points (a mating part rests on it)</span>
+        </Switch>
+      )}
+      {offered && entry.highPoints.on && (
+        <div className={styles.subPanel}>
+          <div className={styles.sizeLine}>
+            <span className={styles.inlineLabel}>Adding material here makes it</span>
+            <SegmentedControl
+              label={`Row ${n}: adding material at this surface makes the dimension`}
+              size="sm"
+              options={[
+                { value: 'larger', label: 'Larger' },
+                { value: 'smaller', label: 'Smaller' },
+              ]}
+              value={entry.highPoints.materialSide}
+              onChange={(materialSide) => change({ highPoints: { ...entry.highPoints, materialSide } })}
+            />
+          </div>
+          {readout && <span className={styles.readout}>{readout}</span>}
+        </div>
+      )}
+      {standard === 'asme' && (
+        <span className={styles.muted}>Rule #1 (ASME Y14.5-2018 §5): if this feature’s size is already in the chain, its form is inside that size; leave this row out.</span>
+      )}
     </>
   )
 }
@@ -195,11 +284,11 @@ function CharacteristicPicker({ value, standard, onChange }: { value: GeometricC
                 type="button"
                 role="radio"
                 aria-checked={c === value}
-                aria-label={`${characteristicName(c, standard)} ${GEOMETRIC_RULES[c].symbol}`}
-                title={characteristicName(c, standard)}
+                aria-label={`${characteristicName(c, standard)} ${GEOMETRIC_RULES[c].symbol}${inStandard(c, standard) ? '' : `, ${NOT_IN_STANDARD}`}`}
+                title={inStandard(c, standard) ? characteristicName(c, standard) : `${characteristicName(c, standard)}: ${NOT_IN_STANDARD}`}
                 tabIndex={c === value ? 0 : -1}
                 data-characteristic={c}
-                className={cx(styles.pickerItem, c === value && styles.pickerSelected)}
+                className={cx(styles.pickerItem, c === value && styles.pickerSelected, !inStandard(c, standard) && styles.pickerOutside)}
                 onClick={() => onChange(c)}
               >
                 <Icon name={gdtIcon(c)} />
@@ -230,7 +319,7 @@ interface SizePanelProps {
 }
 
 /** The sub-panel of Ⓜ/Ⓛ or of a datum at MMB/LMB: the feature's type and size limits, and what they give. */
-function SizePanel({ title, feature, system, label, invalid, onChange, readout, allowance }: SizePanelProps) {
+export function SizePanel({ title, feature, system, label, invalid, onChange, readout, allowance }: SizePanelProps) {
   return (
     <div className={styles.subPanel}>
       <MonoLabel size="xs">{title}</MonoLabel>
@@ -264,7 +353,7 @@ interface DatumInputProps {
 const POSITION = ['primary', 'secondary', 'tertiary']
 
 /** A datum cell: its letter and, once a letter is in, its material boundary. */
-function DatumInput({ datum, position, rowNumber, standard, boundary, invalid, onChange }: DatumInputProps) {
+export function DatumInput({ datum, position, rowNumber, standard, boundary, invalid, onChange }: DatumInputProps) {
   const boundaries: readonly MaterialBoundary[] = ['rmb', 'mmb', 'lmb']
   return (
     <span className={styles.datumCell}>
@@ -293,23 +382,37 @@ function DatumInput({ datum, position, rowNumber, standard, boundary, invalid, o
 function Modifiers({ row, index, entry, inputs, system, invalidField, error, change }: GeometricFieldsProps & { change: (changes: Partial<GeometricEntry>) => void }) {
   const { standard } = inputs
   const rule = GEOMETRIC_RULES[entry.characteristic]
+  const available = geometricAvailability(entry.characteristic, standard)
   const profile = isProfile(entry.characteristic)
   const n = index + 1
-  const chip = (symbol: ModifierSymbol, text: string, on: boolean, toggle: () => void) => (
-    <Chip variant="option" selected={on} onClick={toggle} leading={<GdtModifier symbol={symbol} />}>
-      {text}
-    </Chip>
-  )
+  const chip = (symbol: ModifierSymbol, text: string, on: boolean, toggle: () => void, outside = false) => {
+    const option = (
+      <Chip variant="option" selected={on} onClick={toggle} leading={<GdtModifier symbol={symbol} />}>
+        {text}
+        {outside && <span className={styles.outsideMark}> · not in {STANDARD_NAME[standard]}</span>}
+      </Chip>
+    )
+    return outside ? (
+      <span className={styles.chipOutside} title={`Not used on ${rule.name.toLowerCase()} under ${STANDARD_NAME[standard]}: switch it off`}>
+        {option}
+      </span>
+    ) : (
+      option
+    )
+  }
   return (
     <>
       <div className={styles.chips}>
-        {rule.projected && chip('P', 'Projected', entry.projected.on, () => change({ projected: { ...entry.projected, on: !entry.projected.on } }))}
-        {profile && chip(standard === 'iso' ? 'UZ' : 'U', 'Unequal', entry.unequal.on, () => change({ unequal: { ...entry.unequal, on: !entry.unequal.on } }))}
-        {chip('F', 'Free state', entry.freeState, () => change({ freeState: !entry.freeState }))}
-        {chip('T', 'Tangent plane', entry.tangentPlane, () => change({ tangentPlane: !entry.tangentPlane }))}
-        {chip('CZ', 'Combined zone', entry.commonZone, () => change({ commonZone: !entry.commonZone }))}
+        {available.projected && chip('P', 'Projected', entry.projected.on, () => change({ projected: { ...entry.projected, on: !entry.projected.on } }))}
+        {available.unequal && chip(standard === 'iso' ? 'UZ' : 'U', 'Unequal', entry.unequal.on, () => change({ unequal: { ...entry.unequal, on: !entry.unequal.on } }))}
+        {available.freeState && chip('F', 'Free state', entry.freeState, () => change({ freeState: !entry.freeState }))}
+        {/* Not in the standard for this characteristic: offered nowhere, shown flagged only while still set (to switch it off). */}
+        {(available.tangentPlane || entry.tangentPlane) &&
+          chip('T', 'Tangent plane', entry.tangentPlane, () => change({ tangentPlane: !entry.tangentPlane }), !available.tangentPlane)}
+        {(available.combinedZone || entry.commonZone) &&
+          chip('CZ', 'Combined zone', entry.commonZone, () => change({ commonZone: !entry.commonZone }), !available.combinedZone)}
       </div>
-      {profile && entry.unequal.on && (
+      {profile && available.unequal && entry.unequal.on && (
         <div className={styles.subPanel}>
           <div className={styles.sizeLine}>
             <span className={styles.inlineLabel}>{standard === 'iso' ? 'UZ offset' : 'Ⓤ value'}</span>
@@ -382,7 +485,14 @@ function OnTheStack({ entry, contributor, inputs, system }: GeometricFieldsProps
           worst case · σ {sigma(system, contributor.sigma)} RSS
         </span>
       </div>
-      {terms && breakdown ? (
+      {breakdown?.surface ? (
+        // To the feature surface: the boundaries (VC, RC) and where they put the surface (engine surfaceBoundary).
+        <p className={styles.mono}>
+          {surfaceReadout(system, breakdown.surface)[0]}
+          <br />
+          {surfaceReadout(system, breakdown.surface)[1]}
+        </p>
+      ) : terms && breakdown ? (
         <p className={styles.mono}>
           {breakdownTerms(system, entry, breakdown)}
           <br />= effective zone {len(system, breakdown.effectiveZone)} → {plusMinus(system, breakdown.effectiveZone / 2)}

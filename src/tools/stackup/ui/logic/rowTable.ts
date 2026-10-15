@@ -5,6 +5,7 @@
 import type { UnitSystem } from '../../../../core/units'
 import type { ContributorResult, StackAnalysis } from '../../calc'
 import type { GeometricEntry, StackInputs } from '../state/stackInputs'
+import { shiftText } from './datumShifts'
 import { rowLabel, stackName } from './engineInput'
 import { coefficientText, deviations, len, percent, plusMinus, sigma, toleranceText } from './format'
 import { isBroken, linkStateText, type ResolvedLink } from './links'
@@ -39,14 +40,19 @@ export function rowTable(inputs: StackInputs, analysis: StackAnalysis, links: Re
     const input = inputs.rows[i]
     const link = input?.kind === 'linked' ? links.get(input.id) : undefined
     const dimension = input?.kind === 'dimension' ? input : null
+    const shift = input?.kind === 'datum-shift' ? input : null
+    // A row typed in this calculation (not a linked part): its own label and source.
+    const own = dimension ?? shift
     return {
       id: input?.id ?? String(i),
       number: i + 1,
-      label: dimension ? rowLabel(dimension, i) : link ? stackName({ mode: 'part', partName: link.partName, resultName: link.resultName }) : row.label,
-      source: dimension ? dimension.source.trim() : link ? `${link.calculationName} (${link.folderName})` : '',
+      label: own ? rowLabel(own, i) : link ? stackName({ mode: 'part', partName: link.partName, resultName: link.resultName }) : row.label,
+      source: own ? own.source.trim() : link ? `${link.calculationName} (${link.folderName})` : '',
       coefficient: coefficientText(row.sensitivity),
       nominal: len(system, row.nominal),
-      tolerance: dimension ? toleranceText(system, dimension.tolerance, inputs.standard, dimension.statistical) : link ? deviations(system, link.stack.upperDeviation, link.stack.lowerDeviation) : '',
+      tolerance: dimension
+        ? toleranceText(system, dimension.tolerance, inputs.standard, dimension.statistical)
+        : link ? deviations(system, link.stack.upperDeviation, link.stack.lowerDeviation) : shift ? shiftText(shift) : '',
       geometric: dimension?.tolerance.kind === 'geometric' ? dimension.tolerance : null,
       statistical: row.statistical,
       mean: len(system, row.mean),

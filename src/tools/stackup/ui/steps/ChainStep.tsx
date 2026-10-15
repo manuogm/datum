@@ -2,7 +2,8 @@
 // in the contributor editor, with the stack chart beside it following every
 // edit. Next waits for a chain the engine accepts: every later step needs a
 // result. A broken link does not block it (the engine takes the part's last
-// known values) but is noted above the list.
+// known values) but is noted above the list, as are the engine's things to
+// check that name no row (those that do sit under their row).
 import { useEffect, useRef, useState } from 'react'
 import { Button, Callout, Dialog, EmptyState, StepPage, cx } from '../../../../app/ui'
 import { StackChart } from '../charts/StackChart'
@@ -10,6 +11,7 @@ import { stackChartModel } from '../charts/stackChart'
 import { AddButtons, ContributorList } from '../editor/ContributorList'
 import { LinkPicker } from '../editor/LinkPicker'
 import { lengthUnit } from '../logic/format'
+import { warningsByRow } from '../logic/datumShifts'
 import { brokenLinksNote } from '../logic/links'
 import { chainCount, stepLabel } from '../logic/steps'
 import { nextRowId } from '../state/stackReducer'
@@ -32,6 +34,7 @@ export function ChainStep(props: StackStepProps) {
   const chainFault = engineFault?.step === 'chain' ? engineFault : null
   const assembly = inputs.mode === 'assembly'
   const broken = brokenLinksNote(results.brokenLinks)
+  const chainWarnings = results.analysis.ok ? warningsByRow(results.analysis.value.warnings).chain : []
   const unit = lengthUnit(system)
   const model = lastValid && inputs.rows.length > 0 ? stackChartModel(lastValid, system, status ?? 'none') : null
   // A row the engine rejects keeps the last valid chart, dimmed, until it is fixed.
@@ -81,6 +84,13 @@ export function ChainStep(props: StackStepProps) {
       {broken && (
         <div className={styles.chainNote}>
           <Callout status="warn" title={broken} />
+        </div>
+      )}
+      {chainWarnings.length > 0 && (
+        <div className={styles.chainNote}>
+          <Callout status="warn" title={chainWarnings.length === 1 ? chainWarnings[0] : `${chainWarnings.length} things to check`}>
+            {chainWarnings.length > 1 && chainWarnings.join(' ')}
+          </Callout>
         </div>
       )}
       {inputs.rows.length === 0 ? (

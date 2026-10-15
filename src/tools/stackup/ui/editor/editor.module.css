@@ -387,6 +387,85 @@
   padding: var(--space-4) 0 0;
 }
 
+/* Things to check on a row (engine warnings): calm, under the row, never an error. */
+.rowWarnings {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0 var(--space-8) var(--space-6) 62px;
+  list-style: none;
+  font-size: var(--fs-12);
+  line-height: var(--leading-snug);
+  color: var(--warn-text);
+}
+
+.rowWarnings li {
+  margin: 0;
+}
+
+.suggestion {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-4) var(--space-8);
+  color: var(--text-secondary);
+}
+
+/* A characteristic or modifier that is not in the drawing standard: kept while set, flagged. */
+.pickerOutside {
+  border-style: dashed;
+  color: var(--text-muted);
+}
+
+.pickerOutside.pickerSelected {
+  border-color: var(--warn);
+  background: var(--warn-soft, var(--surface));
+  color: var(--warn-text);
+}
+
+.chipOutside {
+  display: inline-flex;
+}
+
+.outsideMark {
+  color: var(--warn-text);
+}
+
+/* A datum-shift row's nominal: always 0 (the band is centred), faint and read-only. */
+.shiftZero {
+  align-items: center;
+  padding-left: var(--space-6);
+  color: var(--text-faint);
+}
+
+/* A datum-shift row's tolerance cell: its icon and frame, read-only. */
+.shiftFrame {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-4);
+  overflow: hidden;
+  font-family: var(--font-mono);
+  font-size: var(--fs-11-5, 11.5px);
+  white-space: nowrap;
+}
+
+.shiftFrame svg {
+  flex: none;
+}
+
+.shiftFrameText {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.guidance {
+  margin: 0;
+  font-size: var(--fs-12-5);
+  line-height: var(--leading-snug);
+  color: var(--text-secondary);
+}
+
 /* Details under the row */
 .details {
   margin: 0 var(--space-4) var(--space-4);
@@ -1038,6 +1117,7 @@
   }
 
   .rowError,
+  .rowWarnings,
   .linkNote {
     padding-left: var(--space-8);
   }

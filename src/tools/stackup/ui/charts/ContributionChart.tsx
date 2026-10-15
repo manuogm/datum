@@ -31,7 +31,7 @@ const METHODS = [
 ] as const
 
 const iconOf = (row: StackRow | undefined): IconName | null =>
-  row?.kind === 'linked' ? 'link' : row?.tolerance.kind === 'geometric' ? gdtIcon(row.tolerance.characteristic) : null
+  row?.kind === 'linked' ? 'link' : row?.kind === 'datum-shift' ? 'datum-shift' : row?.tolerance.kind === 'geometric' ? gdtIcon(row.tolerance.characteristic) : null
 
 export function ContributionChart({ inputs, analysis, links, system, memoryKey }: ContributionChartProps) {
   const [method, setMethod] = useSessionState<StackMethod>(memoryKey, analysis.method)

@@ -5,8 +5,8 @@
 // seeded Part example.
 import { GEOMETRIC_CHARACTERISTICS, type GeometricCharacteristic, type StackResult } from '../../calc'
 import {
-  EXAMPLE_STACK_INPUTS, NEW_STACK_INPUTS, emptyDatum, newGeometric,
-  type DatumCell, type DimensionRow, type FeatureSize, type GeometricEntry, type LinkSnapshot, type LinkedRow, type StackInputs,
+  EXAMPLE_STACK_INPUTS, NEW_STACK_INPUTS, emptyDatum, newDatumShift, newGeometric,
+  type DatumCell, type DatumShiftRow, type DimensionRow, type FeatureSize, type GeometricEntry, type LinkSnapshot, type LinkedRow, type StackInputs,
   type StackRow, type ToleranceEntry,
 } from './stackInputs'
 
@@ -42,16 +42,16 @@ function asDatum(value: unknown): DatumCell {
 function asGeometric(tolerance: Fields): GeometricEntry {
   const characteristic = oneOf<GeometricCharacteristic>(GEOMETRIC_CHARACTERISTICS, tolerance.characteristic, 'position')
   const base = newGeometric(characteristic)
-  const datums = Array.isArray(tolerance.datums) ? tolerance.datums.slice(0, 3).map(asDatum) : []
   const unequal = fields(tolerance.unequal)
   const projected = fields(tolerance.projected)
+  const highPoints = fields(tolerance.highPoints)
   return {
     ...base,
     zone: asNumber(tolerance.zone),
     diameterZone: asFlag(tolerance.diameterZone),
     materialCondition: oneOf(['rfs', 'mmc', 'lmc'], tolerance.materialCondition, 'rfs'),
     feature: asFeature(tolerance.feature),
-    datums: [...datums, emptyDatum(), emptyDatum(), emptyDatum()].slice(0, 3),
+    datums: asDatums(tolerance.datums),
     unequal: {
       on: asFlag(unequal.on),
       value: asNumber(unequal.value),
@@ -63,7 +63,16 @@ function asGeometric(tolerance: Fields): GeometricEntry {
     freeState: asFlag(tolerance.freeState),
     tangentPlane: asFlag(tolerance.tangentPlane),
     commonZone: asFlag(tolerance.commonZone),
+    // Stored before these existed: to the axis, centred (what the engine did then).
+    stackTo: oneOf(['axis', 'near-surface', 'far-surface'], tolerance.stackTo, 'axis'),
+    highPoints: { on: asFlag(highPoints.on), materialSide: oneOf(['larger', 'smaller'], highPoints.materialSide, 'larger') },
   }
+}
+
+/** Three datum cells from a stored list (missing cells empty). */
+function asDatums(value: unknown): DatumCell[] {
+  const datums = Array.isArray(value) ? value.slice(0, 3).map(asDatum) : []
+  return [...datums, emptyDatum(), emptyDatum(), emptyDatum()].slice(0, 3)
 }
 
 function asTolerance(value: unknown): ToleranceEntry | null {
@@ -86,7 +95,13 @@ function asStackResult(value: unknown, fallbackName: string): StackResult | null
   const stack = fields(value)
   const [nominal, mean, upperDeviation, lowerDeviation, sigma] = [stack.nominal, stack.mean, stack.upperDeviation, stack.lowerDeviation, stack.sigma].map(asNumber)
   if (nominal === null || upperDeviation === null || lowerDeviation === null || sigma === null) return null
-  return { name: asText(stack.name, fallbackName), nominal, mean: mean ?? nominal + (upperDeviation + lowerDeviation) / 2, upperDeviation, lowerDeviation, sigma }
+  // The two parts of the WC band (kept since the engine carries ⟨ST⟩ through links); absent in older results, read as all arithmetic.
+  const [arithmeticHalfBand, statisticalHalfBand] = [stack.arithmeticHalfBand, stack.statisticalHalfBand].map(asNumber)
+  return {
+    name: asText(stack.name, fallbackName), nominal, mean: mean ?? nominal + (upperDeviation + lowerDeviation) / 2, upperDeviation, lowerDeviation, sigma,
+    ...(arithmeticHalfBand === null ? {} : { arithmeticHalfBand }),
+    ...(statisticalHalfBand === null ? {} : { statisticalHalfBand }),
+  }
 }
 
 function asSnapshot(value: unknown): LinkSnapshot | null {
@@ -111,6 +126,13 @@ function asRow(value: unknown, id: string): StackRow | null {
     if (!last || !calcId) return null
     const linked: LinkedRow = { kind: 'linked', id, sensitivity: asSensitivity(row.sensitivity), calcId, last }
     return linked
+  }
+  if (row.kind === 'datum-shift') {
+    const shift: DatumShiftRow = {
+      ...newDatumShift(id, asDatums(row.datums)),
+      label: asText(row.label), sensitivity: asSensitivity(row.sensitivity), frame: asText(row.frame), source: asText(row.source),
+    }
+    return shift
   }
   if (row.kind !== 'dimension') return null
   const tolerance = asTolerance(row.tolerance)
@@ -156,6 +178,6 @@ export function stackInputsFrom(value: unknown): StackInputs {
     startLabel: asText(saved.startLabel),
     endLabel: asText(saved.endLabel),
     // Only an assembly links part stacks.
-    rows: mode === 'part' ? rows.filter((row) => row.kind === 'dimension') : rows,
+    rows: mode === 'part' ? rows.filter((row) => row.kind !== 'linked') : rows,
   }
 }

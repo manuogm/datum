@@ -11,14 +11,10 @@
 // typed in (GeometricEntry.unequal.typedAs). The engine's Ⓤ value is worked
 // out from it only when the engine input is built, with the zone as it is
 // then: so typing the offset before the zone, or changing the zone after,
-// keeps what the drawing says.
-import type { DrawingStandard } from '../../calc'
+// keeps what the drawing says. The conversion itself is the engine's
+// (unequalValueFromIsoOffset, isoOffsetFromUnequalValue).
+import { isoOffsetFromUnequalValue, unequalValueFromIsoOffset, type DrawingStandard } from '../../calc'
 import type { GeometricEntry, UnequalForm } from '../state/stackInputs'
-
-/** An ISO UZ offset v as the Ⓤ value the engine takes: t/2 + v. */
-export const unequalValueFromOffset = (zone: number, offset: number): number => zone / 2 + offset
-/** A Ⓤ value as an ISO UZ offset: value − t/2. */
-export const offsetFromUnequalValue = (zone: number, value: number): number => value - zone / 2
 
 /** The form a drawing of this standard gives the number in. */
 export const unequalFormOf = (standard: DrawingStandard): UnequalForm => (standard === 'iso' ? 'iso-offset' : 'asme-value')
@@ -28,7 +24,7 @@ export function unequalEngineValue(entry: Pick<GeometricEntry, 'zone' | 'unequal
   const { zone, unequal } = entry
   if (unequal.value === null) return null
   if (unequal.typedAs === 'asme-value') return unequal.value
-  return zone === null ? null : unequalValueFromOffset(zone, unequal.value)
+  return zone === null ? null : unequalValueFromIsoOffset(zone, unequal.value)
 }
 
 /**
@@ -40,7 +36,7 @@ export function unequalShown(entry: Pick<GeometricEntry, 'zone' | 'unequal'>, st
   const { zone, unequal } = entry
   if (unequal.value === null || unequal.typedAs === unequalFormOf(standard)) return unequal.value
   if (zone === null) return null
-  return unequal.typedAs === 'asme-value' ? offsetFromUnequalValue(zone, unequal.value) : unequalValueFromOffset(zone, unequal.value)
+  return unequal.typedAs === 'asme-value' ? isoOffsetFromUnequalValue(zone, unequal.value) : unequalValueFromIsoOffset(zone, unequal.value)
 }
 
 /**

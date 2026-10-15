@@ -112,7 +112,10 @@ export function resolveLinks(inputs: StackInputs, library: Library, hasDraft?: (
 /**
  * A part stack result as an assembly records it: each number to 12
  * significant digits, so floating-point noise (0.1700000000000017) is not
- * stored and does not count as a change of the part.
+ * stored and does not count as a change of the part. The worst-case band's
+ * two parts (Σ|a|t of the plain rows, √Σ(a t)² of the ⟨ST⟩ rows) are kept
+ * when the result has them, so ⟨ST⟩ rows of the part still combine by RSS
+ * in the assembly after the part is gone (engine notes §4, §7).
  */
 export function recordedStack(stack: StackResult): StackResult {
   const round = (value: number) => Number(value.toPrecision(12))
@@ -123,6 +126,8 @@ export function recordedStack(stack: StackResult): StackResult {
     upperDeviation: round(stack.upperDeviation),
     lowerDeviation: round(stack.lowerDeviation),
     sigma: round(stack.sigma),
+    ...(stack.arithmeticHalfBand === undefined ? {} : { arithmeticHalfBand: round(stack.arithmeticHalfBand) }),
+    ...(stack.statisticalHalfBand === undefined ? {} : { statisticalHalfBand: round(stack.statisticalHalfBand) }),
   }
 }
 

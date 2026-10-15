@@ -10,7 +10,7 @@
 // can say which row needs what. Inputs of a modifier that is switched off
 // are kept, so switching it on again brings them back.
 import type {
-  DrawingStandard, FeatureType, GeometricCharacteristic, MaterialBoundary, MaterialCondition, StackMethod, StackResult,
+  DrawingStandard, FeatureType, GeometricCharacteristic, MaterialBoundary, MaterialCondition, StackMethod, StackResult, StackTo,
 } from '../../calc'
 
 /** Part: one dimension on one part, through its features. Assembly: a gap through several parts, using their part stacks. */
@@ -68,6 +68,20 @@ export interface GeometricEntry {
   readonly freeState: boolean
   readonly tangentPlane: boolean
   readonly commonZone: boolean
+  /**
+   * With Ⓜ/Ⓛ on a location tolerance: stack to the axis (the default), or
+   * straight to the near or far surface of the feature, between its virtual
+   * and resultant condition boundaries (ASME Y14.5-2018 §5; ISO 2692:2021;
+   * Fischer 2011). A surface row replaces the separate radius row.
+   */
+  readonly stackTo: StackTo
+  /**
+   * Flatness or straightness of a surface a mating part rests on: the stack
+   * point lies between the high points and t into the material, one-sided
+   * (Fischer 2011; Drake ch. 9). materialSide: whether adding material at
+   * this surface makes the stacked dimension larger or smaller.
+   */
+  readonly highPoints: { readonly on: boolean; readonly materialSide: 'larger' | 'smaller' }
 }
 
 /** A row's tolerance: ± t, deviations +a/−b (signed, ISO 286 style), limits, or a geometric tolerance. */
@@ -121,7 +135,28 @@ export interface LinkedRow {
   readonly last: LinkSnapshot
 }
 
-export type StackRow = DimensionRow | LinkedRow
+/**
+ * The datum shift of one datum reference frame, as its own row: the part may
+ * move on its datum simulators by its MMB/LMB datum features' departure from
+ * their boundaries, 0 ± shift/2 along the stack (ASME Y14.5-2018 §7;
+ * ISO 2692:2021; Fischer 2011). It belongs in the chain once per frame, and
+ * only where the chain crosses the datum feature's interface with its
+ * mating part or fixture.
+ */
+export interface DatumShiftRow {
+  readonly kind: 'datum-shift'
+  readonly id: string
+  readonly label: string
+  /** ±1 like any row; the band is centred, so the direction changes nothing. */
+  readonly sensitivity: number
+  /** Always three cells: primary, secondary, tertiary, as in the feature control frame. */
+  readonly datums: readonly DatumCell[]
+  /** Optional name telling two frames with the same letters apart, e.g. the part ("Housing"). */
+  readonly frame: string
+  readonly source: string
+}
+
+export type StackRow = DimensionRow | LinkedRow | DatumShiftRow
 
 export interface StackInputs {
   readonly mode: StackMode
@@ -153,6 +188,15 @@ export function newGeometric(characteristic: GeometricCharacteristic = 'position
     unequal: { on: false, value: null, typedAs: 'asme-value', materialSide: 'larger' },
     projected: { on: false, height: null },
     freeState: false, tangentPlane: false, commonZone: false,
+    stackTo: 'axis', highPoints: { on: false, materialSide: 'larger' },
+  }
+}
+
+/** A new datum-shift row, for these datum cells (padded to three) or none yet. */
+export function newDatumShift(id: string, datums: readonly DatumCell[] = []): DatumShiftRow {
+  return {
+    kind: 'datum-shift', id, label: '', sensitivity: 1, frame: '', source: '',
+    datums: [...datums, emptyDatum(), emptyDatum(), emptyDatum()].slice(0, 3),
   }
 }
 
