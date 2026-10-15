@@ -99,6 +99,13 @@
   --status-soft: var(--bad-soft);
 }
 
+.none {
+  --status-text: var(--text-muted);
+  --status-soft: var(--surface-raised);
+  color: var(--text);
+  background: var(--status-soft);
+}
+
 .summaryLabel {
   font-family: var(--font-mono);
   font-size: var(--fs-10);

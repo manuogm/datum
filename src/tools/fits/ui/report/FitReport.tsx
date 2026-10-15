@@ -5,6 +5,7 @@ import {
   ReportWarnings, reportStyles as styles, type ReportStatus,
 } from '../../../../app/report'
 import { MathText } from '../../../../app/ui'
+import type { CalculationStatus } from '../../../../core/library'
 import { formatQuantity, formatQuantityRange, unitOf, type UnitSystem } from '../../../../core/units'
 import { PREFERRED_FITS, type FitAnalysis } from '../../calc'
 import { ASSEMBLY_LABELS } from '../logic/applications'
@@ -32,10 +33,10 @@ const ADVISOR_HEADLINE: Record<ReportStatus, string> = {
   fail: 'Fail: a check fails',
 }
 
-/** The summary's headline: what the status judges, or that nothing was judged. */
-function headline(inputs: FitInputs, status: ReportStatus, advised: boolean): string {
-  if (advised) return ADVISOR_HEADLINE[status]
-  return inputs.requiredClearanceUm === null ? 'Not judged: no required window' : STATUS_HEADLINE[status]
+/** The summary's headline: what the status judges, or that nothing was judged (no required window). */
+function headline(status: CalculationStatus, advised: boolean): string {
+  if (status === 'none') return 'Not judged: no required window'
+  return advised ? ADVISOR_HEADLINE[status] : STATUS_HEADLINE[status]
 }
 
 interface FitReportProps {
@@ -69,7 +70,7 @@ export function FitReport({ name, fit, inputs, results, system }: FitReportProps
         meta={[['Selected by', source], ['Units', system === 'si' ? 'SI (mm, µm, °C)' : 'Imperial (in, thou, °F)']]}
       />
 
-      <ReportSummary status={status} headline={headline(inputs, status, advised)} warnings={warnings.length} warningsSection={4}>
+      <ReportSummary status={status} headline={headline(status, advised)} warnings={warnings.length} warningsSection={4}>
         <ReportSummaryCell label="FIT TYPE AT 20 °C" value={FIT_TYPE_LABEL[fit.fitType]} note={preferred?.name} />
         <ReportFigure label="MIN CLEARANCE" value={deviation(fit.minClearanceUm)} unit={unitOf('deviation', system)} />
         <ReportFigure label="MAX CLEARANCE" value={deviation(fit.maxClearanceUm)} unit={unitOf('deviation', system)} />

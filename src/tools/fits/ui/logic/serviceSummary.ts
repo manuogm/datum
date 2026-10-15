@@ -27,6 +27,6 @@ export function reportWarnings(
 ): readonly string[] {
   const fitWarnings = candidate
     ? candidate.checks.filter((check) => check.status !== 'pass').map((check) => check.message)
-    : service.status === 'pass' ? [] : [`In service ${serviceSummary(service, inputs, system)}.`]
+    : service.status === 'pass' || service.status === 'none' ? [] : [`In service ${serviceSummary(service, inputs, system)}.`]
   return [...fitWarnings, ...materialNotes]
 }

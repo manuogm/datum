@@ -40,4 +40,11 @@ describe('reportWarnings', () => {
     expect(warnings).toHaveLength(1)
     expect(warnings[0]).toMatch(/^In service .* required 0 … 40 µm\.$/)
   })
+
+  it('has nothing to warn about a fit that is not judged (no required window)', () => {
+    const inputs = { ...EXAMPLE_FIT_INPUTS, requiredClearanceUm: null }
+    const unjudged = serviceClearance(expectOk(analyseFitDesignation('H6/g5', 25)), inputs, housing, shaft)
+    expect(unjudged.status).toBe('none')
+    expect(reportWarnings(unjudged, inputs, 'si', undefined, [])).toEqual([])
+  })
 })

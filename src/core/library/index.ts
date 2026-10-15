@@ -7,12 +7,12 @@
 export type * from './model'
 export {
   createCalculation, createFolder, deleteCalculation, deleteFolder, duplicateCalculation, MAX_NAME_LENGTH,
-  moveCalculation, moveFolder, refreshSummary, renameCalculation, renameFolder, updateCalculation,
+  moveCalculation, moveFolder, refreshInputs, refreshSummary, renameCalculation, renameFolder, updateCalculation,
 } from './commands'
 export {
   calculationsIn, copyName, defaultCalculationName, findCalculation, findFolder, folderAndBelow, folderContents,
   folderPath, subfolders, summaryOf,
 } from './queries'
-export { EXAMPLE_SUMMARIES, EXAMPLES_FOLDER_ID, seedLibrary } from './seed'
+export { EXAMPLE_SUMMARIES, EXAMPLES_FOLDER_ID, isSeededExample, seedLibrary, STACK_ASSEMBLY_EXAMPLE } from './seed'
 export { loadLibrary, saveLibrary, STORAGE_KEY, type KeyValueStore, type LoadedLibrary } from './storage'
 export { TOOL_IDS, TOOLS } from './tools'

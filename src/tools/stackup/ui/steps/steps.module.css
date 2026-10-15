@@ -1,0 +1,101 @@
+/* The steps of the Tolerance Stack-up tool. */
+.note {
+  font-size: var(--fs-12);
+  line-height: var(--leading-snug);
+  color: var(--text-muted);
+}
+
+.usedIn {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-4) var(--space-8);
+  font-size: var(--fs-12-5);
+}
+
+.usedInLink {
+  font-family: var(--font-mono);
+  font-size: var(--fs-11-5);
+  color: var(--accent-text);
+  text-decoration: none;
+}
+
+.usedInLink:hover {
+  text-decoration: underline;
+}
+
+.limits {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 220px));
+  gap: var(--space-10);
+}
+
+.dialogText {
+  margin: 0;
+  font-size: var(--fs-13-5);
+  line-height: var(--leading-body);
+  color: var(--text-secondary);
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-10);
+  margin: var(--space-16) var(--space-20);
+  padding: var(--space-16);
+  border: var(--border-width) dashed var(--border);
+  border-radius: var(--radius-md);
+}
+
+.emptyTitle {
+  display: block;
+  margin-bottom: var(--space-4);
+  font-size: var(--fs-14);
+  font-weight: var(--weight-semibold);
+  color: var(--text);
+}
+
+.assumptions {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.assumptions li {
+  padding: var(--space-6) 0;
+  border-bottom: var(--border-width) solid var(--border-faint);
+  font-size: var(--fs-13);
+  color: var(--text-secondary);
+}
+
+/* The broken-links note above the chain. */
+.chainNote {
+  padding: var(--space-16) var(--space-20) 0;
+}
+
+/* The chart stays in view while a long chain scrolls (a lane click scrolls
+   its row into view, design §3), below the sticky step bar. */
+.chartAside {
+  position: sticky;
+  top: calc(var(--bar-height) + var(--space-20));
+  bottom: var(--space-20);
+}
+
+/* Taller than the window: it scrolls with the chain. */
+.chartAside.chartAsideTall {
+  position: static;
+}
+
+@media (width <= 900px) {
+  .chartAside {
+    position: static;
+  }
+}
+
+@media (width < 640px) {
+  .limits {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

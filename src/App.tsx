@@ -11,7 +11,8 @@ import type { Route } from './app/router/routes'
 import { useRoute } from './app/router/useRoute'
 import { SettingsProvider } from './app/settings/SettingsProvider'
 import { openTab } from './app/shell/openTabs'
-import { loadBolt, loadFit, loadLaminate } from './app/tools/toolModules'
+import { keepDependentsCurrent, refreshStoredSummaries } from './app/tools/dependents'
+import { loadBolt, loadFit, loadLaminate, loadStack } from './app/tools/toolModules'
 import { LoadingState } from './app/ui'
 
 const loadMaterials = () => import('./app/materials/MaterialsPage')
@@ -31,6 +32,10 @@ const TOOL_SCREENS: Record<ToolId, { page: CalculationScreen; report: Calculatio
   lam: {
     page: lazy(() => loadLaminate().then((m) => ({ default: m.LaminatePage }))),
     report: lazy(() => loadLaminate().then((m) => ({ default: m.LaminateReportPage }))),
+  },
+  stack: {
+    page: lazy(() => loadStack().then((m) => ({ default: m.StackPage }))),
+    report: lazy(() => loadStack().then((m) => ({ default: m.StackReportPage }))),
   },
 }
 const MaterialsPage = lazy(() => loadMaterials().then((m) => ({ default: m.MaterialsPage })))
@@ -90,6 +95,10 @@ function Routed() {
 }
 
 export default function App() {
+  // An assembly stack's summary follows the part stacks it links.
+  useEffect(() => keepDependentsCurrent(), [])
+  // Summaries saved by an older engine are worked out again (stale RSS verdicts, engine notes §7).
+  useEffect(() => void refreshStoredSummaries(), [])
   return (
     <SettingsProvider>
       <Routed />

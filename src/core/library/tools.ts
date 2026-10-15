@@ -18,6 +18,11 @@ export const TOOLS: Record<ToolId, { name: string; shortName: string; useWhen: s
     shortName: 'Laminate',
     useWhen: 'Use this when designing a composite panel: stack plies and check stiffness and first-ply failure.',
   },
+  stack: {
+    name: 'Tolerance Stack-up',
+    shortName: 'Stack',
+    useWhen: 'Use this when a gap or a dimension depends on a chain of toleranced features or parts.',
+  },
 }
 
 export const TOOL_IDS = Object.keys(TOOLS) as ToolId[]

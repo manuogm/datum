@@ -28,6 +28,23 @@
   --verdict-text: var(--bad-text);
 }
 
+/* No requirement: the result stands without a verdict, in neutral tones. */
+.none {
+  --verdict: var(--stroke-faint);
+  --verdict-soft: var(--surface-raised);
+  --verdict-text: var(--text);
+}
+
+.none .word,
+.none .target {
+  color: var(--text-muted);
+}
+
+.none .detail {
+  color: var(--text-muted);
+  opacity: 1;
+}
+
 .band {
   display: flex;
   align-items: flex-start;

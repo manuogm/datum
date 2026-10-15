@@ -7,6 +7,7 @@ import type { ToolDefinition } from './toolDefinition'
 export const loadFit = () => import('../../tools/fits/ui')
 export const loadBolt = () => import('../../tools/bolted/ui')
 export const loadLaminate = () => import('../../tools/laminate/ui')
+export const loadStack = () => import('../../tools/stackup/ui')
 
 /** What the library needs from a tool (its default inputs, snapshot builder …), loading it if need be. */
 export function loadToolDefinition(tool: ToolId): Promise<ToolDefinition<unknown>> {
@@ -17,5 +18,7 @@ export function loadToolDefinition(tool: ToolId): Promise<ToolDefinition<unknown
       return loadBolt().then((m) => m.BOLT_TOOL as ToolDefinition<unknown>)
     case 'lam':
       return loadLaminate().then((m) => m.LAM_TOOL as ToolDefinition<unknown>)
+    case 'stack':
+      return loadStack().then((m) => m.STACK_TOOL as ToolDefinition<unknown>)
   }
 }

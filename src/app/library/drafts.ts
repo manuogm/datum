@@ -12,6 +12,8 @@ export interface Draft {
   inputs: unknown
   /** The summary of those inputs, worked out only when saving. */
   summarize: () => CalculationSummary | null
+  /** What Save writes, when the tool adds to the inputs on screen (see ToolDefinition.toSave); omitted: the inputs. */
+  toSave?: () => unknown
 }
 
 let drafts: ReadonlyMap<string, Draft> = new Map()
@@ -51,7 +53,7 @@ export function discardDraft(id: string): void {
 export function saveDraft(id: string): boolean {
   const draft = drafts.get(id)
   if (!draft) return true
-  const saved = libraryActions.saveCalculation(id, draft.inputs, draft.summarize())
+  const saved = libraryActions.saveCalculation(id, draft.toSave?.() ?? draft.inputs, draft.summarize())
   if (saved.ok) discardDraft(id)
   return saved.ok
 }

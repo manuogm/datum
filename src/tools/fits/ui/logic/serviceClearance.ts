@@ -2,7 +2,7 @@
 // hottest service temperature and at the 20 °C reference, and the advisor's
 // verdict on the in-service range against the required window (see
 // inServiceClearance), as a calculation status. Without a required window
-// the fit is not judged: the status is pass.
+// the fit is not judged: the status is 'none' (no requirement).
 import type { Material } from '../../../../core/materials'
 import type { CalculationStatus } from '../../../../core/library'
 import {
@@ -27,7 +27,7 @@ export interface ServiceClearance {
   readonly bands: readonly TemperatureBand[]
   /** Smallest and largest clearance anywhere in the service range. */
   readonly inServiceUm: ClearanceRangeUm
-  /** pass: all inside the required window (or no window set); review: partly; fail: none. */
+  /** pass: all inside the required window; review: partly; fail: none of it; 'none': no window set, not judged. */
   readonly status: FitStatus
 }
 
@@ -40,10 +40,10 @@ export function serviceClearance(fit: FitAnalysis, inputs: ServiceInputs, housin
   const temps = [...new Set([minC, REFERENCE_TEMP_C, maxC])].sort((a, b) => a - b)
   const bands = temps.map((tempC) => ({ ...clearanceAt(at20, shiftUmPerK, tempC), kind: bandKind(tempC) }))
   const { inServiceUm, windowStatus } = inServiceClearance(at20, shiftUmPerK, inputs.serviceTempC, inputs.requiredClearanceUm ?? ANY_CLEARANCE)
-  return { bands, inServiceUm, status: STATUS_OF_WINDOW[windowStatus] }
+  return { bands, inServiceUm, status: inputs.requiredClearanceUm === null ? 'none' : STATUS_OF_WINDOW[windowStatus] }
 }
 
-/** No required window: every clearance and interference is accepted, so the fit always passes. */
+/** No required window: the in-service range is worked out against a window that holds every clearance and interference. */
 const ANY_CLEARANCE: ClearanceRangeUm = { minUm: -Infinity, maxUm: Infinity }
 
 const STATUS_OF_WINDOW: Record<CheckStatus, FitStatus> = { pass: 'pass', warn: 'review', fail: 'fail' }

@@ -175,6 +175,19 @@ export function refreshSummary(library: Library, id: string, summary: Calculatio
   return withCalculation(library, id, (c) => ok({ ...c, summary }))
 }
 
+/**
+ * Writes inputs and their summary that the app worked out, not the user:
+ * e.g. a Tolerance Stack-up Assembly recording the last saved values of a
+ * part stack it links, when that part is deleted. Not an edit: the time is
+ * kept. Returns the same library object when nothing changes.
+ */
+export function refreshInputs(library: Library, id: string, change: { inputs: unknown; summary: CalculationSummary | null }): Result<Library> {
+  const current = findCalculation(library, id)
+  if (!current) return fail('That calculation no longer exists.')
+  if (sameJson(current.inputs, change.inputs) && sameJson(current.summary, change.summary)) return ok(library)
+  return withCalculation(library, id, (c) => ok({ ...c, inputs: change.inputs, summary: change.summary }))
+}
+
 function sameJson(a: unknown, b: unknown): boolean {
   return JSON.stringify(a) === JSON.stringify(b)
 }

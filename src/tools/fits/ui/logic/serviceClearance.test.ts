@@ -41,10 +41,10 @@ describe('serviceClearance', () => {
     expect(serviceClearance(h7g6, inputs, aluminium, steel).status).toBe('fail')
   })
 
-  it('passes without judging when no window is set', () => {
+  it('does not judge the fit when no window is set (no requirement)', () => {
     const inputs = { ...EXAMPLE_FIT_INPUTS, requiredClearanceUm: null }
     const service = serviceClearance(h7g6, inputs, aluminium, steel)
-    expect(service.status).toBe('pass')
+    expect(service.status).toBe('none')
     expect(service.inServiceUm).toEqual({ minUm: -5.3, maxUm: 77.9 })
   })
 })

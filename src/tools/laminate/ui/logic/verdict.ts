@@ -1,11 +1,11 @@
 // What the first-ply failure means for the laminate: the verdict words of the
 // results column and the report, its tone, and the status the library lists.
 import type { Status } from '../../../../app/ui'
-import type { CalculationStatus } from '../../../../core/library'
+import type { JudgedStatus } from '../../../../core/library'
 import { reserveStatus, type LaminateAnalysis, type ReserveStatus } from '../../calc'
 import { angleText, criticalPhrase, formatFactor, formatReserveFactor, MODE_LABELS, plyRangeText, shownReserveFactor } from './labels'
 
-const CALCULATION_STATUS: Record<ReserveStatus, CalculationStatus> = { pass: 'pass', warn: 'review', fail: 'fail' }
+const CALCULATION_STATUS: Record<ReserveStatus, JudgedStatus> = { pass: 'pass', warn: 'review', fail: 'fail' }
 
 type Reserve = Pick<LaminateAnalysis['firstPlyFailure'], 'reserveFactor' | 'targetReserveFactor'>
 
@@ -21,7 +21,7 @@ export const shownStatus = (reserveFactor: number, targetReserveFactor: number):
 export const laminateReserveStatus = ({ reserveFactor, targetReserveFactor }: Reserve): ReserveStatus => shownStatus(reserveFactor, targetReserveFactor)
 
 /** The calculation status of a laminate: review when nothing loads it (RF ∞ checks nothing), else the verdict on its lowest RF. */
-export function laminateStatus(firstPlyFailure: Reserve): CalculationStatus {
+export function laminateStatus(firstPlyFailure: Reserve): JudgedStatus {
   return Number.isFinite(firstPlyFailure.reserveFactor) ? CALCULATION_STATUS[laminateReserveStatus(firstPlyFailure)] : 'review'
 }
 
